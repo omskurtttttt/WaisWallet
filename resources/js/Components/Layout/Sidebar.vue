@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -7,19 +6,23 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    mobileOpen: {
+        type: Boolean,
+        default: false,
+    },
 });
 
-const emit = defineEmits(['toggle']);
+const emit = defineEmits(['toggle', 'closeMobile']);
 
 const page = usePage();
 
 const navItems = [
-    { name: 'Dashboard', href: '/', routeName: 'dashboard', icon: 'dashboard' },
-    { name: 'Transactions', href: '/transactions', routeName: 'transactions', icon: 'transactions' },
-    { name: 'Wallet', href: '/wallet', routeName: 'wallet', icon: 'wallet' },
-    { name: 'Goals', href: '/goals', routeName: 'goals', icon: 'goals' },
-    { name: 'Analytics', href: '/analytics', routeName: 'analytics', icon: 'analytics' },
-    { name: 'Reports', href: '/reports', routeName: 'reports', icon: 'reports' },
+    { name: 'Dashboard', href: '/', icon: 'dashboard' },
+    { name: 'Transactions', href: '/transactions', icon: 'transactions' },
+    { name: 'Wallet', href: '/wallet', icon: 'wallet' },
+    { name: 'Goals', href: '/goals', icon: 'goals' },
+    { name: 'Analytics', href: '/analytics', icon: 'analytics' },
+    { name: 'Reports', href: '/reports', icon: 'reports' },
 ];
 
 function isActive(item) {
@@ -27,13 +30,41 @@ function isActive(item) {
     if (item.href === '/') return url === '/';
     return url.startsWith(item.href);
 }
+
+function handleNavClick() {
+    if (props.mobileOpen) {
+        emit('closeMobile');
+    }
+}
 </script>
 
 <template>
+    <!-- Mobile Overlay -->
+    <transition
+        enter-active-class="transition-opacity duration-300"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-200"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+    >
+        <div
+            v-if="mobileOpen"
+            class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+            @click="$emit('closeMobile')"
+        />
+    </transition>
+
+    <!-- Sidebar -->
     <aside
         :class="[
-            'fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 ease-in-out flex flex-col',
-            collapsed ? 'w-[72px]' : 'w-[260px]',
+            'fixed left-0 top-0 z-50 h-screen border-r border-sidebar-border bg-sidebar flex flex-col',
+            'transition-all duration-300 ease-in-out',
+            // Desktop
+            'max-lg:translate-x-[-100%] lg:translate-x-0',
+            collapsed ? 'lg:w-[72px]' : 'lg:w-[260px]',
+            // Mobile (override when open)
+            mobileOpen ? 'max-lg:translate-x-0 max-lg:w-[280px]' : '',
         ]"
     >
         <!-- Logo -->
@@ -45,35 +76,43 @@ function isActive(item) {
                     <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
                 </svg>
             </div>
-            <transition
-                enter-active-class="transition-opacity duration-200"
-                enter-from-class="opacity-0"
-                enter-to-class="opacity-100"
-                leave-active-class="transition-opacity duration-150"
-                leave-from-class="opacity-100"
-                leave-to-class="opacity-0"
+            <span
+                v-show="!collapsed || mobileOpen"
+                class="text-lg font-bold tracking-tight text-sidebar-foreground whitespace-nowrap"
             >
-                <span v-if="!collapsed" class="text-lg font-bold tracking-tight text-sidebar-foreground whitespace-nowrap">
-                    Wais<span class="text-primary">Wallet</span>
-                </span>
-            </transition>
+                Wais<span class="text-primary">Wallet</span>
+            </span>
         </div>
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+            <p
+                v-show="!collapsed || mobileOpen"
+                class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+            >
+                Menu
+            </p>
+
             <Link
                 v-for="item in navItems"
                 :key="item.name"
                 :href="item.href"
+                @click="handleNavClick"
                 :class="[
-                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group',
+                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative',
                     isActive(item)
-                        ? 'bg-primary text-primary-foreground shadow-md'
+                        ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
                         : 'text-sidebar-foreground hover:bg-sidebar-accent',
-                    collapsed ? 'justify-center' : '',
+                    collapsed && !mobileOpen ? 'justify-center' : '',
                 ]"
-                :title="collapsed ? item.name : ''"
+                :title="collapsed && !mobileOpen ? item.name : ''"
             >
+                <!-- Active Indicator -->
+                <div
+                    v-if="isActive(item)"
+                    class="absolute -left-3 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary"
+                />
+
                 <!-- Dashboard Icon -->
                 <svg v-if="item.icon === 'dashboard'" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -115,21 +154,12 @@ function isActive(item) {
                     <path d="M14 18v-6" />
                 </svg>
 
-                <transition
-                    enter-active-class="transition-opacity duration-200"
-                    enter-from-class="opacity-0"
-                    enter-to-class="opacity-100"
-                    leave-active-class="transition-opacity duration-150"
-                    leave-from-class="opacity-100"
-                    leave-to-class="opacity-0"
-                >
-                    <span v-if="!collapsed" class="whitespace-nowrap">{{ item.name }}</span>
-                </transition>
+                <span v-show="!collapsed || mobileOpen" class="whitespace-nowrap">{{ item.name }}</span>
             </Link>
         </nav>
 
-        <!-- Collapse Toggle -->
-        <div class="border-t border-sidebar-border p-3 shrink-0">
+        <!-- Bottom Section: Collapse Toggle (desktop only) -->
+        <div class="border-t border-sidebar-border p-3 shrink-0 hidden lg:block">
             <button
                 @click="$emit('toggle')"
                 class="flex w-full items-center justify-center rounded-xl p-2.5 text-sidebar-foreground hover:bg-sidebar-accent transition-colors duration-200"

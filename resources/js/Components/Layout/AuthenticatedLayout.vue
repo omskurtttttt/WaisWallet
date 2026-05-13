@@ -6,9 +6,18 @@ import { useThemeStore } from '@/Stores/theme';
 
 const themeStore = useThemeStore();
 const sidebarCollapsed = ref(false);
+const mobileMenuOpen = ref(false);
 
 function toggleSidebar() {
     sidebarCollapsed.value = !sidebarCollapsed.value;
+}
+
+function openMobileMenu() {
+    mobileMenuOpen.value = true;
+}
+
+function closeMobileMenu() {
+    mobileMenuOpen.value = false;
 }
 
 onMounted(() => {
@@ -18,16 +27,27 @@ onMounted(() => {
 
 <template>
     <div class="min-h-screen bg-background transition-theme">
-        <Sidebar :collapsed="sidebarCollapsed" @toggle="toggleSidebar" />
-        <Header :collapsed="sidebarCollapsed" />
+        <Sidebar
+            :collapsed="sidebarCollapsed"
+            :mobile-open="mobileMenuOpen"
+            @toggle="toggleSidebar"
+            @close-mobile="closeMobileMenu"
+        />
+        <Header
+            :collapsed="sidebarCollapsed"
+            @open-mobile="openMobileMenu"
+        />
 
         <main
             :class="[
                 'pt-16 min-h-screen transition-all duration-300',
-                sidebarCollapsed ? 'ml-[72px]' : 'ml-[260px]',
+                'lg:ml-[260px]',
+                sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]',
             ]"
         >
-            <slot />
+            <div class="animate-fade-in">
+                <slot />
+            </div>
         </main>
     </div>
 </template>
