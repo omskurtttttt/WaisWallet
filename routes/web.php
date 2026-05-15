@@ -1,28 +1,33 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+});
+
+Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->name('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/transactions', function () {
-    return Inertia::render('Transactions/Index');
-})->name('transactions');
+Route::middleware('auth')->group(function () {
+    Route::get('/transactions', function () { return Inertia::render('Transactions/Index'); })->name('transactions.index');
+    Route::get('/wallet', function () { return Inertia::render('Wallet/Index'); })->name('wallet.index');
+    Route::get('/goals', function () { return Inertia::render('Goals/Index'); })->name('goals.index');
+    Route::get('/analytics', function () { return Inertia::render('Analytics/Index'); })->name('analytics.index');
+    Route::get('/reports', function () { return Inertia::render('Reports/Index'); })->name('reports.index');
 
-Route::get('/wallet', function () {
-    return Inertia::render('Wallet/Index');
-})->name('wallet');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-Route::get('/goals', function () {
-    return Inertia::render('Goals/Index');
-})->name('goals');
-
-Route::get('/analytics', function () {
-    return Inertia::render('Analytics/Index');
-})->name('analytics');
-
-Route::get('/reports', function () {
-    return Inertia::render('Reports/Index');
-})->name('reports');
+require __DIR__.'/auth.php';
