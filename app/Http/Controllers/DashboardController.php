@@ -58,6 +58,23 @@ class DashboardController extends Controller
             $budgetUsedPercentage = min(100, round(($monthlySpending / $totalBudgetAllocated) * 100));
         }
 
+        // 5. Income Chart Data (Last 6 Months)
+        $incomeChartData = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $monthStart = $now->copy()->subMonths($i)->startOfMonth();
+            $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
+            
+            $monthIncome = $user->transactions()
+                ->where('type', 'income')
+                ->whereBetween('transaction_date', [$monthStart, $monthEnd])
+                ->sum('amount');
+                
+            $incomeChartData[] = [
+                'month' => $monthStart->format('M Y'),
+                'amount' => $monthIncome / 100, // Pass to frontend in standard currency format for chart
+            ];
+        }
+
         return Inertia::render('Dashboard', [
             'metrics' => [
                 'totalBalance' => $totalBalance,
@@ -67,6 +84,7 @@ class DashboardController extends Controller
                 'budgetUsedPercentage' => $budgetUsedPercentage,
                 'totalBudgetAllocated' => $totalBudgetAllocated,
             ],
+            'incomeChartData' => $incomeChartData,
             'currency' => $user->currency,
         ]);
     }

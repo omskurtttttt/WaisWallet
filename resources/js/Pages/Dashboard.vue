@@ -1,10 +1,12 @@
 <script setup>
 import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
+import IncomeChart from '@/Components/Dashboard/IncomeChart.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps({
     metrics: Object,
+    incomeChartData: Array,
     currency: String,
 });
 
@@ -114,27 +116,9 @@ const cards = computed(() => {
 
             <!-- Charts Row -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <!-- Income Chart Placeholder -->
-                <div class="glass-card p-5 lg:col-span-2 animate-slide-up">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-foreground">Total Income</h2>
-                        <select class="h-9 rounded-lg border-0 bg-input px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30">
-                            <option>This month</option>
-                            <option>Last 3 months</option>
-                            <option>Last 6 months</option>
-                            <option>This year</option>
-                        </select>
-                    </div>
-                    <div class="h-64 flex items-center justify-center text-muted-foreground">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 mb-3 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <rect x="3" y="12" width="4" height="9" rx="0.5" />
-                                <rect x="10" y="8" width="4" height="13" rx="0.5" />
-                                <rect x="17" y="4" width="4" height="17" rx="0.5" />
-                            </svg>
-                            <p class="text-sm">Chart will render here</p>
-                        </div>
-                    </div>
+                <!-- Income Chart -->
+                <div class="lg:col-span-2">
+                    <IncomeChart :data="incomeChartData" :currency="currency" />
                 </div>
 
                 <!-- Budget Chart Placeholder -->
