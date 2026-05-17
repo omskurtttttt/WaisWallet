@@ -1,6 +1,55 @@
 <script setup>
 import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const props = defineProps({
+    metrics: Object,
+    currency: String,
+});
+
+// Format monetary values
+const formatMoney = (amountInCents) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: props.currency || 'USD',
+        minimumFractionDigits: 2,
+    }).format((amountInCents || 0) / 100);
+};
+
+// Map metrics to card structure
+const cards = computed(() => {
+    return [
+        { 
+            label: 'Total Balance', 
+            value: formatMoney(props.metrics.totalBalance), 
+            change: '+0.0%', // Placeholder until trend is calculated
+            positive: props.metrics.totalBalance >= 0, 
+            icon: 'balance' 
+        },
+        { 
+            label: 'Monthly Spending', 
+            value: formatMoney(props.metrics.monthlySpending), 
+            change: `${props.metrics.spendingTrend > 0 ? '+' : ''}${props.metrics.spendingTrend}%`, 
+            positive: props.metrics.spendingTrend <= 0, // Less spending is positive
+            icon: 'expense' 
+        },
+        { 
+            label: 'Total Savings', 
+            value: formatMoney(props.metrics.totalSavings), 
+            change: '+0.0%', // Placeholder
+            positive: true, 
+            icon: 'savings' 
+        },
+        { 
+            label: 'Budget Used', 
+            value: `${props.metrics.budgetUsedPercentage}%`, 
+            change: '', // Not needed for budget used
+            positive: props.metrics.budgetUsedPercentage < 90, 
+            icon: 'income' 
+        },
+    ];
+});
 </script>
 
 <template>
@@ -13,14 +62,9 @@ import { Head } from '@inertiajs/vue3';
                 <p class="mt-1 text-sm text-muted-foreground">Welcome back! Here's your financial overview.</p>
             </div>
 
-            <!-- Key Metrics Cards (Skeleton Preview) -->
+            <!-- Key Metrics Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                <div v-for="(card, index) in [
-                    { label: 'Total Balance', value: '$24,563.00', change: '+12.5%', positive: true, icon: 'balance' },
-                    { label: 'Income', value: '$8,350.00', change: '+8.2%', positive: true, icon: 'income' },
-                    { label: 'Expense', value: '$3,280.00', change: '-4.1%', positive: false, icon: 'expense' },
-                    { label: 'Total Savings', value: '$5,070.00', change: '+15.3%', positive: true, icon: 'savings' },
-                ]" :key="index" :class="['glass-card p-5 transition-all duration-200 hover:shadow-lg', `animate-card-${index + 1}`]">
+                <div v-for="(card, index) in cards" :key="index" :class="['glass-card p-5 transition-all duration-200 hover:shadow-lg', `animate-card-${index + 1}`]">
                     <div class="flex items-center justify-between">
                         <p class="text-sm font-medium text-muted-foreground">{{ card.label }}</p>
                         <div :class="[
@@ -33,7 +77,7 @@ import { Head } from '@inertiajs/vue3';
                                 <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
                                 <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
                             </svg>
-                            <!-- Income -->
+                            <!-- Income / Budget -->
                             <svg v-else-if="card.icon === 'income'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 2v20" /><path d="m17 5-5-3-5 3" />
                             </svg>
@@ -50,7 +94,7 @@ import { Head } from '@inertiajs/vue3';
                         </div>
                     </div>
                     <p class="mt-3 text-2xl font-bold text-foreground font-financial">{{ card.value }}</p>
-                    <div class="mt-2 flex items-center gap-1.5">
+                    <div v-if="card.change" class="mt-2 flex items-center gap-1.5">
                         <span :class="[
                             'inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium',
                             card.positive ? 'bg-chart-1/10 text-chart-1' : 'bg-destructive/10 text-destructive'
