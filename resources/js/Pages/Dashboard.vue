@@ -1,12 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
 import IncomeChart from '@/Components/Dashboard/IncomeChart.vue';
+import BudgetChart from '@/Components/Dashboard/BudgetChart.vue';
+import SpendingLimits from '@/Components/Dashboard/SpendingLimits.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps({
     metrics: Object,
     incomeChartData: Array,
+    budgetChartData: Array,
+    spendingLimitsData: Array,
     currency: String,
 });
 
@@ -121,26 +125,9 @@ const cards = computed(() => {
                     <IncomeChart :data="incomeChartData" :currency="currency" />
                 </div>
 
-                <!-- Budget Chart Placeholder -->
-                <div class="glass-card p-5 animate-slide-up">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-foreground">Budget</h2>
-                        <select class="h-9 rounded-lg border-0 bg-input px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30">
-                            <option>This month</option>
-                            <option>Last month</option>
-                            <option>This year</option>
-                        </select>
-                    </div>
-                    <div class="h-64 flex items-center justify-center text-muted-foreground">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 mb-3 opacity-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M12 2a10 10 0 0 1 0 20" />
-                                <circle cx="12" cy="12" r="4" />
-                            </svg>
-                            <p class="text-sm">Chart will render here</p>
-                        </div>
-                    </div>
+                <!-- Budget Chart -->
+                <div>
+                    <BudgetChart :data="budgetChartData" :currency="currency" />
                 </div>
             </div>
 
@@ -169,21 +156,8 @@ const cards = computed(() => {
 
                 <!-- Right Column -->
                 <div class="space-y-4">
-                    <!-- Spending Limits Placeholder -->
-                    <div class="glass-card p-5 animate-slide-up">
-                        <h2 class="text-lg font-semibold text-foreground mb-4">Spending Limits</h2>
-                        <div class="space-y-3">
-                            <div>
-                                <div class="flex justify-between text-sm mb-1.5">
-                                    <span class="text-muted-foreground">Monthly Spending</span>
-                                    <span class="font-medium text-foreground font-financial">$3,280 / $5,000</span>
-                                </div>
-                                <div class="h-2.5 w-full rounded-full bg-muted overflow-hidden">
-                                    <div class="h-full rounded-full bg-primary transition-all duration-1000" style="width: 65.6%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Spending Limits -->
+                    <SpendingLimits :data="spendingLimitsData" :currency="currency" />
 
                     <!-- My Cards Placeholder -->
                     <div class="glass-card p-5 animate-slide-up">

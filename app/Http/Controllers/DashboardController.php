@@ -75,6 +75,63 @@ class DashboardController extends Controller
             ];
         }
 
+        // 6. Budget Donut Chart Data (Expenses by Category for current month)
+        $budgetChartData = $user->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
+            ->selectRaw('category_id, sum(amount) as total')
+            ->groupBy('category_id')
+            ->with('category:id,name,color')
+            ->orderByDesc('total')
+            ->take(5) // Top 5 categories
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->category->name ?? 'Uncategorized',
+                    'color' => $item->category->color ?? '#9CA3AF',
+                    'amount' => $item->total / 100,
+                ];
+            });
+
+        // 7. Spending Limits Data (Budgets for current month)
+        $spendingLimitsData = $user->budgets()
+            ->whereDate('month', $startOfMonth->format('Y-m-d'))
+            ->with('category:id,name,color')
+            ->get()
+            ->map(function ($budget) use ($user, $startOfMonth, $endOfMonth) {
+                $spent = $user->transactions()
+                    ->where('type', 'expense')
+                    ->where('category_id', $budget->category_id)
+                    ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
+                    ->sum('amount');
+                
+                $allocated = $budget->allocated_amount;
+                $percentage = $allocated > 0 ? min(100, round(($spent / $allocated) * 100)) : 0;
+                
+                return [
+                    'id' => $budget->id,
+                    'name' => $budget->category->name ?? 'General Budget',
+                    'color' => $budget->category->color ?? '#7033ff',
+                    'spent' => $spent, // keeping in cents for formatMoney utility
+                    'allocated' => $allocated, // keeping in cents
+                    'percentage' => $percentage,
+                ];
+            })
+            ->sortByDesc('percentage')
+            ->values();
+
+        // If no budgets are defined, provide the overall monthly spending limit
+        if ($spendingLimitsData->isEmpty()) {
+            $spendingLimitsData->push([
+                'id' => 'overall',
+                'name' => 'Overall Monthly Spending',
+                'color' => '#7033ff',
+                'spent' => $monthlySpending,
+                'allocated' => $totalBudgetAllocated > 0 ? $totalBudgetAllocated : max($monthlySpending, 100000), // Default 1000 if none
+                'percentage' => $budgetUsedPercentage,
+            ]);
+        }
+
         return Inertia::render('Dashboard', [
             'metrics' => [
                 'totalBalance' => $totalBalance,
@@ -85,6 +142,8 @@ class DashboardController extends Controller
                 'totalBudgetAllocated' => $totalBudgetAllocated,
             ],
             'incomeChartData' => $incomeChartData,
+            'budgetChartData' => $budgetChartData,
+            'spendingLimitsData' => $spendingLimitsData,
             'currency' => $user->currency,
         ]);
     }
