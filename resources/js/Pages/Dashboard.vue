@@ -3,6 +3,8 @@ import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
 import IncomeChart from '@/Components/Dashboard/IncomeChart.vue';
 import BudgetChart from '@/Components/Dashboard/BudgetChart.vue';
 import SpendingLimits from '@/Components/Dashboard/SpendingLimits.vue';
+import RecentTransactions from '@/Components/Dashboard/RecentTransactions.vue';
+import MyCards from '@/Components/Dashboard/MyCards.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -11,6 +13,8 @@ const props = defineProps({
     incomeChartData: Array,
     budgetChartData: Array,
     spendingLimitsData: Array,
+    recentTransactionsData: Array,
+    myCardsData: Array,
     currency: String,
 });
 
@@ -133,25 +137,9 @@ const cards = computed(() => {
 
             <!-- Bottom Row -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <!-- Recent Transactions Placeholder -->
-                <div class="glass-card p-5 lg:col-span-2 animate-slide-up">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-foreground">Recent Transactions</h2>
-                        <a href="/transactions" class="text-sm font-medium text-primary hover:text-primary/80 transition-colors">See all →</a>
-                    </div>
-                    <div class="space-y-3">
-                        <div v-for="i in 5" :key="i" class="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors">
-                            <div class="h-10 w-10 rounded-full skeleton shrink-0"></div>
-                            <div class="flex-1 min-w-0">
-                                <div class="h-4 w-28 skeleton mb-1.5"></div>
-                                <div class="h-3 w-20 skeleton"></div>
-                            </div>
-                            <div class="text-right">
-                                <div class="h-4 w-20 skeleton mb-1.5 ml-auto"></div>
-                                <div class="h-3 w-14 skeleton ml-auto"></div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Recent Transactions -->
+                <div class="lg:col-span-2">
+                    <RecentTransactions :data="recentTransactionsData" :currency="currency" />
                 </div>
 
                 <!-- Right Column -->
@@ -159,40 +147,8 @@ const cards = computed(() => {
                     <!-- Spending Limits -->
                     <SpendingLimits :data="spendingLimitsData" :currency="currency" />
 
-                    <!-- My Cards Placeholder -->
-                    <div class="glass-card p-5 animate-slide-up">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-foreground">My Cards</h2>
-                            <button class="text-sm font-medium text-primary hover:text-primary/80 transition-colors">+ Add</button>
-                        </div>
-                        <!-- Card Preview -->
-                        <div class="relative h-44 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-chart-4 p-5 text-primary-foreground overflow-hidden">
-                            <div class="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2"></div>
-                            <div class="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2"></div>
-                            <div class="relative z-10 flex flex-col justify-between h-full">
-                                <div class="flex justify-between items-start">
-                                    <svg class="h-8 w-8 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <rect x="1" y="4" width="22" height="16" rx="2" />
-                                        <line x1="1" y1="10" x2="23" y2="10" />
-                                    </svg>
-                                    <span class="text-sm font-medium opacity-80">VISA</span>
-                                </div>
-                                <div>
-                                    <p class="text-lg font-financial tracking-widest mb-2">•••• •••• •••• 4532</p>
-                                    <div class="flex justify-between items-end">
-                                        <div>
-                                            <p class="text-[10px] uppercase opacity-60">Card Holder</p>
-                                            <p class="text-sm font-medium">John Doe</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] uppercase opacity-60">Expires</p>
-                                            <p class="text-sm font-financial">12/28</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- My Cards -->
+                    <MyCards :data="myCardsData" />
                 </div>
             </div>
         </div>

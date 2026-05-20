@@ -132,6 +132,48 @@ class DashboardController extends Controller
             ]);
         }
 
+        // 8. Recent Transactions Data (Latest 5)
+        $recentTransactionsData = $user->transactions()
+            ->with(['category:id,name,icon,color', 'card:id,last_four,brand'])
+            ->orderByDesc('transaction_date')
+            ->orderByDesc('created_at')
+            ->take(5)
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'title' => $transaction->title,
+                    'amount' => $transaction->amount, // keeping in cents
+                    'type' => $transaction->type,
+                    'date' => $transaction->transaction_date->format('M d, Y'),
+                    'category' => $transaction->category ? [
+                        'name' => $transaction->category->name,
+                        'icon' => $transaction->category->icon,
+                        'color' => $transaction->category->color,
+                    ] : null,
+                    'card' => $transaction->card ? [
+                        'brand' => $transaction->card->brand,
+                        'last_four' => $transaction->card->last_four,
+                    ] : null,
+                ];
+            });
+
+        // 9. My Cards Data
+        $myCardsData = $user->cards()
+            ->select('id', 'name', 'brand', 'last_four', 'expiration_month', 'expiration_year', 'color', 'is_active')
+            ->where('is_active', true)
+            ->get()
+            ->map(function ($card) {
+                return [
+                    'id' => $card->id,
+                    'name' => $card->name,
+                    'brand' => $card->brand,
+                    'last_four' => $card->last_four,
+                    'expires' => str_pad($card->expiration_month, 2, '0', STR_PAD_LEFT) . '/' . substr($card->expiration_year, -2),
+                    'color' => $card->color,
+                ];
+            });
+
         return Inertia::render('Dashboard', [
             'metrics' => [
                 'totalBalance' => $totalBalance,
@@ -144,6 +186,8 @@ class DashboardController extends Controller
             'incomeChartData' => $incomeChartData,
             'budgetChartData' => $budgetChartData,
             'spendingLimitsData' => $spendingLimitsData,
+            'recentTransactionsData' => $recentTransactionsData,
+            'myCardsData' => $myCardsData,
             'currency' => $user->currency,
         ]);
     }
