@@ -17,6 +17,8 @@ Route::get('/', function () {
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\GoalController;
+use App\Http\Controllers\AnalyticsController;
 
 Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
@@ -29,8 +31,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/wallet', [CardController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/cards', [CardController::class, 'store'])->name('wallet.cards.store');
     Route::delete('/wallet/cards/{card}', [CardController::class, 'destroy'])->name('wallet.cards.destroy');
-    Route::get('/goals', function () { return Inertia::render('Goals/Index'); })->name('goals.index');
-    Route::get('/analytics', function () { return Inertia::render('Analytics/Index'); })->name('analytics.index');
+    Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
+    Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
+    Route::post('/goals/{goal}/funds', [GoalController::class, 'addFunds'])->name('goals.funds');
+    Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
+    Route::get('/analytics', AnalyticsController::class)->name('analytics.index');
     Route::get('/reports', function () { return Inertia::render('Reports/Index'); })->name('reports.index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
