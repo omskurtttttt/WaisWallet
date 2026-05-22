@@ -19,6 +19,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
@@ -36,7 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/goals/{goal}/funds', [GoalController::class, 'addFunds'])->name('goals.funds');
     Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
     Route::get('/analytics', AnalyticsController::class)->name('analytics.index');
-    Route::get('/reports', function () { return Inertia::render('Reports/Index'); })->name('reports.index');
+    Route::get('/reports', ReportController::class)->name('reports.index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
