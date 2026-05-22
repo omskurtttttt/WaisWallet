@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AddCardModal from './Partials/AddCardModal.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({
     cards: Array,
@@ -20,10 +21,22 @@ const getBrandIcon = (brand) => {
     }
 };
 
-const deleteCard = (id) => {
-    if (confirm('Are you sure you want to remove this card?')) {
-        router.delete(route('wallet.cards.destroy', id), {
-            preserveScroll: true
+const showDeleteConfirm = ref(false);
+const cardToDelete = ref(null);
+
+const confirmDeleteCard = (id) => {
+    cardToDelete.value = id;
+    showDeleteConfirm.value = true;
+};
+
+const deleteCard = () => {
+    if (cardToDelete.value) {
+        router.delete(route('wallet.cards.destroy', cardToDelete.value), {
+            preserveScroll: true,
+            onSuccess: () => {
+                showDeleteConfirm.value = false;
+                cardToDelete.value = null;
+            }
         });
     }
 };
@@ -90,7 +103,7 @@ const deleteCard = (id) => {
                     
                     <!-- Actions Menu (Visible on hover) -->
                     <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
-                        <button @click="deleteCard(card.id)" class="flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-destructive hover:text-destructive-foreground transition-colors" title="Remove Card">
+                        <button @click="confirmDeleteCard(card.id)" class="flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-destructive hover:text-destructive-foreground transition-colors" title="Remove Card">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
                             </svg>
@@ -128,5 +141,14 @@ const deleteCard = (id) => {
         </div>
 
         <AddCardModal :show="showAddModal" @close="showAddModal = false" />
+
+        <ConfirmationModal
+            :show="showDeleteConfirm"
+            title="Remove Card"
+            message="Are you sure you want to remove this card from your wallet? This will not delete your transactions but the card info will be removed."
+            confirm-button-text="Remove"
+            @confirm="deleteCard"
+            @close="showDeleteConfirm = false"
+        />
     </AuthenticatedLayout>
 </template>

@@ -1,58 +1,127 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# WaisWallet — Premium Personal Finance Dashboard
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+WaisWallet is a sleek, modern, and highly interactive personal finance management web application. Built with **Laravel 11**, **Inertia.js**, **Vue 3**, **Tailwind CSS v4**, and **PostgreSQL**, WaisWallet is designed with premium dark/light themes, smooth page animations, glassmorphism card layouts, and dynamic data visualizations.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Key Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 📈 1. Interactive Dashboard
+- **Aggregate Metrics**: Track your total balance, monthly spending, monthly savings, and budget utilization in real time.
+- **Spending & Balance Charts**: Clear visual timelines of your cash flow trends using ApexCharts.
+- **Card Wallet Preview**: Quick glance at your active credit/debit card accounts.
+- **Recent Transactions**: Instant tabular view of your latest 5 transactions.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 💸 2. Transactions Manager
+- **Full CRUD operations**: Create, update, view, and delete transactions.
+- **Server-side Search & Filtering**: Filter by type (Income vs Expense) or Category, and search by transaction title with debounced requests.
+- **Pagination**: High-performance paginated lists using Inertia's router.
+- **Custom Confirmation Modals**: Destructive deletions secured with clean, native-styled confirmation cards.
 
-## Learning Laravel
+### 💳 3. Virtual Wallet
+- **Card Customization**: Add Visa, Mastercard, American Express, or Discover cards with custom name tags and color gradients.
+- **Manage Funding Methods**: Visual credit/debit card components representing funding methods.
+- **Dynamic Deletion**: Remove expired or unused payment cards.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🎯 4. Savings Goals Tracker
+- **Set Financial Milestones**: Define targets (e.g., Emergency Fund, Car Downpayment) with goal amounts and target dates.
+- **Visual Progress Bars**: Watch savings progress automatically calculated.
+- **Contribution History**: Easily deposit or withdraw funds from goals to adjust current balances.
+- **Time Indicators**: Displays "days left" badges (highlighted in red for goals ending in under 30 days) and automated success triggers.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 📊 5. Financial Analytics
+- **Spending Trends**: Smooth line/area charts visualizing daily outflows.
+- **Category Distributions**: Donut and pie charts ranking category expenses by percentage and absolute values.
+- **Monthly Inflows vs Outflows**: High-level visual comparisons of income vs expenses over the last 6 months.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### 📄 6. Financial Reports
+- **Monthly and Yearly Scopes**: Toggle report views to review data for specific months or full financial years.
+- **Trend Comparison Indicators**: Compare current metrics against previous periods (last month/year) with percentage increases/decreases.
+- **Print Statement View**: Custom print styles format statements beautifully for physical printouts or PDF saves.
+- **Data Exporting**: Download detailed statements directly as JSON files.
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Tech Stack
 
+- **Backend**: Laravel 11, PHP 8.2+
+- **Frontend**: Vue 3 (Composition API), Inertia.js, Pinia (Theme State)
+- **Styling**: Tailwind CSS v4, Custom CSS Design Variables, Google Fonts (Plus Jakarta Sans, IBM Plex Mono, Lora)
+- **Charts**: ApexCharts (vue3-apexcharts)
+- **Database**: PostgreSQL (Production) / SQLite (Local Support)
+
+---
+
+## Installation & Setup
+
+Follow these steps to run WaisWallet locally:
+
+### Prerequisites
+- PHP 8.2+
+- Composer
+- Node.js 18+ and npm
+- PostgreSQL database (or SQLite setup)
+
+### 1. Clone the repository
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/omskurtttttt/WaisWallet.git
+cd WaisWallet
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install dependencies
+```bash
+# Install PHP dependencies
+composer install
 
-## Contributing
+# Install frontend dependencies
+npm install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Environment configuration
+Copy the sample environment file and configure your database:
+```bash
+cp .env.example .env
+```
+Open `.env` and fill in your connection details (PostgreSQL details, database name, username, and password).
+*Note: If using SQLite, set `DB_CONNECTION=sqlite` and let Laravel create the database file.*
 
-## Code of Conduct
+### 4. Generate Application Key
+```bash
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 5. Run Migrations & Seeder
+Run the database migrations and seed realistic mock data to explore the application:
+```bash
+php artisan migrate --seed
+```
+*This seeds a default test user:*
+- **Email**: `john@example.com`
+- **Password**: `password`
 
-## Security Vulnerabilities
+### 6. Start the Servers
+Launch the Laravel development backend:
+```bash
+php artisan serve
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+In a separate terminal, launch the Vite dev server for hot module reloading:
+```bash
+npm run dev
+```
 
-## License
+Visit the application at `http://localhost:8000`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## Production Build
+
+To compile and optimize assets for production deployment:
+```bash
+npm run build
+```
+
+---
+
+## Code Quality & Verification
+WaisWallet is built following Laravel conventions and modern Vue structures. Assets and compilation scripts compile with zero linting warnings or compilation errors.

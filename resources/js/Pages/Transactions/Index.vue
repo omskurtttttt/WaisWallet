@@ -4,6 +4,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
 import AddTransactionModal from './Partials/AddTransactionModal.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({
     transactions: Object,
@@ -59,10 +60,22 @@ const applyFilters = debounce(() => {
 
 watch([search, typeFilter, categoryFilter], applyFilters);
 
-const deleteTransaction = (id) => {
-    if (confirm('Are you sure you want to delete this transaction?')) {
-        router.delete(route('transactions.destroy', id), {
-            preserveScroll: true
+const showDeleteConfirm = ref(false);
+const transactionToDelete = ref(null);
+
+const confirmDeleteTransaction = (id) => {
+    transactionToDelete.value = id;
+    showDeleteConfirm.value = true;
+};
+
+const deleteTransaction = () => {
+    if (transactionToDelete.value) {
+        router.delete(route('transactions.destroy', transactionToDelete.value), {
+            preserveScroll: true,
+            onSuccess: () => {
+                showDeleteConfirm.value = false;
+                transactionToDelete.value = null;
+            }
         });
     }
 };
@@ -163,7 +176,7 @@ const deleteTransaction = (id) => {
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button @click="deleteTransaction(tx.id)" class="text-muted-foreground hover:text-destructive transition-colors">
+                                    <button @click="confirmDeleteTransaction(tx.id)" class="text-muted-foreground hover:text-destructive transition-colors">
                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
                                         </svg>
@@ -218,6 +231,15 @@ const deleteTransaction = (id) => {
             :categories="categories" 
             :cards="cards" 
             @close="showAddModal = false" 
+        />
+
+        <ConfirmationModal
+            :show="showDeleteConfirm"
+            title="Delete Transaction"
+            message="Are you sure you want to delete this transaction? This action cannot be undone."
+            confirm-button-text="Delete"
+            @confirm="deleteTransaction"
+            @close="showDeleteConfirm = false"
         />
     </AuthenticatedLayout>
 </template>

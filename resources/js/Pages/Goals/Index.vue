@@ -4,6 +4,7 @@ import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AddGoalModal from './Partials/AddGoalModal.vue';
 import AddFundsModal from './Partials/AddFundsModal.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
 const props = defineProps({
     goals: Array,
@@ -27,10 +28,22 @@ const openAddFunds = (goal) => {
     showAddFundsModal.value = true;
 };
 
-const deleteGoal = (id) => {
-    if (confirm('Are you sure you want to delete this savings goal?')) {
-        router.delete(route('goals.destroy', id), {
-            preserveScroll: true
+const showDeleteConfirm = ref(false);
+const goalToDelete = ref(null);
+
+const confirmDeleteGoal = (id) => {
+    goalToDelete.value = id;
+    showDeleteConfirm.value = true;
+};
+
+const deleteGoal = () => {
+    if (goalToDelete.value) {
+        router.delete(route('goals.destroy', goalToDelete.value), {
+            preserveScroll: true,
+            onSuccess: () => {
+                showDeleteConfirm.value = false;
+                goalToDelete.value = null;
+            }
         });
     }
 };
@@ -138,7 +151,7 @@ const getDaysRemaining = (targetDateStr) => {
                             Adjust Funds
                         </button>
                         <button 
-                            @click="deleteGoal(goal.id)"
+                            @click="confirmDeleteGoal(goal.id)"
                             class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200"
                             title="Delete Goal"
                         >
@@ -177,5 +190,14 @@ const getDaysRemaining = (targetDateStr) => {
 
         <AddGoalModal :show="showAddGoalModal" @close="showAddGoalModal = false" />
         <AddFundsModal :show="showAddFundsModal" :goal="selectedGoal" @close="showAddFundsModal = false" />
+        
+        <ConfirmationModal
+            :show="showDeleteConfirm"
+            title="Delete Savings Goal"
+            message="Are you sure you want to delete this savings goal? Any saved progress will be lost from this goal tracker (though transaction history is retained)."
+            confirm-button-text="Delete"
+            @confirm="deleteGoal"
+            @close="showDeleteConfirm = false"
+        />
     </AuthenticatedLayout>
 </template>
