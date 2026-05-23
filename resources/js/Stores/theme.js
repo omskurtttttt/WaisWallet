@@ -1,16 +1,29 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
 
 export const useThemeStore = defineStore('theme', () => {
     const isDark = ref(false);
 
-    // Initialize from localStorage or system preference
+    // Initialize from localStorage, DB preference, or system preference
     function init() {
-        const stored = localStorage.getItem('waiswallet-theme');
-        if (stored) {
-            isDark.value = stored === 'dark';
+        let dbTheme = null;
+        try {
+            const page = usePage();
+            dbTheme = page.props.auth?.user?.theme_preference;
+        } catch (e) {
+            // usePage might fail if called outside Inertia context
+        }
+
+        if (dbTheme) {
+            isDark.value = dbTheme === 'dark';
         } else {
-            isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const stored = localStorage.getItem('waiswallet-theme');
+            if (stored) {
+                isDark.value = stored === 'dark';
+            } else {
+                isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            }
         }
         applyTheme();
     }
@@ -26,14 +39,36 @@ export const useThemeStore = defineStore('theme', () => {
 
     function toggle() {
         isDark.value = !isDark.value;
-        localStorage.setItem('waiswallet-theme', isDark.value ? 'dark' : 'light');
+        const themeStr = isDark.value ? 'dark' : 'light';
+        localStorage.setItem('waiswallet-theme', themeStr);
         applyTheme();
+
+        // Sync to backend if authenticated
+        try {
+            const page = usePage();
+            if (page && page.props.auth?.user) {
+                router.post('/profile/theme', { theme: themeStr }, { preserveScroll: true, preserveState: true });
+            }
+        } catch (e) {
+            // Fail silently if page/auth context is not ready
+        }
     }
 
     function setTheme(dark) {
         isDark.value = dark;
-        localStorage.setItem('waiswallet-theme', dark ? 'dark' : 'light');
+        const themeStr = dark ? 'dark' : 'light';
+        localStorage.setItem('waiswallet-theme', themeStr);
         applyTheme();
+
+        // Sync to backend if authenticated
+        try {
+            const page = usePage();
+            if (page && page.props.auth?.user) {
+                router.post('/profile/theme', { theme: themeStr }, { preserveScroll: true, preserveState: true });
+            }
+        } catch (e) {
+            // Fail silently
+        }
     }
 
     // Watch for changes

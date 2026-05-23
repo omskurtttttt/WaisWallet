@@ -1,4 +1,6 @@
 <script setup>
+import { useCurrency } from '@/Composables/useCurrency';
+
 const props = defineProps({
     data: {
         type: Array,
@@ -10,14 +12,7 @@ const props = defineProps({
     }
 });
 
-// Format monetary values
-const formatMoney = (amountInCents) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: props.currency || 'USD',
-        maximumFractionDigits: 0,
-    }).format((amountInCents || 0) / 100);
-};
+const { formatMoney } = useCurrency();
 </script>
 
 <template>
@@ -29,7 +24,7 @@ const formatMoney = (amountInCents) => {
                 <div class="flex justify-between text-sm mb-1.5">
                     <span class="text-muted-foreground">{{ limit.name }}</span>
                     <span class="font-medium text-foreground font-financial">
-                        {{ formatMoney(limit.spent) }} / {{ formatMoney(limit.allocated) }}
+                        {{ formatMoney(limit.spent, { maximumFractionDigits: 0 }) }} / {{ formatMoney(limit.allocated, { maximumFractionDigits: 0 }) }}
                     </span>
                 </div>
                 <div class="h-2 w-full rounded-full bg-muted overflow-hidden">

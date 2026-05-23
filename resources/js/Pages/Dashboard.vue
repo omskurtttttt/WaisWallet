@@ -18,14 +18,9 @@ const props = defineProps({
     currency: String,
 });
 
-// Format monetary values
-const formatMoney = (amountInCents) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: props.currency || 'USD',
-        minimumFractionDigits: 2,
-    }).format((amountInCents || 0) / 100);
-};
+import { useCurrency } from '@/Composables/useCurrency';
+
+const { formatMoney } = useCurrency();
 
 // Map metrics to card structure
 const cards = computed(() => {

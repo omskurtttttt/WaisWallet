@@ -1,5 +1,7 @@
 <script setup>
 import { useThemeStore } from '@/Stores/theme';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const props = defineProps({
     collapsed: {
@@ -11,6 +13,18 @@ const props = defineProps({
 const emit = defineEmits(['openMobile']);
 
 const themeStore = useThemeStore();
+const page = usePage();
+
+const user = computed(() => page.props.auth?.user);
+const initials = computed(() => {
+    if (!user.value || !user.value.name) return 'U';
+    return user.value.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+});
 </script>
 
 <template>
@@ -110,11 +124,11 @@ const themeStore = useThemeStore();
             <!-- User Avatar -->
             <button class="flex items-center gap-3 rounded-xl px-2 md:px-3 py-2 hover:bg-muted transition-all duration-200">
                 <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm shrink-0">
-                    JD
+                    {{ initials }}
                 </div>
-                <div class="hidden lg:block text-left">
-                    <p class="text-sm font-semibold text-foreground leading-tight">John Doe</p>
-                    <p class="text-xs text-muted-foreground leading-tight">john@example.com</p>
+                <div class="hidden lg:block text-left" v-if="user">
+                    <p class="text-sm font-semibold text-foreground leading-tight">{{ user.name }}</p>
+                    <p class="text-xs text-muted-foreground leading-tight">{{ user.email }}</p>
                 </div>
             </button>
         </div>

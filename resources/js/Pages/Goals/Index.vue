@@ -6,6 +6,8 @@ import AddGoalModal from './Partials/AddGoalModal.vue';
 import AddFundsModal from './Partials/AddFundsModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 
+import { useCurrency } from '@/Composables/useCurrency';
+
 const props = defineProps({
     goals: Array,
     currency: String,
@@ -15,13 +17,7 @@ const showAddGoalModal = ref(false);
 const showAddFundsModal = ref(false);
 const selectedGoal = ref(null);
 
-const formatMoney = (amountInCents) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: props.currency || 'USD',
-        maximumFractionDigits: 0,
-    }).format((amountInCents || 0) / 100);
-};
+const { formatMoney } = useCurrency();
 
 const openAddFunds = (goal) => {
     selectedGoal.value = goal;
@@ -43,6 +39,10 @@ const deleteGoal = () => {
             onSuccess: () => {
                 showDeleteConfirm.value = false;
                 goalToDelete.value = null;
+            },
+            onError: (errors) => {
+                console.error(errors);
+                alert('Failed to delete savings goal. Please try again.');
             }
         });
     }
@@ -120,8 +120,8 @@ const getDaysRemaining = (targetDateStr) => {
                         <!-- Progress Bar & Target -->
                         <div class="space-y-2 mt-6">
                             <div class="flex justify-between text-sm">
-                                <span class="font-medium text-foreground">{{ formatMoney(goal.current_amount) }}</span>
-                                <span class="text-muted-foreground">Target: {{ formatMoney(goal.target_amount) }}</span>
+                                <span class="font-medium text-foreground">{{ formatMoney(goal.current_amount, { maximumFractionDigits: 0 }) }}</span>
+                                <span class="text-muted-foreground">Target: {{ formatMoney(goal.target_amount, { maximumFractionDigits: 0 }) }}</span>
                             </div>
                             
                             <!-- Progress Container -->
@@ -137,7 +137,7 @@ const getDaysRemaining = (targetDateStr) => {
 
                             <div class="flex justify-between text-xs text-muted-foreground pt-1">
                                 <span>{{ goal.percentage }}% saved</span>
-                                <span v-if="goal.percentage < 100">{{ formatMoney(goal.remaining) }} remaining</span>
+                                <span v-if="goal.percentage < 100">{{ formatMoney(goal.remaining, { maximumFractionDigits: 0 }) }} remaining</span>
                             </div>
                         </div>
                     </div>

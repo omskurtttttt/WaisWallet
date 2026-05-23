@@ -17,7 +17,7 @@ const emit = defineEmits(['toggle', 'closeMobile']);
 const page = usePage();
 
 const navItems = [
-    { name: 'Dashboard', href: '/', icon: 'dashboard' },
+    { name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     { name: 'Transactions', href: '/transactions', icon: 'transactions' },
     { name: 'Wallet', href: '/wallet', icon: 'wallet' },
     { name: 'Goals', href: '/goals', icon: 'goals' },
@@ -155,6 +155,24 @@ function handleNavClick() {
                 </svg>
 
                 <span v-show="!collapsed || mobileOpen" class="whitespace-nowrap">{{ item.name }}</span>
+            </Link>
+            <!-- Logout Link -->
+            <Link
+                href="/logout"
+                method="post"
+                as="button"
+                :class="[
+                    'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-destructive hover:bg-destructive/10 group relative',
+                    collapsed && !mobileOpen ? 'justify-center' : '',
+                ]"
+                title="Log Out"
+            >
+                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                <span v-show="!collapsed || mobileOpen" class="whitespace-nowrap">Log Out</span>
             </Link>
         </nav>
 

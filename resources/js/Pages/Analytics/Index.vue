@@ -4,6 +4,7 @@ import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { useThemeStore } from '@/Stores/theme';
+import { useCurrency } from '@/Composables/useCurrency';
 
 const props = defineProps({
     incomeVsExpenses: Array,
@@ -15,13 +16,7 @@ const props = defineProps({
 const themeStore = useThemeStore();
 const isDark = computed(() => themeStore.isDark);
 
-const formatMoney = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: props.currency || 'USD',
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
+const { formatMoney } = useCurrency();
 
 // 1. Income vs Expenses Chart Options & Series
 const incomeVsExpensesSeries = computed(() => {
@@ -82,7 +77,7 @@ const incomeVsExpensesOptions = computed(() => ({
             style: {
                 colors: isDark.value ? '#9CA3AF' : '#6B7280',
             },
-            formatter: (val) => formatMoney(val)
+            formatter: (val) => formatMoney(val * 100, { maximumFractionDigits: 0 })
         }
     },
     grid: {
@@ -100,7 +95,7 @@ const incomeVsExpensesOptions = computed(() => ({
     tooltip: {
         theme: isDark.value ? 'dark' : 'light',
         y: {
-            formatter: (val) => formatMoney(val)
+            formatter: (val) => formatMoney(val * 100, { maximumFractionDigits: 0 })
         }
     }
 }));
@@ -152,7 +147,7 @@ const dailySpendingOptions = computed(() => ({
             style: {
                 colors: isDark.value ? '#9CA3AF' : '#6B7280',
             },
-            formatter: (val) => formatMoney(val)
+            formatter: (val) => formatMoney(val * 100, { maximumFractionDigits: 0 })
         }
     },
     grid: {
@@ -162,7 +157,7 @@ const dailySpendingOptions = computed(() => ({
     tooltip: {
         theme: isDark.value ? 'dark' : 'light',
         y: {
-            formatter: (val) => formatMoney(val)
+            formatter: (val) => formatMoney(val * 100, { maximumFractionDigits: 0 })
         }
     }
 }));
@@ -208,7 +203,7 @@ const categoryOptions = computed(() => ({
     tooltip: {
         theme: isDark.value ? 'dark' : 'light',
         y: {
-            formatter: (val) => formatMoney(val)
+            formatter: (val) => formatMoney(val * 100, { maximumFractionDigits: 0 })
         }
     }
 }));
@@ -277,7 +272,7 @@ const categoryOptions = computed(() => ({
                                     <span class="h-3.5 w-3.5 rounded-full" :style="{ backgroundColor: item.color }"></span>
                                     <span class="font-medium text-foreground">{{ item.name }}</span>
                                 </div>
-                                <span class="font-semibold text-foreground font-financial">{{ formatMoney(item.value) }}</span>
+                                <span class="font-semibold text-foreground font-financial">{{ formatMoney(item.value * 100, { maximumFractionDigits: 0 }) }}</span>
                             </div>
                         </div>
                     </div>

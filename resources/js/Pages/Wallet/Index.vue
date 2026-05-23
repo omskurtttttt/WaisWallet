@@ -36,6 +36,10 @@ const deleteCard = () => {
             onSuccess: () => {
                 showDeleteConfirm.value = false;
                 cardToDelete.value = null;
+            },
+            onError: (errors) => {
+                console.error(errors);
+                alert('Failed to remove card. Please try again.');
             }
         });
     }
