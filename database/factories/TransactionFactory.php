@@ -20,9 +20,11 @@ class TransactionFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
+            'title' => fake()->sentence(3),
             'type' => fake()->randomElement(['income', 'expense']),
             'amount' => fake()->numberBetween(1000, 150000), // $10.00 to $1,500.00
             'category_id' => Category::factory(),
+            'card_id' => null,
             'recipient_name' => fake()->company(),
             'status' => fake()->randomElement(['completed', 'completed', 'completed', 'pending', 'failed']),
             'transaction_date' => fake()->dateTimeBetween('-3 months', 'now'),

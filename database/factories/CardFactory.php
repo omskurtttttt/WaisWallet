@@ -19,11 +19,13 @@ class CardFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
+            'name' => fake()->words(2, true) . ' Card',
+            'brand' => fake()->randomElement(['Visa', 'Mastercard', 'Amex', 'Discover', 'Other']),
             'last_four' => fake()->numerify('####'),
-            'cardholder_name' => fake()->name(),
-            'expiry_date' => fake()->numberBetween(1, 12) . '/' . fake()->numberBetween(25, 30),
-            'card_type' => fake()->randomElement(['visa', 'mastercard', 'amex', 'other']),
-            'nickname' => fake()->optional(0.5)->word(),
+            'expiration_month' => fake()->numberBetween(1, 12),
+            'expiration_year' => (int) date('Y') + fake()->numberBetween(1, 5),
+            'color' => fake()->hexColor(),
+            'is_active' => true,
         ];
     }
 }

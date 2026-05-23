@@ -18,9 +18,11 @@ class Transaction extends Model
      */
     protected $fillable = [
         'user_id',
+        'title',
         'type',
         'amount',
         'category_id',
+        'card_id',
         'recipient_name',
         'status',
         'transaction_date',
@@ -54,5 +56,13 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the card associated with the transaction.
+     */
+    public function card(): BelongsTo
+    {
+        return $this->belongsTo(Card::class);
     }
 }

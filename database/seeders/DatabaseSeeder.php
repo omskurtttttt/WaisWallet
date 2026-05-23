@@ -30,16 +30,16 @@ class DatabaseSeeder extends Seeder
         // 2. Create Categories
         $categories = [
             // Income
-            ['name' => 'Salary', 'type' => 'income', 'icon' => 'briefcase'],
-            ['name' => 'Freelance', 'type' => 'income', 'icon' => 'monitor'],
-            ['name' => 'Investments', 'type' => 'income', 'icon' => 'trending-up'],
+            ['name' => 'Salary', 'type' => 'income', 'icon' => 'briefcase', 'color' => '#4ac885'],
+            ['name' => 'Freelance', 'type' => 'income', 'icon' => 'monitor', 'color' => '#3276e4'],
+            ['name' => 'Investments', 'type' => 'income', 'icon' => 'trending-up', 'color' => '#fd822b'],
             // Expense / Budget
-            ['name' => 'Housing', 'type' => 'expense', 'icon' => 'home'],
-            ['name' => 'Food & Dining', 'type' => 'expense', 'icon' => 'coffee'],
-            ['name' => 'Transportation', 'type' => 'expense', 'icon' => 'car'],
-            ['name' => 'Shopping', 'type' => 'expense', 'icon' => 'shopping-cart'],
-            ['name' => 'Entertainment', 'type' => 'expense', 'icon' => 'film'],
-            ['name' => 'Utilities', 'type' => 'expense', 'icon' => 'zap'],
+            ['name' => 'Housing', 'type' => 'expense', 'icon' => 'home', 'color' => '#7033ff'],
+            ['name' => 'Food & Dining', 'type' => 'expense', 'icon' => 'coffee', 'color' => '#fd822b'],
+            ['name' => 'Transportation', 'type' => 'expense', 'icon' => 'car', 'color' => '#3276e4'],
+            ['name' => 'Shopping', 'type' => 'expense', 'icon' => 'shopping-cart', 'color' => '#747474'],
+            ['name' => 'Entertainment', 'type' => 'expense', 'icon' => 'film', 'color' => '#e54b4f'],
+            ['name' => 'Utilities', 'type' => 'expense', 'icon' => 'zap', 'color' => '#5993f4'],
         ];
 
         $createdCategories = [];
@@ -49,23 +49,30 @@ class DatabaseSeeder extends Seeder
                 'name' => $catData['name'],
                 'type' => $catData['type'],
                 'icon' => $catData['icon'],
+                'color' => $catData['color'],
             ]);
         }
 
         // 3. Create Cards
-        Card::factory()->create([
+        $card1 = Card::factory()->create([
             'user_id' => $user->id,
-            'card_type' => 'visa',
+            'brand' => 'Visa',
             'last_four' => '4532',
-            'cardholder_name' => 'John Doe',
-            'nickname' => 'Main Checking',
+            'name' => 'Main Checking',
+            'expiration_month' => 12,
+            'expiration_year' => 2028,
+            'color' => '#7033ff',
+            'is_active' => true,
         ]);
-        Card::factory()->create([
+        $card2 = Card::factory()->create([
             'user_id' => $user->id,
-            'card_type' => 'mastercard',
+            'brand' => 'Mastercard',
             'last_four' => '8891',
-            'cardholder_name' => 'John Doe',
-            'nickname' => 'Travel Rewards',
+            'name' => 'Travel Rewards',
+            'expiration_month' => 6,
+            'expiration_year' => 2029,
+            'color' => '#fd822b',
+            'is_active' => true,
         ]);
 
         // 4. Create Goals
@@ -107,12 +114,27 @@ class DatabaseSeeder extends Seeder
         $incomeCategories = array_filter($createdCategories, fn($c) => $c->type === 'income');
 
         // Generate 50 random expenses
+        $cardOptions = [$card1->id, $card2->id, null];
+        $transactionNames = [
+            'Housing' => ['Rent Payment', 'Home Maintenance', 'Internet Bill'],
+            'Food & Dining' => ['Supermarket Weekly', 'Corner Bakery', 'Starbucks Coffee', 'Dinner with Friends'],
+            'Transportation' => ['Gas Station Refill', 'Uber Ride', 'Bus Ticket', 'Train Fare'],
+            'Shopping' => ['Target Store', 'Amazon Order', 'H&M Clothing', 'Electronics Upgrade'],
+            'Entertainment' => ['Netflix Subscription', 'Movie Night', 'Concert Ticket', 'Spotify Family'],
+            'Utilities' => ['Electric Bill', 'Water Bill', 'Gas Utility'],
+        ];
+
         for ($i = 0; $i < 50; $i++) {
             $cat = $expenseCategories[array_rand($expenseCategories)];
+            $nameOptions = $transactionNames[$cat->name] ?? ['Expense Purchase'];
+            $title = $nameOptions[array_rand($nameOptions)];
+            
             Transaction::factory()->create([
                 'user_id' => $user->id,
                 'category_id' => $cat->id,
+                'card_id' => $cardOptions[array_rand($cardOptions)],
                 'type' => 'expense',
+                'title' => $title,
                 'amount' => rand(1000, 25000), // $10 to $250
                 'transaction_date' => Carbon::now()->subDays(rand(0, 90)),
             ]);
@@ -123,7 +145,9 @@ class DatabaseSeeder extends Seeder
             Transaction::factory()->create([
                 'user_id' => $user->id,
                 'category_id' => $createdCategories['Salary']->id,
+                'card_id' => null,
                 'type' => 'income',
+                'title' => 'Bi-weekly Salary',
                 'amount' => 350000, // $3,500.00
                 'recipient_name' => 'Acme Corp Inc.',
                 'transaction_date' => Carbon::now()->subDays($i * 14),

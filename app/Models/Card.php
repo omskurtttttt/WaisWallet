@@ -18,12 +18,28 @@ class Card extends Model
      */
     protected $fillable = [
         'user_id',
+        'name',
+        'brand',
         'last_four',
-        'cardholder_name',
-        'expiry_date',
-        'card_type',
-        'nickname',
+        'expiration_month',
+        'expiration_year',
+        'color',
+        'is_active',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'expiration_month' => 'integer',
+            'expiration_year' => 'integer',
+        ];
+    }
 
     /**
      * Get the user that owns the card.
