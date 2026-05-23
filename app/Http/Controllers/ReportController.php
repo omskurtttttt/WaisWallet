@@ -14,6 +14,12 @@ class ReportController extends Controller
      */
     public function __invoke(Request $request): Response
     {
+        $request->validate([
+            'type' => ['nullable', 'string', 'in:monthly,yearly'],
+            'year' => ['nullable', 'integer', 'min:2000', 'max:' . (Carbon::now()->year + 10)],
+            'month' => ['nullable', 'integer', 'min:1', 'max:12'],
+        ]);
+
         $user = $request->user();
         
         $type = $request->input('type', 'monthly'); // monthly or yearly

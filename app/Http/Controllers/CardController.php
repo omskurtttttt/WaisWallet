@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Card;
+use App\Http\Requests\StoreCardRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -33,17 +34,9 @@ class CardController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreCardRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'brand' => 'required|string|in:Visa,Mastercard,Amex,Discover,Other',
-            'last_four' => 'required|string|size:4',
-            'expiration_month' => 'required|integer|min:1|max:12',
-            'expiration_year' => 'required|integer|min:' . date('Y'),
-            'color' => 'required|string|size:7',
-            'is_active' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         $request->user()->cards()->create($validated);
 

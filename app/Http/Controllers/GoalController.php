@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Goal;
+use App\Http\Requests\StoreGoalRequest;
+use App\Http\Requests\AddGoalFundsRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class GoalController extends Controller
@@ -41,17 +44,9 @@ class GoalController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreGoalRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'target_amount' => 'required|numeric|min:0.01',
-            'current_amount' => 'nullable|numeric|min:0',
-            'target_date' => 'required|date|after_or_equal:today',
-        ]);
+        $validated = $request->validated();
 
         // Convert dollars to cents
         $validated['target_amount'] = (int) round($validated['target_amount'] * 100);
@@ -65,26 +60,26 @@ class GoalController extends Controller
     /**
      * Add funds to a goal.
      */
-    public function addFunds(Request $request, Goal $goal)
+    public function addFunds(AddGoalFundsRequest $request, Goal $goal)
     {
         if ($goal->user_id !== auth()->id()) {
             abort(403);
         }
 
-        $validated = $request->validate([
-            'amount' => 'required|numeric|min:0.01',
-            'operation' => 'required|in:add,withdraw',
-        ]);
-
+        $validated = $request->validated();
         $amountInCents = (int) round($validated['amount'] * 100);
 
-        if ($validated['operation'] === 'add') {
-            $goal->increment('current_amount', $amountInCents);
-        } else {
-            // Ensure we don't go below 0
-            $newAmount = max(0, $goal->current_amount - $amountInCents);
-            $goal->update(['current_amount' => $newAmount]);
-        }
+        DB::transaction(function () use ($goal, $amountInCents, $validated) {
+            $lockedGoal = Goal::where('id', $goal->id)->lockForUpdate()->firstOrFail();
+
+            if ($validated['operation'] === 'add') {
+                $lockedGoal->increment('current_amount', $amountInCents);
+            } else {
+                // Ensure we don't go below 0
+                $newAmount = max(0, $lockedGoal->current_amount - $amountInCents);
+                $lockedGoal->update(['current_amount' => $newAmount]);
+            }
+        });
 
         return redirect()->back()->with('success', 'Funds updated successfully.');
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use App\Models\Category;
 use App\Models\Card;
+use App\Http\Requests\StoreTransactionRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -58,7 +59,7 @@ class TransactionController extends Controller
             ]);
 
         // Need categories and cards for the filter dropdowns and Add Transaction modal
-        $categories = Category::select('id', 'name', 'type', 'icon', 'color')->orderBy('name')->get();
+        $categories = $user->categories()->select('id', 'name', 'type', 'icon', 'color')->orderBy('name')->get();
         $cards = $user->cards()->where('is_active', true)->select('id', 'name', 'brand', 'last_four')->get();
 
         return Inertia::render('Transactions/Index', [
@@ -70,17 +71,9 @@ class TransactionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreTransactionRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0.01',
-            'type' => 'required|in:income,expense',
-            'transaction_date' => 'required|date',
-            'category_id' => 'required|exists:categories,id',
-            'card_id' => 'nullable|exists:cards,id',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         // Convert amount to cents before saving
         $validated['amount'] = (int) round($validated['amount'] * 100);
