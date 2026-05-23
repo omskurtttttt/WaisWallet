@@ -58,20 +58,25 @@ class DashboardController extends Controller
             $budgetUsedPercentage = min(100, round(($monthlySpending / $totalBudgetAllocated) * 100));
         }
 
-        // 5. Income Chart Data (Last 6 Months)
+        // 5. Income Chart Data (Last 6 Months - Optimized into 1 query)
+        $sixMonthsAgo = $now->copy()->subMonths(5)->startOfMonth();
+        $monthlyIncomes = $user->transactions()
+            ->where('type', 'income')
+            ->where('transaction_date', '>=', $sixMonthsAgo)
+            ->selectRaw("TO_CHAR(transaction_date, 'YYYY-MM') as month_key, sum(amount) as total")
+            ->groupBy('month_key')
+            ->get()
+            ->pluck('total', 'month_key');
+
         $incomeChartData = [];
         for ($i = 5; $i >= 0; $i--) {
             $monthStart = $now->copy()->subMonths($i)->startOfMonth();
-            $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
-            
-            $monthIncome = $user->transactions()
-                ->where('type', 'income')
-                ->whereBetween('transaction_date', [$monthStart, $monthEnd])
-                ->sum('amount');
+            $monthKey = $monthStart->format('Y-m');
+            $monthIncome = $monthlyIncomes->get($monthKey) ?? 0;
                 
             $incomeChartData[] = [
                 'month' => $monthStart->format('M Y'),
-                'amount' => $monthIncome / 100, // Pass to frontend in standard currency format for chart
+                'amount' => $monthIncome / 100,
             ];
         }
 
@@ -83,7 +88,7 @@ class DashboardController extends Controller
             ->groupBy('category_id')
             ->with('category:id,name,color')
             ->orderByDesc('total')
-            ->take(5) // Top 5 categories
+            ->take(5)
             ->get()
             ->map(function ($item) {
                 return [
@@ -93,18 +98,20 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 7. Spending Limits Data (Budgets for current month)
+        // 7. Spending Limits Data (Budgets for current month - Optimized to prevent N+1)
+        $categorySpending = $user->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
+            ->groupBy('category_id')
+            ->selectRaw('category_id, sum(amount) as total')
+            ->pluck('total', 'category_id');
+
         $spendingLimitsData = $user->budgets()
             ->whereDate('month', $startOfMonth->format('Y-m-d'))
             ->with('category:id,name,color')
             ->get()
-            ->map(function ($budget) use ($user, $startOfMonth, $endOfMonth) {
-                $spent = $user->transactions()
-                    ->where('type', 'expense')
-                    ->where('category_id', $budget->category_id)
-                    ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-                    ->sum('amount');
-                
+            ->map(function ($budget) use ($categorySpending) {
+                $spent = $categorySpending->get($budget->category_id) ?? 0;
                 $allocated = $budget->allocated_amount;
                 $percentage = $allocated > 0 ? min(100, round(($spent / $allocated) * 100)) : 0;
                 
@@ -112,8 +119,8 @@ class DashboardController extends Controller
                     'id' => $budget->id,
                     'name' => $budget->category->name ?? 'General Budget',
                     'color' => $budget->category->color ?? '#7033ff',
-                    'spent' => $spent, // keeping in cents for formatMoney utility
-                    'allocated' => $allocated, // keeping in cents
+                    'spent' => $spent,
+                    'allocated' => $allocated,
                     'percentage' => $percentage,
                 ];
             })
