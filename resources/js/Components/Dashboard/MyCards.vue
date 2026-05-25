@@ -41,7 +41,13 @@ const getBrandIcon = (brand) => {
     <div class="glass-card p-5 animate-slide-up">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-foreground">My Cards</h2>
-            <Link :href="route('wallet.index')" class="text-sm font-medium text-primary hover:text-primary/80 transition-colors">+ Add</Link>
+            <Link :href="route('wallet.index')" class="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Add</span>
+            </Link>
         </div>
         
         <div v-if="data && data.length > 0" class="relative">

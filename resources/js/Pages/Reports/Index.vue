@@ -6,6 +6,7 @@ import VueApexCharts from 'vue3-apexcharts';
 import { useThemeStore } from '@/Stores/theme';
 import { useCurrency } from '@/Composables/useCurrency';
 import { useIcons } from '@/Composables/useIcons';
+import CustomSelect from '@/Components/CustomSelect.vue';
 
 const props = defineProps({
     filters: Object,
@@ -265,7 +266,7 @@ const downloadReportData = () => {
             </div>
 
             <!-- Navigation & Filters -->
-            <div class="glass-card p-4 print:hidden animate-slide-up flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="glass-card p-4 print:hidden animate-slide-up flex flex-col md:flex-row gap-4 items-center justify-between relative z-20">
                 <!-- Toggle Mode tabs -->
                 <div class="flex bg-muted/60 p-1 rounded-xl w-full md:w-auto">
                     <button 
@@ -290,22 +291,20 @@ const downloadReportData = () => {
 
                 <!-- Select Filters -->
                 <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
-                    <select 
+                    <CustomSelect 
                         v-if="viewType === 'monthly'"
                         v-model="selectedMonth"
+                        :options="months"
                         @change="handleFilterChange"
-                        class="h-10 rounded-lg border-0 bg-input px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all min-w-[130px]"
-                    >
-                        <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
-                    </select>
+                        class="min-w-[130px]"
+                    />
 
-                    <select 
+                    <CustomSelect 
                         v-model="selectedYear"
+                        :options="availableYears"
                         @change="handleFilterChange"
-                        class="h-10 rounded-lg border-0 bg-input px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all min-w-[110px]"
-                    >
-                        <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
-                    </select>
+                        class="min-w-[110px]"
+                    />
                 </div>
             </div>
 
@@ -316,7 +315,7 @@ const downloadReportData = () => {
             </div>
 
             <!-- Metrics Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up" style="animation-delay: 0.05s">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up relative z-10" style="animation-delay: 0.05s">
                 <!-- Total Income -->
                 <div class="glass-card p-5 border-l-4 border-chart-1 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Income</p>

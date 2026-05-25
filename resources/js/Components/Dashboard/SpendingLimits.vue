@@ -8,7 +8,7 @@ const props = defineProps({
     },
     currency: {
         type: String,
-        default: 'USD'
+        default: 'PHP'
     }
 });
 

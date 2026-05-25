@@ -6,6 +6,7 @@ import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import CustomSelect from '@/Components/CustomSelect.vue';
 
 const props = defineProps({
     show: {
@@ -118,16 +119,13 @@ const close = () => {
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <InputLabel for="brand" value="Brand" />
-                        <select
+                        <CustomSelect
                             id="brand"
                             v-model="form.brand"
-                            class="mt-1 h-11 w-full rounded-xl border-0 bg-input px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-200"
-                            required
-                        >
-                            <option v-for="brand in brands" :key="brand" :value="brand">
-                                {{ brand }}
-                            </option>
-                        </select>
+                            :options="brands"
+                            class="mt-1"
+                            trigger-class="h-11 rounded-xl"
+                        />
                         <InputError class="mt-2" :message="form.errors.brand" />
                     </div>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -7,6 +7,7 @@ import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import CustomSelect from '@/Components/CustomSelect.vue';
 
 const props = defineProps({
     show: {
@@ -50,6 +51,17 @@ const close = () => {
     form.clearErrors();
     emit('close');
 };
+
+const categoryOptions = computed(() => {
+    return props.categories.map(cat => ({ value: cat.id, label: cat.name }));
+});
+
+const cardOptions = computed(() => {
+    return [
+        { value: '', label: 'Cash / Other' },
+        ...props.cards.map(card => ({ value: card.id, label: `${card.brand} •••• ${card.last_four}` }))
+    ];
+});
 </script>
 
 <template>
@@ -136,32 +148,26 @@ const close = () => {
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <InputLabel for="category_id" value="Category" />
-                        <select
+                        <CustomSelect
                             id="category_id"
                             v-model="form.category_id"
-                            class="mt-1 h-11 w-full rounded-xl border-0 bg-input px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-200"
-                            required
-                        >
-                            <option value="" disabled>Select category</option>
-                            <option v-for="category in categories" :key="category.id" :value="category.id">
-                                {{ category.name }}
-                            </option>
-                        </select>
+                            :options="categoryOptions"
+                            placeholder="Select category"
+                            class="mt-1"
+                            trigger-class="h-11 rounded-xl"
+                        />
                         <InputError class="mt-2" :message="form.errors.category_id" />
                     </div>
 
                     <div>
                         <InputLabel for="card_id" value="Payment Method" />
-                        <select
+                        <CustomSelect
                             id="card_id"
                             v-model="form.card_id"
-                            class="mt-1 h-11 w-full rounded-xl border-0 bg-input px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-200"
-                        >
-                            <option value="">Cash / Other</option>
-                            <option v-for="card in cards" :key="card.id" :value="card.id">
-                                {{ card.brand }} •••• {{ card.last_four }}
-                            </option>
-                        </select>
+                            :options="cardOptions"
+                            class="mt-1"
+                            trigger-class="h-11 rounded-xl"
+                        />
                         <InputError class="mt-2" :message="form.errors.card_id" />
                     </div>
                 </div>

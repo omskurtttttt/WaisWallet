@@ -1,7 +1,8 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { useThemeStore } from '@/Stores/theme';
+import CustomSelect from '@/Components/CustomSelect.vue';
 
 const props = defineProps({
     data: {
@@ -10,7 +11,7 @@ const props = defineProps({
     },
     currency: {
         type: String,
-        default: 'USD'
+        default: 'PHP'
     }
 });
 
@@ -19,6 +20,12 @@ const isDark = computed(() => themeStore.isDark);
 
 const hasData = computed(() => props.data && props.data.length > 0);
 
+const period = ref('This month');
+const periodOptions = [
+    { value: 'This month', label: 'This month' },
+    { value: 'Last month', label: 'Last month (Coming Soon)', disabled: true }
+];
+// ... rest of scripts
 const chartOptions = computed(() => ({
     chart: {
         type: 'donut',
@@ -116,10 +123,12 @@ const series = computed(() => {
     <div class="glass-card p-5 animate-slide-up">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-foreground">Top Expenses</h2>
-            <select class="h-9 rounded-lg border border-border bg-input px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30">
-                <option>This month</option>
-                <option disabled>Last month (Coming Soon)</option>
-            </select>
+            <CustomSelect
+                v-model="period"
+                :options="periodOptions"
+                class="w-40"
+                trigger-class="h-9 rounded-lg"
+            />
         </div>
         
         <div v-if="hasData" class="flex flex-col items-center">

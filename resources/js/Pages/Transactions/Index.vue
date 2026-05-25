@@ -1,12 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import debounce from 'lodash/debounce';
 import AddTransactionModal from './Partials/AddTransactionModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { useCurrency } from '@/Composables/useCurrency';
 import { useIcons } from '@/Composables/useIcons';
+import CustomSelect from '@/Components/CustomSelect.vue';
 
 const props = defineProps({
     transactions: Object,
@@ -61,6 +62,19 @@ const deleteTransaction = () => {
         });
     }
 };
+
+const typeOptions = [
+    { value: 'all', label: 'All Types' },
+    { value: 'income', label: 'Income' },
+    { value: 'expense', label: 'Expense' }
+];
+
+const categoryOptions = computed(() => {
+    return [
+        { value: 'all', label: 'All Categories' },
+        ...props.categories.map(cat => ({ value: cat.id, label: cat.name }))
+    ];
+});
 </script>
 
 <template>
@@ -75,14 +89,18 @@ const deleteTransaction = () => {
                 </div>
                 <button 
                     @click="showAddModal = true"
-                    class="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-md shadow-primary/25"
+                    class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-md shadow-primary/25"
                 >
-                    + Add Transaction
+                    <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add Transaction</span>
                 </button>
             </div>
 
             <!-- Filters -->
-            <div class="glass-card p-4 animate-slide-up flex flex-col md:flex-row gap-4">
+            <div class="glass-card p-4 animate-slide-up flex flex-col md:flex-row gap-4 relative z-20">
                 <div class="flex-1 relative">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
@@ -95,26 +113,21 @@ const deleteTransaction = () => {
                     />
                 </div>
                 <div class="flex flex-wrap md:flex-nowrap gap-4">
-                    <select 
+                    <CustomSelect 
                         v-model="typeFilter"
-                        class="h-10 rounded-lg border-0 bg-input px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all min-w-[140px]"
-                    >
-                        <option value="all">All Types</option>
-                        <option value="income">Income</option>
-                        <option value="expense">Expense</option>
-                    </select>
-                    <select 
+                        :options="typeOptions"
+                        class="min-w-[140px]"
+                    />
+                    <CustomSelect 
                         v-model="categoryFilter"
-                        class="h-10 rounded-lg border-0 bg-input px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all min-w-[160px]"
-                    >
-                        <option value="all">All Categories</option>
-                        <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                    </select>
+                        :options="categoryOptions"
+                        class="min-w-[160px]"
+                    />
                 </div>
             </div>
 
             <!-- Transactions Table -->
-            <div class="glass-card overflow-hidden animate-slide-up" style="animation-delay: 0.1s">
+            <div class="glass-card overflow-hidden animate-slide-up relative z-10" style="animation-delay: 0.1s">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead class="bg-muted/30 text-muted-foreground border-b border-border">

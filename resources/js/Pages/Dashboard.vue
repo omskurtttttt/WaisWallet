@@ -118,7 +118,7 @@ const cards = computed(() => {
             </div>
 
             <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 relative z-20">
                 <!-- Income Chart -->
                 <div class="lg:col-span-2">
                     <IncomeChart :data="incomeChartData" :currency="currency" />
@@ -131,7 +131,7 @@ const cards = computed(() => {
             </div>
 
             <!-- Bottom Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 relative z-10">
                 <!-- Recent Transactions -->
                 <div class="lg:col-span-2">
                     <RecentTransactions :data="recentTransactionsData" :currency="currency" />

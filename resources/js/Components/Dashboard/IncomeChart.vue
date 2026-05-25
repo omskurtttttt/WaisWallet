@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { useThemeStore } from '@/Stores/theme';
+import CustomSelect from '@/Components/CustomSelect.vue';
 
 const props = defineProps({
     data: {
@@ -10,14 +11,21 @@ const props = defineProps({
     },
     currency: {
         type: String,
-        default: 'USD'
+        default: 'PHP'
     }
 });
 
 const themeStore = useThemeStore();
 const isDark = computed(() => themeStore.isDark);
 
+const period = ref('Last 6 months');
+const periodOptions = [
+    { value: 'Last 6 months', label: 'Last 6 months' },
+    { value: 'This year', label: 'This year (Coming Soon)', disabled: true }
+];
+
 const chartOptions = computed(() => ({
+// ... rest of chartOptions and series code
     chart: {
         type: 'bar',
         fontFamily: 'Inter, sans-serif',
@@ -118,10 +126,12 @@ const series = computed(() => [{
     <div class="glass-card p-5 animate-slide-up">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-foreground">Total Income</h2>
-            <select class="h-9 rounded-lg border border-border bg-input px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30">
-                <option>Last 6 months</option>
-                <option disabled>This year (Coming Soon)</option>
-            </select>
+            <CustomSelect
+                v-model="period"
+                :options="periodOptions"
+                class="w-48"
+                trigger-class="h-9 rounded-lg"
+            />
         </div>
         <div class="h-[300px] w-full">
             <VueApexCharts
