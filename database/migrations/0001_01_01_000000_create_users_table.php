@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('avatar')->nullable();
-            $table->string('currency', 3)->default('USD');
+            $table->string('currency', 3)->default('PHP');
             $table->integer('monthly_spending_limit')->default(500000); // 5000.00 in cents
             $table->string('theme_preference', 5)->default('light');
             $table->rememberToken();
