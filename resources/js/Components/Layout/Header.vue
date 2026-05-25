@@ -31,7 +31,7 @@ const initials = computed(() => {
     <header
         :class="[
             'fixed top-0 right-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 md:px-6 transition-all duration-300',
-            'left-0 lg:left-[260px]',
+            'left-0',
             collapsed ? 'lg:left-[72px]' : 'lg:left-[260px]',
         ]"
     >

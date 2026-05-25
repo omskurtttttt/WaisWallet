@@ -41,7 +41,6 @@ onMounted(() => {
         <main
             :class="[
                 'pt-16 min-h-screen transition-all duration-300',
-                'lg:ml-[260px]',
                 sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]',
             ]"
         >
