@@ -26,7 +26,7 @@
   --chart-5: #747474;
   --popover: #fcfcfc;
   --primary: #7033ff;
-  --sidebar: #f5f8fb;
+  --sidebar: var(--background);
   --spacing: 0.27rem;
   --font-mono: 'IBM Plex Mono', monospace;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
@@ -41,8 +41,8 @@
   --shadow-spread: 0px;
   --letter-spacing: -0.025em;
   --shadow-opacity: 0.16;
-  --sidebar-accent: #ebebeb;
-  --sidebar-border: #ebebeb;
+  --sidebar-accent: var(--muted);
+  --sidebar-border: var(--border);
   --card-foreground: #000000;
   --shadow-offset-x: 0px;
   --shadow-offset-y: 2px;
@@ -73,7 +73,7 @@
   --chart-5: #a0a0a0;
   --popover: #222327;
   --primary: #8c5cff;
-  --sidebar: #161618;
+  --sidebar: var(--background);
   --spacing: 0.27rem;
   --font-mono: 'IBM Plex Mono', monospace;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
@@ -88,8 +88,8 @@
   --shadow-spread: 0px;
   --letter-spacing: -0.025em;
   --shadow-opacity: 0.16;
-  --sidebar-accent: #2a2c33;
-  --sidebar-border: #33353a;
+  --sidebar-accent: var(--muted);
+  --sidebar-border: var(--border);
   --card-foreground: #f0f0f0;
   --shadow-offset-x: 0px;
   --shadow-offset-y: 2px;

@@ -40,8 +40,8 @@ onMounted(() => {
 
         <main
             :class="[
-                'pt-16 min-h-screen transition-all duration-300',
-                sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]',
+                'pt-[72px] min-h-screen transition-all duration-300',
+                sidebarCollapsed ? 'lg:ml-[78px]' : 'lg:ml-[264px]',
             ]"
         >
             <div class="animate-fade-in">
