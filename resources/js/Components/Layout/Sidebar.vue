@@ -1,4 +1,5 @@
 <script setup>
+import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -16,7 +17,10 @@ const emit = defineEmits(['toggle', 'closeMobile']);
 
 const page = usePage();
 
-const navItems = [
+// Whether sidebar is showing expanded content (either not collapsed or mobile open)
+const isExpanded = computed(() => !props.collapsed || props.mobileOpen);
+
+const mainNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     { name: 'Transactions', href: '/transactions', icon: 'transactions' },
     { name: 'Wallet', href: '/wallet', icon: 'wallet' },
@@ -36,6 +40,7 @@ function handleNavClick() {
         emit('closeMobile');
     }
 }
+
 </script>
 
 <template>
@@ -58,145 +63,209 @@ function handleNavClick() {
     <!-- Sidebar -->
     <aside
         :class="[
-            'fixed left-0 top-0 z-50 h-screen border-r border-sidebar-border bg-sidebar flex flex-col',
-            'transition-all duration-300 ease-in-out',
+            'fixed left-0 top-0 z-50 h-screen bg-sidebar border-r border-sidebar-border flex flex-col',
+            'transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]',
             // Desktop
             'max-lg:translate-x-[-100%] lg:translate-x-0',
-            collapsed ? 'lg:w-[72px]' : 'lg:w-[260px]',
+            collapsed ? 'lg:w-[78px]' : 'lg:w-[264px]',
             // Mobile (override when open)
-            mobileOpen ? 'max-lg:translate-x-0 max-lg:w-[280px]' : '',
+            mobileOpen ? 'max-lg:translate-x-0 max-lg:w-[264px]' : '',
         ]"
     >
-        <!-- Logo -->
-        <div class="flex h-16 items-center gap-3 px-5 border-b border-sidebar-border shrink-0">
-            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shrink-0">
-                <svg class="h-5 w-5 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Logo Section — Clickable to toggle collapse/expand on desktop -->
+        <div
+            :class="[
+                'flex items-center shrink-0',
+                isExpanded ? 'h-[72px] px-6 gap-3' : 'h-[72px] justify-center px-0',
+            ]"
+        >
+            <button
+                @click="$emit('toggle')"
+                class="hidden lg:flex h-10 w-10 items-center justify-center rounded-[14px] bg-primary shrink-0 shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 cursor-pointer"
+                :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+            >
+                <svg class="h-5 w-5 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                </svg>
+            </button>
+            <!-- Mobile: non-clickable logo -->
+            <div class="flex h-10 w-10 items-center justify-center rounded-[14px] bg-primary shrink-0 shadow-md shadow-primary/20 lg:hidden">
+                <svg class="h-5 w-5 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
                     <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
                     <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
                 </svg>
             </div>
-            <span
-                v-show="!collapsed || mobileOpen"
-                class="text-lg font-bold tracking-tight text-sidebar-foreground whitespace-nowrap"
+            <transition
+                enter-active-class="transition-all duration-200 delay-100"
+                enter-from-class="opacity-0 -translate-x-2"
+                enter-to-class="opacity-100 translate-x-0"
+                leave-active-class="transition-all duration-150"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
             >
-                Wais<span class="text-primary">Wallet</span>
-            </span>
+                <span
+                    v-if="isExpanded"
+                    class="text-[17px] font-extrabold tracking-tight text-sidebar-foreground whitespace-nowrap"
+                >
+                    WAIS<span class="text-primary">WALLET</span>
+                </span>
+            </transition>
         </div>
+
+        <!-- Logo Divider (Only shown when collapsed) -->
+        <transition
+            enter-active-class="transition-opacity duration-200"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition-opacity duration-150"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div v-if="!isExpanded" class="flex justify-center py-2 shrink-0">
+                <div class="h-px bg-sidebar-border/70 rounded-full w-6"></div>
+            </div>
+        </transition>
 
         <!-- Navigation -->
-        <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-            <p
-                v-show="!collapsed || mobileOpen"
-                class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
-            >
-                Menu
-            </p>
+        <nav class="flex-1 overflow-y-auto overflow-x-hidden py-5 sidebar-scrollable">
+            <!-- Main Navigation Section -->
+            <div :class="isExpanded ? 'px-4' : 'px-2.5'">
+                <transition
+                    enter-active-class="transition-all duration-200 delay-75"
+                    enter-from-class="opacity-0"
+                    enter-to-class="opacity-100"
+                    leave-active-class="transition-all duration-100"
+                    leave-from-class="opacity-100"
+                    leave-to-class="opacity-0"
+                >
+                    <p
+                        v-if="isExpanded"
+                        class="px-3 pb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70"
+                    >
+                        Navigation
+                    </p>
+                </transition>
 
-            <Link
-                v-for="item in navItems"
-                :key="item.name"
-                :href="item.href"
-                @click="handleNavClick"
-                :class="[
-                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative',
-                    isActive(item)
-                        ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent',
-                    collapsed && !mobileOpen ? 'justify-center' : '',
-                ]"
-                :title="collapsed && !mobileOpen ? item.name : ''"
-            >
-                <!-- Active Indicator -->
-                <div
-                    v-if="isActive(item)"
-                    class="absolute -left-3 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary"
-                />
+                <div class="space-y-1">
+                    <Link
+                        v-for="item in mainNavItems"
+                        :key="item.name"
+                        :href="item.href"
+                        @click="handleNavClick"
+                        :class="[
+                            'sidebar-nav-item flex items-center rounded-[12px] text-[13px] font-semibold transition-all duration-200 group relative',
+                            isActive(item)
+                                ? 'bg-sidebar-accent text-sidebar-foreground sidebar-nav-active'
+                                : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
+                            isExpanded
+                                ? 'gap-3 px-3 py-2.5'
+                                : 'justify-center p-2.5',
+                        ]"
+                        :title="!isExpanded ? item.name : ''"
+                    >
+                        <!-- Dashboard Icon -->
+                        <svg v-if="item.icon === 'dashboard'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                        </svg>
 
-                <!-- Dashboard Icon -->
-                <svg v-if="item.icon === 'dashboard'" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7" rx="1" />
-                    <rect x="14" y="3" width="7" height="7" rx="1" />
-                    <rect x="3" y="14" width="7" height="7" rx="1" />
-                    <rect x="14" y="14" width="7" height="7" rx="1" />
-                </svg>
+                        <!-- Transactions Icon (Philippine Peso ₱) -->
+                        <svg v-else-if="item.icon === 'transactions'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 4v16" />
+                            <path d="M7 4h7a4 4 0 0 1 0 8H7" />
+                            <path d="M4 8h14" />
+                            <path d="M4 11h14" />
+                        </svg>
 
-                <!-- Transactions Icon -->
-                <svg v-else-if="item.icon === 'transactions'" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
+                        <!-- Wallet Icon -->
+                        <svg v-else-if="item.icon === 'wallet'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                            <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                        </svg>
 
-                <!-- Wallet Icon -->
-                <svg v-else-if="item.icon === 'wallet'" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-                    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
-                </svg>
+                        <!-- Goals Icon -->
+                        <svg v-else-if="item.icon === 'goals'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <circle cx="12" cy="12" r="6" />
+                            <circle cx="12" cy="12" r="2" />
+                        </svg>
 
-                <!-- Goals Icon -->
-                <svg v-else-if="item.icon === 'goals'" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="12" r="6" />
-                    <circle cx="12" cy="12" r="2" />
-                </svg>
+                        <!-- Analytics Icon -->
+                        <svg v-else-if="item.icon === 'analytics'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18" />
+                            <path d="m19 9-5 5-4-4-3 3" />
+                        </svg>
 
-                <!-- Analytics Icon -->
-                <svg v-else-if="item.icon === 'analytics'" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 3v18h18" />
-                    <path d="m19 9-5 5-4-4-3 3" />
-                </svg>
+                        <!-- Reports Icon -->
+                        <svg v-else-if="item.icon === 'reports'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                            <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                            <path d="M10 18v-4" />
+                            <path d="M14 18v-6" />
+                        </svg>
 
-                <!-- Reports Icon -->
-                <svg v-else-if="item.icon === 'reports'" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-                    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-                    <path d="M10 18v-4" />
-                    <path d="M14 18v-6" />
-                </svg>
+                        <transition
+                            enter-active-class="transition-all duration-200 delay-75"
+                            enter-from-class="opacity-0"
+                            enter-to-class="opacity-100"
+                            leave-active-class="transition-all duration-100"
+                            leave-from-class="opacity-100"
+                            leave-to-class="opacity-0"
+                        >
+                            <span v-if="isExpanded" class="whitespace-nowrap">{{ item.name }}</span>
+                        </transition>
 
-                <span v-show="!collapsed || mobileOpen" class="whitespace-nowrap">{{ item.name }}</span>
-            </Link>
-            <!-- Logout Link -->
-            <Link
-                href="/logout"
-                method="post"
-                as="button"
-                :class="[
-                    'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-destructive hover:bg-destructive/10 group relative',
-                    collapsed && !mobileOpen ? 'justify-center' : '',
-                ]"
-                title="Log Out"
-            >
-                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
-                <span v-show="!collapsed || mobileOpen" class="whitespace-nowrap">Log Out</span>
-            </Link>
+                        <!-- Collapsed tooltip -->
+                        <div
+                            v-if="!isExpanded"
+                            class="absolute left-full ml-3 hidden group-hover:flex items-center z-50"
+                        >
+                            <div class="rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background shadow-lg whitespace-nowrap">
+                                {{ item.name }}
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+            </div>
+
         </nav>
 
-        <!-- Bottom Section: Collapse Toggle (desktop only) -->
-        <div class="border-t border-sidebar-border p-3 shrink-0 hidden lg:block">
-            <button
-                @click="$emit('toggle')"
-                class="flex w-full items-center justify-center rounded-xl p-2.5 text-sidebar-foreground hover:bg-sidebar-accent transition-colors duration-200"
-                :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-            >
-                <svg
-                    class="h-5 w-5 transition-transform duration-300"
-                    :class="{ 'rotate-180': collapsed }"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <path d="m11 17-5-5 5-5" />
-                    <path d="m18 17-5-5 5-5" />
-                </svg>
-            </button>
-        </div>
     </aside>
 </template>
+
+<style scoped>
+/* Hide scrollbar for sidebar nav but keep scrollable */
+.sidebar-scrollable {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.sidebar-scrollable::-webkit-scrollbar {
+    display: none;
+}
+
+/* Active nav item subtle left accent bar */
+.sidebar-nav-active::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    border-radius: 0 4px 4px 0;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Only show the accent bar in expanded mode */
+:deep(.lg\:w-\[264px\]) .sidebar-nav-active::before {
+    opacity: 1;
+}
+</style>
