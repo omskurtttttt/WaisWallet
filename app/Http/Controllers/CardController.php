@@ -12,10 +12,17 @@ class CardController extends Controller
     public function index(Request $request)
     {
         $cards = $request->user()->cards()
+            ->withSum(['transactions as income_sum' => function ($query) {
+                $query->where('type', 'income');
+            }], 'amount')
+            ->withSum(['transactions as expense_sum' => function ($query) {
+                $query->where('type', 'expense');
+            }], 'amount')
             ->orderByDesc('is_active')
             ->orderBy('name')
             ->get()
             ->map(function ($card) {
+                $balance = ($card->income_sum ?? 0) - ($card->expense_sum ?? 0);
                 return [
                     'id' => $card->id,
                     'name' => $card->name,
@@ -25,6 +32,7 @@ class CardController extends Controller
                     'expiration_year' => $card->expiration_year,
                     'color' => $card->color,
                     'is_active' => $card->is_active,
+                    'balance' => $balance,
                     'created_at' => $card->created_at->format('M d, Y'),
                 ];
             });

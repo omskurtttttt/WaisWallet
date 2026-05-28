@@ -1,4 +1,5 @@
 <script setup>
+import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -23,13 +24,13 @@ const form = useForm({
     last_four: '',
     expiration_month: '',
     expiration_year: '',
-    color: '#3b82f6', // Default blue
+    color: '#8b5cf6', // Default purple/violet for the accounts
     is_active: true,
 });
 
 const colors = [
-    { name: 'Blue', value: '#3b82f6' },
     { name: 'Purple', value: '#8b5cf6' },
+    { name: 'Blue', value: '#3b82f6' },
     { name: 'Indigo', value: '#6366f1' },
     { name: 'Pink', value: '#ec4899' },
     { name: 'Rose', value: '#f43f5e' },
@@ -40,7 +41,36 @@ const colors = [
     { name: 'Zinc', value: '#71717a' },
 ];
 
-const brands = ['Visa', 'Mastercard', 'Amex', 'Discover', 'Other'];
+const brands = ['Visa', 'Mastercard', 'Amex', 'Discover', 'GCash', 'Maya', 'GrabPay', 'Coins.ph', 'BPI', 'BDO', 'Metrobank', 'UnionBank', 'Cash', 'Other'];
+
+const isCash = computed(() => form.brand === 'Cash');
+const isEWallet = computed(() => ['gcash', 'maya', 'grabpay', 'coins.ph'].includes(form.brand?.toLowerCase()));
+const showExpiry = computed(() => !isCash.value && !isEWallet.value);
+const showLastFour = computed(() => !isCash.value);
+
+watch(() => form.brand, (newBrand) => {
+    if (newBrand === 'Cash') {
+        form.last_four = '0000';
+        form.expiration_month = 12;
+        form.expiration_year = 2099;
+    } else if (['gcash', 'maya', 'grabpay', 'coins.ph'].includes(newBrand.toLowerCase())) {
+        form.expiration_month = 12;
+        form.expiration_year = 2099;
+        if (form.last_four === '0000') {
+            form.last_four = '';
+        }
+    }
+});
+
+const lastFourLabel = computed(() => {
+    if (isEWallet.value) {
+        return 'Last 4 Digits of Mobile No.';
+    }
+    if (['bpi', 'bdo', 'metrobank', 'unionbank'].includes(form.brand?.toLowerCase())) {
+        return 'Last 4 Digits of Account No.';
+    }
+    return 'Last 4 Digits';
+});
 
 const submit = () => {
     form.post(route('wallet.cards.store'), {
@@ -62,7 +92,7 @@ const close = () => {
 <template>
     <Modal :show="show" @close="close" maxWidth="md">
         <div class="p-6">
-            <h2 class="text-xl font-bold text-foreground mb-6">Add New Card</h2>
+            <h2 class="text-xl font-bold text-foreground mb-6">Add New Account</h2>
 
             <form @submit.prevent="submit" class="space-y-4">
                 
@@ -74,7 +104,17 @@ const close = () => {
                     
                     <div class="relative z-10 flex flex-col justify-between h-full p-5 text-white">
                         <div class="flex justify-between items-start">
-                            <svg class="h-8 w-8 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <!-- Icon selection based on type -->
+                            <svg v-if="isCash" class="h-8 w-8 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="2" y="6" width="20" height="12" rx="2" />
+                                <circle cx="12" cy="12" r="2" />
+                                <path d="M6 12h.01M18 12h.01" />
+                            </svg>
+                            <svg v-else-if="isEWallet" class="h-8 w-8 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            <svg v-else class="h-8 w-8 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                 <rect x="2" y="5" width="20" height="14" rx="2" />
                                 <line x1="2" y1="10" x2="22" y2="10" />
                                 <line x1="7" y1="5" x2="7" y2="10" />
@@ -84,18 +124,24 @@ const close = () => {
                         </div>
                         
                         <div>
-                            <p class="text-lg font-financial tracking-widest mb-1 shadow-sm">
-                                •••• •••• •••• {{ form.last_four || 'XXXX' }}
+                            <p class="text-lg font-financial tracking-widest mb-1 shadow-sm uppercase">
+                                <span v-if="isCash">CASH ACCOUNT</span>
+                                <span v-else>•••• •••• •••• {{ form.last_four || 'XXXX' }}</span>
                             </p>
                             <div class="flex justify-between items-end">
                                 <div>
-                                    <p class="text-[10px] uppercase opacity-70 tracking-wider">Card Name</p>
-                                    <p class="text-sm font-medium">{{ form.name || 'My Card' }}</p>
+                                    <p class="text-[10px] uppercase opacity-70 tracking-wider">Account Name</p>
+                                    <p class="text-sm font-medium">{{ form.name || (isCash ? 'My Cash' : 'My Account') }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-[10px] uppercase opacity-70 tracking-wider">Expires</p>
-                                    <p class="text-sm font-financial">
-                                        {{ form.expiration_month ? form.expiration_month.toString().padStart(2, '0') : 'MM' }}/{{ form.expiration_year ? form.expiration_year.toString().slice(-2) : 'YY' }}
+                                    <p class="text-[10px] uppercase opacity-70 tracking-wider">{{ showExpiry ? 'Expires' : 'Status' }}</p>
+                                    <p class="text-sm font-financial uppercase">
+                                        <span v-if="showExpiry">
+                                            {{ form.expiration_month ? form.expiration_month.toString().padStart(2, '0') : 'MM' }}/{{ form.expiration_year ? form.expiration_year.toString().slice(-2) : 'YY' }}
+                                        </span>
+                                        <span v-else class="font-bold tracking-wider text-[11px] bg-white/20 px-2 py-0.5 rounded">
+                                            Active
+                                        </span>
                                     </p>
                                 </div>
                             </div>
@@ -104,21 +150,21 @@ const close = () => {
                 </div>
 
                 <div>
-                    <InputLabel for="name" value="Card Name" />
+                    <InputLabel for="name" :value="isCash ? 'Account Name' : 'Account/Card Nickname'" />
                     <TextInput
                         id="name"
                         type="text"
                         class="mt-1 block w-full"
                         v-model="form.name"
                         required
-                        placeholder="e.g. Personal Checkings, Travel Credit"
+                        :placeholder="isCash ? 'e.g. My Pocket Cash, Safe Box' : 'e.g. Personal Checkings, Travel Credit'"
                     />
                     <InputError class="mt-2" :message="form.errors.name" />
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div :class="showLastFour ? 'grid grid-cols-2 gap-4' : 'block'">
                     <div>
-                        <InputLabel for="brand" value="Brand" />
+                        <InputLabel for="brand" value="Account Type / Provider" />
                         <CustomSelect
                             id="brand"
                             v-model="form.brand"
@@ -129,8 +175,8 @@ const close = () => {
                         <InputError class="mt-2" :message="form.errors.brand" />
                     </div>
 
-                    <div>
-                        <InputLabel for="last_four" value="Last 4 Digits" />
+                    <div v-if="showLastFour">
+                        <InputLabel for="last_four" :value="lastFourLabel" />
                         <TextInput
                             id="last_four"
                             type="text"
@@ -146,7 +192,7 @@ const close = () => {
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div v-if="showExpiry" class="grid grid-cols-2 gap-4">
                     <div>
                         <InputLabel for="expiration_month" value="Exp Month (MM)" />
                         <TextInput
@@ -178,7 +224,7 @@ const close = () => {
                 </div>
 
                 <div>
-                    <InputLabel value="Card Color" />
+                    <InputLabel value="Theme Color" />
                     <div class="mt-2 flex flex-wrap gap-2">
                         <button
                             v-for="color in colors"
@@ -200,7 +246,7 @@ const close = () => {
                         :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
                         :disabled="form.processing"
                     >
-                        {{ form.processing ? 'Saving...' : 'Add Card' }}
+                        {{ form.processing ? 'Saving...' : 'Add Account' }}
                     </PrimaryButton>
                 </div>
             </form>

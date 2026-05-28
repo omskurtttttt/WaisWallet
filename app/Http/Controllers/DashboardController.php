@@ -167,10 +167,16 @@ class DashboardController extends Controller
 
         // 9. My Cards Data
         $myCardsData = $user->cards()
-            ->select('id', 'name', 'brand', 'last_four', 'expiration_month', 'expiration_year', 'color', 'is_active')
+            ->withSum(['transactions as income_sum' => function ($query) {
+                $query->where('type', 'income');
+            }], 'amount')
+            ->withSum(['transactions as expense_sum' => function ($query) {
+                $query->where('type', 'expense');
+            }], 'amount')
             ->where('is_active', true)
             ->get()
             ->map(function ($card) {
+                $balance = ($card->income_sum ?? 0) - ($card->expense_sum ?? 0);
                 return [
                     'id' => $card->id,
                     'name' => $card->name,
@@ -178,6 +184,7 @@ class DashboardController extends Controller
                     'last_four' => $card->last_four,
                     'expires' => str_pad($card->expiration_month, 2, '0', STR_PAD_LEFT) . '/' . substr($card->expiration_year, -2),
                     'color' => $card->color,
+                    'balance' => $balance,
                 ];
             });
 

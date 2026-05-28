@@ -4,11 +4,13 @@ import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AddCardModal from './Partials/AddCardModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { useCurrency } from '@/Composables/useCurrency';
 
 const props = defineProps({
     cards: Array,
 });
 
+const { formatMoney } = useCurrency();
 const showAddModal = ref(false);
 
 const getBrandIcon = (brand) => {
@@ -17,7 +19,24 @@ const getBrandIcon = (brand) => {
         case 'mastercard': return 'MC';
         case 'amex': return 'AMEX';
         case 'discover': return 'DISC';
-        default: return 'CARD';
+        case 'gcash': return 'GCash';
+        case 'maya': return 'Maya';
+        case 'grabpay': return 'GrabPay';
+        case 'coins.ph': return 'Coins.ph';
+        default: return brand || 'CARD';
+    }
+};
+
+const getAccountCategory = (brand) => {
+    const brandLower = brand?.toLowerCase();
+    if (['gcash', 'maya', 'grabpay', 'coins.ph'].includes(brandLower)) {
+        return { name: 'E-Wallet', icon: 'wallet', colorClass: 'bg-[#8c5cff]/10 text-[#8c5cff]' };
+    } else if (['bpi', 'bdo', 'metrobank', 'unionbank'].includes(brandLower)) {
+        return { name: 'Bank Account', icon: 'bank', colorClass: 'bg-[#38bdf8]/10 text-[#38bdf8]' };
+    } else if (brandLower === 'cash') {
+        return { name: 'Cash', icon: 'cash', colorClass: 'bg-[#3ee08f]/10 text-[#3ee08f]' };
+    } else {
+        return { name: 'Credit Card', icon: 'card', colorClass: 'bg-[#ff477e]/10 text-[#ff477e]' };
     }
 };
 
@@ -39,7 +58,7 @@ const deleteCard = () => {
             },
             onError: (errors) => {
                 console.error(errors);
-                alert('Failed to remove card. Please try again.');
+                alert('Failed to remove account. Please try again.');
             }
         });
     }
@@ -53,8 +72,8 @@ const deleteCard = () => {
             <!-- Header Row -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fade-in">
                 <div>
-                    <h1 class="text-2xl font-bold text-foreground">My Wallet</h1>
-                    <p class="mt-1 text-sm text-muted-foreground">Manage your credit cards, debit cards, and accounts.</p>
+                    <h1 class="text-2xl font-bold text-foreground">Accounts & Wallets</h1>
+                    <p class="mt-1 text-sm text-muted-foreground">Manage your credit cards, debit cards, cash, and e-wallets.</p>
                 </div>
                 <button 
                     @click="showAddModal = true"
@@ -64,7 +83,7 @@ const deleteCard = () => {
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    <span>Add Card</span>
+                    <span>Add Account</span>
                 </button>
             </div>
 
@@ -81,8 +100,20 @@ const deleteCard = () => {
                         <!-- Card Content -->
                         <div class="relative z-10 flex flex-col justify-between h-full p-6 text-white">
                             <div class="flex justify-between items-start">
-                                <!-- Chip Icon -->
-                                <svg class="h-10 w-10 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <!-- Dynamic Icon depending on category -->
+                                <svg v-if="getAccountCategory(card.brand).icon === 'cash'" class="h-10 w-10 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="2" y="6" width="20" height="12" rx="2" />
+                                    <circle cx="12" cy="12" r="2" />
+                                    <path d="M6 12h.01M18 12h.01" />
+                                </svg>
+                                <svg v-else-if="getAccountCategory(card.brand).icon === 'wallet'" class="h-10 w-10 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                                <svg v-else-if="getAccountCategory(card.brand).icon === 'bank'" class="h-10 w-10 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 22V11M21 22V11M2 11L12 2l10 9M10 22v-5h4v5M4 11h16M12 5v2" />
+                                </svg>
+                                <svg v-else class="h-10 w-10 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                     <rect x="2" y="5" width="20" height="14" rx="2" />
                                     <line x1="2" y1="10" x2="22" y2="10" />
                                     <line x1="7" y1="5" x2="7" y2="10" />
@@ -92,17 +123,31 @@ const deleteCard = () => {
                             </div>
                             
                             <div>
-                                <p class="text-2xl font-financial tracking-widest mb-3 shadow-sm">
-                                    •••• •••• •••• {{ card.last_four }}
+                                <p class="text-2xl font-bold font-financial tracking-tight mb-2 shadow-sm">
+                                    {{ formatMoney(card.balance) }}
                                 </p>
                                 <div class="flex justify-between items-end">
                                     <div>
-                                        <p class="text-[10px] uppercase opacity-70 tracking-wider mb-1">Card Name</p>
+                                        <p class="text-[10px] uppercase opacity-70 tracking-wider mb-1">
+                                            <span v-if="card.brand === 'Cash'">CASH ACCOUNT</span>
+                                            <span v-else-if="['gcash', 'maya', 'grabpay', 'coins.ph'].includes(card.brand.toLowerCase())">E-WALLET ({{ card.last_four }})</span>
+                                            <span v-else-if="['bpi', 'bdo', 'metrobank', 'unionbank'].includes(card.brand.toLowerCase())">BANK ACCT ({{ card.last_four }})</span>
+                                            <span v-else>CARD ({{ card.last_four }})</span>
+                                        </p>
                                         <p class="text-base font-medium truncate max-w-[150px]">{{ card.name }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <p class="text-[10px] uppercase opacity-70 tracking-wider mb-1">Expires</p>
-                                        <p class="text-base font-financial">{{ card.expiration_month }}/{{ card.expiration_year.toString().slice(-2) }}</p>
+                                        <p class="text-[10px] uppercase opacity-70 tracking-wider mb-1">
+                                            {{ (card.brand === 'Cash' || ['gcash', 'maya', 'grabpay', 'coins.ph'].includes(card.brand.toLowerCase())) ? 'Status' : 'Expires' }}
+                                        </p>
+                                        <p class="text-base font-financial uppercase">
+                                            <span v-if="card.brand === 'Cash' || ['gcash', 'maya', 'grabpay', 'coins.ph'].includes(card.brand.toLowerCase())" class="font-bold tracking-wider text-[11px] bg-white/20 px-2 py-0.5 rounded">
+                                                Active
+                                            </span>
+                                            <span v-else>
+                                                {{ card.expiration_month }}/{{ card.expiration_year.toString().slice(-2) }}
+                                            </span>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -111,7 +156,7 @@ const deleteCard = () => {
                     
                     <!-- Actions Menu (Visible on hover) -->
                     <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
-                        <button @click="confirmDeleteCard(card.id)" class="flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-destructive hover:text-destructive-foreground transition-colors" title="Remove Card">
+                        <button @click="confirmDeleteCard(card.id)" class="flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-destructive hover:text-destructive-foreground transition-colors" title="Remove Account">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
                             </svg>
@@ -126,7 +171,7 @@ const deleteCard = () => {
                             <path d="M5 12h14"/><path d="M12 5v14"/>
                         </svg>
                     </div>
-                    <span class="font-medium">Add another card</span>
+                    <span class="font-medium">Add another account</span>
                 </button>
             </div>
             
@@ -137,13 +182,13 @@ const deleteCard = () => {
                         <line x1="2" x2="22" y1="10" y2="10" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-foreground mb-2">No Cards Added Yet</h3>
-                <p class="text-muted-foreground max-w-md mb-8">Keep track of your spending methods by adding your credit and debit cards to your digital wallet.</p>
+                <h3 class="text-xl font-bold text-foreground mb-2">No Accounts Added Yet</h3>
+                <p class="text-muted-foreground max-w-md mb-8">Keep track of your spending methods by adding your bank accounts, e-wallets, cash, and credit cards to your digital wallet.</p>
                 <button 
                     @click="showAddModal = true"
                     class="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-lg shadow-primary/25"
                 >
-                    Add Your First Card
+                    Add Your First Account
                 </button>
             </div>
         </div>
