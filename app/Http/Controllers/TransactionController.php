@@ -60,7 +60,26 @@ class TransactionController extends Controller
 
         // Need categories and cards for the filter dropdowns and Add Transaction modal
         $categories = $user->categories()->select('id', 'name', 'type', 'icon', 'color')->orderBy('name')->get();
-        $cards = $user->cards()->where('is_active', true)->select('id', 'name', 'brand', 'last_four')->get();
+        $cards = $user->cards()
+            ->where('is_active', true)
+            ->withSum(['transactions as income_sum' => function ($query) {
+                $query->where('type', 'income');
+            }], 'amount')
+            ->withSum(['transactions as expense_sum' => function ($query) {
+                $query->where('type', 'expense');
+            }], 'amount')
+            ->get()
+            ->map(function ($card) {
+                $balance = ($card->income_sum ?? 0) - ($card->expense_sum ?? 0);
+                return [
+                    'id' => $card->id,
+                    'name' => $card->name,
+                    'brand' => $card->brand,
+                    'last_four' => $card->last_four,
+                    'color' => $card->color,
+                    'balance' => $balance,
+                ];
+            });
 
         return Inertia::render('Transactions/Index', [
             'transactions' => $transactions,

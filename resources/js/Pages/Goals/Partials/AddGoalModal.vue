@@ -65,7 +65,7 @@ const close = () => {
                         <InputLabel for="target_amount" value="Target Amount" />
                         <div class="relative mt-1">
                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                <span class="text-muted-foreground sm:text-sm">$</span>
+                                <span class="text-muted-foreground sm:text-sm">₱</span>
                             </div>
                             <input
                                 id="target_amount"
@@ -85,7 +85,7 @@ const close = () => {
                         <InputLabel for="current_amount" value="Current Savings (Optional)" />
                         <div class="relative mt-1">
                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                <span class="text-muted-foreground sm:text-sm">$</span>
+                                <span class="text-muted-foreground sm:text-sm">₱</span>
                             </div>
                             <input
                                 id="current_amount"

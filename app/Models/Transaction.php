@@ -12,6 +12,18 @@ class Transaction extends Model
     use HasFactory, HasUuid;
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function ($transaction) {
+            if (empty($transaction->recipient_name)) {
+                $transaction->recipient_name = $transaction->title ?? 'N/A';
+            }
+        });
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

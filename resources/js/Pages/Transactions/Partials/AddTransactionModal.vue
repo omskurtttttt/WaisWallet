@@ -8,6 +8,7 @@ import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import CustomSelect from '@/Components/CustomSelect.vue';
+import AddCategoryModal from './AddCategoryModal.vue';
 
 const props = defineProps({
     show: {
@@ -25,6 +26,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+
+const showCreateCategoryModal = ref(false);
 
 const form = useForm({
     title: '',
@@ -52,16 +55,64 @@ const close = () => {
     emit('close');
 };
 
+// Filter categories by selected transaction type and append "Create New" option
 const categoryOptions = computed(() => {
-    return props.categories.map(cat => ({ value: cat.id, label: cat.name }));
+    const filtered = props.categories.filter(cat => cat.type === form.type);
+    return [
+        ...filtered.map(cat => ({ value: cat.id, label: cat.name })),
+        { value: 'CREATE_NEW_CATEGORY', label: '➕ Add new category...' }
+    ];
 });
+
+const getColorEmoji = (hex) => {
+    if (!hex) return '💳';
+    const h = hex.toLowerCase();
+    if (['#8b5cf6', '#6366f1'].includes(h)) return '🟣';
+    if (['#3b82f6', '#38bdf8'].includes(h)) return '🔵';
+    if (['#10b981', '#14b8a6'].includes(h)) return '🟢';
+    if (['#f97316', '#fd822b'].includes(h)) return '🟠';
+    if (['#f43f5e', '#ec4899', '#ff477e', '#e54b4f'].includes(h)) return '🔴';
+    if (['#fdbe2a'].includes(h)) return '🟡';
+    return '⚫';
+};
 
 const cardOptions = computed(() => {
     return [
-        { value: '', label: 'Cash / Other' },
-        ...props.cards.map(card => ({ value: card.id, label: `${card.brand} •••• ${card.last_four}` }))
+        { value: '', label: '💵 Cash / Other' },
+        ...props.cards.map(card => {
+            const emoji = getColorEmoji(card.color);
+            const balanceStr = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(card.balance);
+            const lastFourStr = card.last_four && card.last_four !== '0000' ? ` (•••• ${card.last_four})` : '';
+            return {
+                value: card.id,
+                label: `${emoji} ${card.brand}${lastFourStr} — ${balanceStr}`
+            };
+        })
     ];
 });
+
+// Watch category_id: if "CREATE_NEW_CATEGORY" is chosen, open sub-modal and reset select value
+watch(() => form.category_id, (newVal) => {
+    if (newVal === 'CREATE_NEW_CATEGORY') {
+        form.category_id = '';
+        showCreateCategoryModal.value = true;
+    }
+});
+
+// Watch type: reset category selection to avoid mismatches
+watch(() => form.type, () => {
+    form.category_id = '';
+});
+
+// Watch categories: if a new category was added, auto-select it
+watch(() => props.categories, (newCats, oldCats) => {
+    if (oldCats && newCats.length > oldCats.length) {
+        const added = newCats.find(newCat => !oldCats.some(oldCat => oldCat.id === newCat.id));
+        if (added && added.type === form.type) {
+            form.category_id = added.id;
+        }
+    }
+}, { deep: true });
 </script>
 
 <template>
@@ -116,7 +167,7 @@ const cardOptions = computed(() => {
                         <InputLabel for="amount" value="Amount" />
                         <div class="relative mt-1">
                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                <span class="text-muted-foreground sm:text-sm">$</span>
+                                <span class="text-muted-foreground sm:text-sm">₱</span>
                             </div>
                             <input
                                 id="amount"
@@ -196,4 +247,11 @@ const cardOptions = computed(() => {
             </form>
         </div>
     </Modal>
+
+    <!-- Sub-modal for creating a new category inline -->
+    <AddCategoryModal
+        :show="showCreateCategoryModal"
+        :type="form.type"
+        @close="showCreateCategoryModal = false"
+    />
 </template>

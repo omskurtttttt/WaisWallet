@@ -91,7 +91,7 @@ const close = () => {
                     <InputLabel for="amount" value="Amount" />
                     <div class="relative mt-1">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <span class="text-muted-foreground sm:text-sm">$</span>
+                            <span class="text-muted-foreground sm:text-sm">₱</span>
                         </div>
                         <input
                             id="amount"
