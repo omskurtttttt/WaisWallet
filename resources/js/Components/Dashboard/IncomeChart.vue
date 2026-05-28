@@ -28,7 +28,7 @@ const chartOptions = computed(() => ({
 // ... rest of chartOptions and series code
     chart: {
         type: 'bar',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
         toolbar: { show: false },
         animations: {
             enabled: true,
@@ -39,7 +39,7 @@ const chartOptions = computed(() => ({
         },
         background: 'transparent'
     },
-    colors: ['#7033ff'],
+    colors: [isDark.value ? '#8c5cff' : '#7033ff'],
     plotOptions: {
         bar: {
             borderRadius: 6,
@@ -61,16 +61,17 @@ const chartOptions = computed(() => ({
         axisTicks: { show: false },
         labels: {
             style: {
-                colors: isDark.value ? '#9CA3AF' : '#6B7280',
-                fontSize: '12px'
+                colors: isDark.value ? '#767e93' : '#6B7280',
+                fontSize: '11px',
+                fontFamily: 'Plus Jakarta Sans, sans-serif'
             }
         }
     },
     yaxis: {
         labels: {
             style: {
-                colors: isDark.value ? '#9CA3AF' : '#6B7280',
-                fontSize: '12px',
+                colors: isDark.value ? '#767e93' : '#6B7280',
+                fontSize: '11px',
                 fontFamily: 'IBM Plex Mono, monospace'
             },
             formatter: (value) => {
@@ -83,7 +84,7 @@ const chartOptions = computed(() => ({
         }
     },
     grid: {
-        borderColor: isDark.value ? '#374151' : '#E5E7EB',
+        borderColor: isDark.value ? '#1d1e26' : '#E5E7EB',
         strokeDashArray: 4,
         yaxis: { lines: { show: true } },
         xaxis: { lines: { show: false } },
@@ -96,7 +97,7 @@ const chartOptions = computed(() => ({
             shade: isDark.value ? 'dark' : 'light',
             type: 'vertical',
             shadeIntensity: 0.5,
-            gradientToColors: ['#9c77ff'],
+            gradientToColors: [isDark.value ? '#38bdf8' : '#9c77ff'],
             inverseColors: true,
             opacityFrom: 1,
             opacityTo: 0.8,

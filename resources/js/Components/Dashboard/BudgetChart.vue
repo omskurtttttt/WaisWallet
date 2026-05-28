@@ -29,7 +29,7 @@ const periodOptions = [
 const chartOptions = computed(() => ({
     chart: {
         type: 'donut',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
         background: 'transparent',
         animations: {
             enabled: true,
@@ -49,17 +49,17 @@ const chartOptions = computed(() => ({
                     show: true,
                     name: {
                         show: true,
-                        fontSize: '14px',
-                        fontFamily: 'Inter, sans-serif',
-                        fontWeight: 500,
-                        color: isDark.value ? '#9CA3AF' : '#6B7280',
+                        fontSize: '13px',
+                        fontFamily: 'Plus Jakarta Sans, sans-serif',
+                        fontWeight: 600,
+                        color: isDark.value ? '#767e93' : '#6B7280',
                     },
                     value: {
                         show: true,
-                        fontSize: '24px',
-                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '22px',
+                        fontFamily: 'Plus Jakarta Sans, sans-serif',
                         fontWeight: 700,
-                        color: isDark.value ? '#F9FAFB' : '#111827',
+                        color: isDark.value ? '#f0f0f0' : '#111827',
                         formatter: function (val) {
                             return new Intl.NumberFormat('en-US', {
                                 style: 'currency',
@@ -72,9 +72,9 @@ const chartOptions = computed(() => ({
                         show: true,
                         showAlways: true,
                         label: 'Total Spent',
-                        fontSize: '12px',
-                        fontWeight: 500,
-                        color: isDark.value ? '#9CA3AF' : '#6B7280',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: isDark.value ? '#767e93' : '#6B7280',
                         formatter: function (w) {
                             const total = w.globals.seriesTotals.reduce((a, b) => {
                                 return a + b
@@ -95,8 +95,8 @@ const chartOptions = computed(() => ({
     },
     stroke: {
         show: true,
-        colors: isDark.value ? ['#1f2937'] : ['#ffffff'],
-        width: 2
+        colors: isDark.value ? ['#12131a'] : ['#ffffff'],
+        width: 3
     },
     legend: {
         show: false, // We'll build a custom legend below the chart
@@ -121,12 +121,12 @@ const series = computed(() => {
 
 <template>
     <div class="glass-card p-5 animate-slide-up">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-foreground">Top Expenses</h2>
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <h2 class="text-lg font-semibold text-foreground whitespace-nowrap">Top Expenses</h2>
             <CustomSelect
                 v-model="period"
                 :options="periodOptions"
-                class="w-40"
+                class="w-36"
                 trigger-class="h-9 rounded-lg"
             />
         </div>
