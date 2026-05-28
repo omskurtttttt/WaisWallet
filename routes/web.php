@@ -20,12 +20,14 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');

@@ -28,30 +28,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 2. Create Categories
-        $categories = [
-            // Income
-            ['name' => 'Salary', 'type' => 'income', 'icon' => 'briefcase', 'color' => '#4ac885'],
-            ['name' => 'Freelance', 'type' => 'income', 'icon' => 'monitor', 'color' => '#3276e4'],
-            ['name' => 'Investments', 'type' => 'income', 'icon' => 'trending-up', 'color' => '#fd822b'],
-            // Expense / Budget
-            ['name' => 'Housing', 'type' => 'expense', 'icon' => 'home', 'color' => '#7033ff'],
-            ['name' => 'Food & Dining', 'type' => 'expense', 'icon' => 'coffee', 'color' => '#fd822b'],
-            ['name' => 'Transportation', 'type' => 'expense', 'icon' => 'car', 'color' => '#3276e4'],
-            ['name' => 'Shopping', 'type' => 'expense', 'icon' => 'shopping-cart', 'color' => '#747474'],
-            ['name' => 'Entertainment', 'type' => 'expense', 'icon' => 'film', 'color' => '#e54b4f'],
-            ['name' => 'Utilities', 'type' => 'expense', 'icon' => 'zap', 'color' => '#5993f4'],
-        ];
-
-        $createdCategories = [];
-        foreach ($categories as $catData) {
-            $createdCategories[$catData['name']] = Category::factory()->create([
-                'user_id' => $user->id,
-                'name' => $catData['name'],
-                'type' => $catData['type'],
-                'icon' => $catData['icon'],
-                'color' => $catData['color'],
-            ]);
-        }
+        Category::seedDefaultsForUser($user);
+        $createdCategories = $user->categories()->get()->keyBy('name');
 
         // 3. Create Cards
         $card1 = Card::factory()->create([
@@ -94,34 +72,35 @@ class DatabaseSeeder extends Seeder
         // 5. Create Budgets for current month
         $currentMonth = Carbon::now()->startOfMonth()->format('Y-m-d');
         $budgetAllocations = [
-            'Housing' => 150000, // $1,500.00
-            'Food & Dining' => 60000, // $600.00
-            'Transportation' => 30000, // $300.00
-            'Shopping' => 40000, // $400.00
+            '🏠 Bills & Utilities' => 150000,
+            '🍔 Food & Dining' => 60000,
+            '🚗 Transportation' => 30000,
+            '🛍 Shopping' => 40000,
         ];
 
         foreach ($budgetAllocations as $catName => $amount) {
-            Budget::factory()->create([
-                'user_id' => $user->id,
-                'category_id' => $createdCategories[$catName]->id,
-                'allocated_amount' => $amount,
-                'month' => $currentMonth,
-            ]);
+            if (isset($createdCategories[$catName])) {
+                Budget::factory()->create([
+                    'user_id' => $user->id,
+                    'category_id' => $createdCategories[$catName]->id,
+                    'allocated_amount' => $amount,
+                    'month' => $currentMonth,
+                ]);
+            }
         }
 
         // 6. Create Transactions (mix of income and expenses over last 3 months)
-        $expenseCategories = array_filter($createdCategories, fn($c) => $c->type === 'expense');
-        $incomeCategories = array_filter($createdCategories, fn($c) => $c->type === 'income');
+        $expenseCategories = $createdCategories->filter(fn($c) => $c->type === 'expense')->all();
+        $incomeCategories = $createdCategories->filter(fn($c) => $c->type === 'income')->all();
 
         // Generate 50 random expenses
         $cardOptions = [$card1->id, $card2->id, null];
         $transactionNames = [
-            'Housing' => ['Rent Payment', 'Home Maintenance', 'Internet Bill'],
-            'Food & Dining' => ['Supermarket Weekly', 'Corner Bakery', 'Starbucks Coffee', 'Dinner with Friends'],
-            'Transportation' => ['Gas Station Refill', 'Uber Ride', 'Bus Ticket', 'Train Fare'],
-            'Shopping' => ['Target Store', 'Amazon Order', 'H&M Clothing', 'Electronics Upgrade'],
-            'Entertainment' => ['Netflix Subscription', 'Movie Night', 'Concert Ticket', 'Spotify Family'],
-            'Utilities' => ['Electric Bill', 'Water Bill', 'Gas Utility'],
+            '🏠 Bills & Utilities' => ['Rent Payment', 'Home Maintenance', 'Internet Bill', 'Electric Bill', 'Water Bill', 'Gas Utility'],
+            '🍔 Food & Dining' => ['Supermarket Weekly', 'Corner Bakery', 'Starbucks Coffee', 'Dinner with Friends'],
+            '🚗 Transportation' => ['Gas Station Refill', 'Uber Ride', 'Bus Ticket', 'Train Fare'],
+            '🛍 Shopping' => ['Target Store', 'Amazon Order', 'H&M Clothing', 'Electronics Upgrade'],
+            '🎮 Entertainment' => ['Netflix Subscription', 'Movie Night', 'Concert Ticket', 'Spotify Family'],
         ];
 
         for ($i = 0; $i < 50; $i++) {
@@ -144,7 +123,7 @@ class DatabaseSeeder extends Seeder
         for ($i = 0; $i < 6; $i++) {
             Transaction::factory()->create([
                 'user_id' => $user->id,
-                'category_id' => $createdCategories['Salary']->id,
+                'category_id' => $createdCategories['💼 Salary']->id,
                 'card_id' => null,
                 'type' => 'income',
                 'title' => 'Bi-weekly Salary',
