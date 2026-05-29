@@ -32,7 +32,7 @@ const initials = computed(() => {
         :class="[
             'absolute top-0 right-0 z-30 flex h-[72px] items-center justify-between px-4 md:px-6 transition-all duration-300',
             'left-0',
-            collapsed ? 'lg:left-[78px]' : 'lg:left-[264px]',
+            collapsed ? 'lg:left-20' : 'lg:left-72',
         ]"
     >
         <!-- Left: Mobile menu + Logo + Search -->

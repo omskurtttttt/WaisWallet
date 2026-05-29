@@ -64,19 +64,19 @@ function handleNavClick() {
     <aside
         :class="[
             'fixed left-0 top-0 z-50 h-screen bg-sidebar border-r border-sidebar-border flex flex-col',
-            'transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]',
+            'transition-all duration-300 ease-in-out',
             // Desktop
             'max-lg:translate-x-[-100%] lg:translate-x-0',
-            collapsed ? 'lg:w-[78px]' : 'lg:w-[264px]',
+            collapsed ? 'lg:w-20' : 'lg:w-72',
             // Mobile (override when open)
-            mobileOpen ? 'max-lg:translate-x-0 max-lg:w-[264px]' : '',
+            mobileOpen ? 'max-lg:translate-x-0 max-lg:w-72' : '',
         ]"
     >
         <!-- Logo Section — Clickable to toggle collapse/expand on desktop -->
         <div
             :class="[
-                'flex items-center shrink-0',
-                isExpanded ? 'h-[72px] px-6 gap-3' : 'h-[72px] justify-center px-0',
+                'flex items-center shrink-0 transition-all duration-300',
+                collapsed ? 'h-[72px] justify-center px-0' : 'h-[72px] px-6 gap-3',
             ]"
         >
             <button
@@ -98,56 +98,39 @@ function handleNavClick() {
                     <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
                 </svg>
             </div>
-            <transition
-                enter-active-class="transition-all duration-200 delay-100"
-                enter-from-class="opacity-0 -translate-x-2"
-                enter-to-class="opacity-100 translate-x-0"
-                leave-active-class="transition-all duration-150"
-                leave-from-class="opacity-100"
-                leave-to-class="opacity-0"
+            
+            <span
+                :class="[
+                    collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto ml-3'
+                ]"
+                class="text-[17px] font-extrabold tracking-tight text-sidebar-foreground whitespace-nowrap transition-all duration-300 ease-in-out"
             >
-                <span
-                    v-if="isExpanded"
-                    class="text-[17px] font-extrabold tracking-tight text-sidebar-foreground whitespace-nowrap"
-                >
-                    WAIS<span class="text-primary">WALLET</span>
-                </span>
-            </transition>
+                WAIS<span class="text-primary">WALLET</span>
+            </span>
         </div>
 
         <!-- Logo Divider (Only shown when collapsed) -->
-        <transition
-            enter-active-class="transition-opacity duration-200"
-            enter-from-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-active-class="transition-opacity duration-150"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
+        <div
+            :class="[
+                collapsed ? 'opacity-100 h-auto py-2' : 'opacity-0 h-0 overflow-hidden py-0'
+            ]"
+            class="flex justify-center shrink-0 transition-all duration-300 ease-in-out"
         >
-            <div v-if="!isExpanded" class="flex justify-center py-2 shrink-0">
-                <div class="h-px bg-sidebar-border/70 rounded-full w-6"></div>
-            </div>
-        </transition>
+            <div class="h-px bg-sidebar-border/70 rounded-full w-6"></div>
+        </div>
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto overflow-x-hidden py-5 sidebar-scrollable">
             <!-- Main Navigation Section -->
-            <div :class="isExpanded ? 'px-4' : 'px-2.5'">
-                <transition
-                    enter-active-class="transition-all duration-200 delay-75"
-                    enter-from-class="opacity-0"
-                    enter-to-class="opacity-100"
-                    leave-active-class="transition-all duration-100"
-                    leave-from-class="opacity-100"
-                    leave-to-class="opacity-0"
+            <div :class="collapsed ? 'px-2.5' : 'px-4'">
+                <p
+                    :class="[
+                        collapsed ? 'opacity-0 h-0 overflow-hidden pb-0' : 'opacity-100 h-auto pb-3'
+                    ]"
+                    class="px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70 transition-all duration-300 ease-in-out whitespace-nowrap"
                 >
-                    <p
-                        v-if="isExpanded"
-                        class="px-3 pb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70"
-                    >
-                        Navigation
-                    </p>
-                </transition>
+                    Navigation
+                </p>
 
                 <div class="space-y-1">
                     <Link
@@ -156,18 +139,18 @@ function handleNavClick() {
                         :href="item.href"
                         @click="handleNavClick"
                         :class="[
-                            'sidebar-nav-item flex items-center rounded-[12px] text-[13px] font-semibold transition-all duration-200 group relative',
+                            'sidebar-nav-item flex items-center rounded-[12px] text-[13px] font-semibold transition-all duration-300 ease-in-out group relative',
                             isActive(item)
                                 ? 'bg-sidebar-accent text-sidebar-foreground sidebar-nav-active'
                                 : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
-                            isExpanded
-                                ? 'gap-3 px-3 py-2.5'
-                                : 'justify-center p-2.5',
+                            collapsed
+                                ? 'justify-center p-2.5'
+                                : 'gap-3 px-3 py-2.5',
                         ]"
-                        :title="!isExpanded ? item.name : ''"
+                        :title="collapsed ? '' : item.name"
                     >
                         <!-- Dashboard Icon -->
-                        <svg v-if="item.icon === 'dashboard'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg v-if="item.icon === 'dashboard'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-300 ease-in-out', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7" rx="1.5" />
                             <rect x="14" y="3" width="7" height="7" rx="1.5" />
                             <rect x="3" y="14" width="7" height="7" rx="1.5" />
@@ -175,55 +158,52 @@ function handleNavClick() {
                         </svg>
 
                         <!-- Transactions Icon (Philippine Peso ₱) -->
-                        <svg v-else-if="item.icon === 'transactions'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M7 4v16" />
-                            <path d="M7 4h7a4 4 0 0 1 0 8H7" />
-                            <path d="M4 8h14" />
-                            <path d="M4 11h14" />
+                        <svg v-else-if="item.icon === 'transactions'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-300 ease-in-out', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 11H4" />
+                            <path d="M20 7H4" />
+                            <path d="M7 21V4a1 1 0 0 1 1-1h4a1 1 0 0 1 0 12H7" />
                         </svg>
 
                         <!-- Wallet Icon -->
-                        <svg v-else-if="item.icon === 'wallet'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg v-else-if="item.icon === 'wallet'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-300 ease-in-out', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
                             <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
                             <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
                         </svg>
 
                         <!-- Goals Icon -->
-                        <svg v-else-if="item.icon === 'goals'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg v-else-if="item.icon === 'goals'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-300 ease-in-out', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10" />
                             <circle cx="12" cy="12" r="6" />
                             <circle cx="12" cy="12" r="2" />
                         </svg>
 
                         <!-- Analytics Icon -->
-                        <svg v-else-if="item.icon === 'analytics'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg v-else-if="item.icon === 'analytics'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-300 ease-in-out', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 3v18h18" />
                             <path d="m19 9-5 5-4-4-3 3" />
                         </svg>
 
                         <!-- Reports Icon -->
-                        <svg v-else-if="item.icon === 'reports'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-200', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg v-else-if="item.icon === 'reports'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-300 ease-in-out', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
                             <path d="M14 2v4a2 2 0 0 0 2 2h4" />
                             <path d="M10 18v-4" />
                             <path d="M14 18v-6" />
                         </svg>
 
-                        <transition
-                            enter-active-class="transition-all duration-200 delay-75"
-                            enter-from-class="opacity-0"
-                            enter-to-class="opacity-100"
-                            leave-active-class="transition-all duration-100"
-                            leave-from-class="opacity-100"
-                            leave-to-class="opacity-0"
+                        <span
+                            :class="[
+                                collapsed ? 'opacity-0 w-0 overflow-hidden ml-0' : 'opacity-100 w-auto ml-3'
+                            ]"
+                            class="whitespace-nowrap transition-all duration-300 ease-in-out font-medium"
                         >
-                            <span v-if="isExpanded" class="whitespace-nowrap">{{ item.name }}</span>
-                        </transition>
+                            {{ item.name }}
+                        </span>
 
                         <!-- Collapsed tooltip -->
                         <div
-                            v-if="!isExpanded"
+                            v-if="collapsed"
                             class="absolute left-full ml-3 hidden group-hover:flex items-center z-50"
                         >
                             <div class="rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background shadow-lg whitespace-nowrap">
@@ -261,7 +241,7 @@ function handleNavClick() {
     border-radius: 0 4px 4px 0;
     background: var(--primary);
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.3s ease;
 }
 
 /* Only show the accent bar in expanded mode */

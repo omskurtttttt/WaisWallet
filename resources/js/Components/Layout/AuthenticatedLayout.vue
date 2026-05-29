@@ -10,6 +10,7 @@ const mobileMenuOpen = ref(false);
 
 function toggleSidebar() {
     sidebarCollapsed.value = !sidebarCollapsed.value;
+    localStorage.setItem('sidebar-collapsed', sidebarCollapsed.value);
 }
 
 function openMobileMenu() {
@@ -22,6 +23,7 @@ function closeMobileMenu() {
 
 onMounted(() => {
     themeStore.init();
+    sidebarCollapsed.value = localStorage.getItem('sidebar-collapsed') === 'true';
 });
 </script>
 
@@ -41,7 +43,7 @@ onMounted(() => {
         <main
             :class="[
                 'pt-[72px] min-h-screen transition-all duration-300',
-                sidebarCollapsed ? 'lg:ml-[78px]' : 'lg:ml-[264px]',
+                sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72',
             ]"
         >
             <div class="animate-fade-in">
