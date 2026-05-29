@@ -60,7 +60,7 @@ const categoryOptions = computed(() => {
     const filtered = props.categories.filter(cat => cat.type === form.type);
     return [
         ...filtered.map(cat => ({ value: cat.id, label: cat.name })),
-        { value: 'CREATE_NEW_CATEGORY', label: '➕ Add new category...' }
+        { value: 'CREATE_NEW_CATEGORY', label: '➕ Add Category' }
     ];
 });
 
