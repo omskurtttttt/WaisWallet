@@ -26,11 +26,11 @@ const { formatMoney } = useCurrency();
 const cards = computed(() => {
     return [
         { 
-            label: 'Total Balance', 
-            value: formatMoney(props.metrics.totalBalance), 
-            subtext: 'Net asset position',
-            colorClass: 'text-[#fdbe2a]',
-            icon: 'balance' 
+            label: 'Budget Used', 
+            value: `${props.metrics.budgetUsedPercentage}%`, 
+            subtext: `${formatMoney(props.metrics.monthlySpending, { maximumFractionDigits: 0 })} of ${formatMoney(props.metrics.totalBudgetAllocated, { maximumFractionDigits: 0 })} spent`,
+            colorClass: 'text-[#3ee08f]',
+            icon: 'income' 
         },
         { 
             label: 'Total Savings', 
@@ -49,11 +49,11 @@ const cards = computed(() => {
             icon: 'expense' 
         },
         { 
-            label: 'Budget Used', 
-            value: `${props.metrics.budgetUsedPercentage}%`, 
-            subtext: `${formatMoney(props.metrics.monthlySpending, { maximumFractionDigits: 0 })} of ${formatMoney(props.metrics.totalBudgetAllocated, { maximumFractionDigits: 0 })} spent`,
-            colorClass: 'text-[#3ee08f]',
-            icon: 'income' 
+            label: 'Total Balance', 
+            value: formatMoney(props.metrics.totalBalance), 
+            subtext: 'Net asset position',
+            colorClass: 'text-[#fdbe2a]',
+            icon: 'balance' 
         },
     ];
 });
@@ -74,37 +74,40 @@ const cards = computed(() => {
                 <div v-for="(card, index) in cards" :key="index" :class="['glass-card p-5 relative overflow-hidden transition-all duration-200 hover:scale-[1.01] hover:shadow-md flex flex-col justify-between min-h-[148px]', `animate-card-${index + 1}`]">
                     <div class="flex flex-col gap-3">
                         <!-- Icon at Top Left -->
-                        <div class="flex items-center">
-                            <div :class="['flex h-7 w-7 items-center justify-center rounded-lg bg-card border border-border shadow-sm', card.colorClass]">
-                                <!-- Balance/Wallet -->
-                                <svg v-if="card.icon === 'balance'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                <!-- Savings/Diamond -->
-                                <svg v-else-if="card.icon === 'savings'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M2.7 10.3a2.4 2.4 0 0 0 0 3.4l7.6 7.6a2.4 2.4 0 0 0 3.4 0l7.6-7.6a2.4 2.4 0 0 0 0-3.4L13.7 2.7a2.4 2.4 0 0 0-3.4 0z"/>
-                                </svg>
-                                <!-- Expense/Activity -->
-                                <svg v-else-if="card.icon === 'expense'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                                </svg>
-                                <!-- Income/Lightning -->
-                                <svg v-else class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                                </svg>
-                            </div>
+                        <div class="flex items-center min-h-[24px]">
+                            <!-- Balance/Wallet -> Wallet Icon -->
+                            <svg v-if="card.icon === 'balance'" class="h-5 w-5 text-muted-foreground/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                            </svg>
+                            <!-- Savings/Diamond -> Target Icon -->
+                            <svg v-else-if="card.icon === 'savings'" class="h-5 w-5 text-muted-foreground/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <circle cx="12" cy="12" r="6" />
+                                <circle cx="12" cy="12" r="2" />
+                            </svg>
+                            <!-- Expense/Activity -> Credit Card Icon -->
+                            <svg v-else-if="card.icon === 'expense'" class="h-5 w-5 text-muted-foreground/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
+                                <line x1="2" y1="10" x2="22" y2="10" />
+                            </svg>
+                            <!-- Income/Lightning -> Pie Chart Icon (Colored) -->
+                            <svg v-else class="h-5 w-5 text-[#3ee08f] fill-[#3ee08f]/10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                                <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                            </svg>
                         </div>
 
                         <!-- Big Neon Value -->
                         <div class="mt-1">
-                            <p :class="['text-3xl font-extrabold tracking-tight font-financial', card.colorClass]">{{ card.value }}</p>
+                            <p :class="['text-2xl md:text-3xl font-bold font-financial', card.colorClass]">{{ card.value }}</p>
                         </div>
                     </div>
 
                     <!-- Label and Subtext -->
                     <div class="mt-3 flex flex-col gap-1">
-                        <p class="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">{{ card.label }}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/80">{{ card.label }}</p>
                         
                         <div class="flex items-center gap-1.5 min-h-[16px]">
                             <!-- Spending Trend badge if available -->
@@ -120,7 +123,7 @@ const cards = computed(() => {
                                 </svg>
                                 {{ card.change }}
                             </span>
-                            <span class="text-xs text-muted-foreground/75 leading-none">{{ card.subtext }}</span>
+                            <span class="text-xs text-muted-foreground/60 leading-none font-sans">{{ card.subtext }}</span>
                         </div>
                     </div>
                 </div>
