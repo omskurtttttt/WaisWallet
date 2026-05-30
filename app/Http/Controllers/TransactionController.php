@@ -102,6 +102,23 @@ class TransactionController extends Controller
         return redirect()->back()->with('success', 'Transaction created successfully.');
     }
 
+    public function update(StoreTransactionRequest $request, Transaction $transaction)
+    {
+        // Ensure the transaction belongs to the user
+        if ($transaction->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validated();
+
+        // Convert amount to cents before saving
+        $validated['amount'] = (int) round($validated['amount'] * 100);
+
+        $transaction->update($validated);
+
+        return redirect()->back()->with('success', 'Transaction updated successfully.');
+    }
+
     public function destroy(Transaction $transaction)
     {
         // Ensure the transaction belongs to the user
