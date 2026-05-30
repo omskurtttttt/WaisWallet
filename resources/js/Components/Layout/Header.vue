@@ -1,7 +1,9 @@
 <script setup>
 import { useThemeStore } from '@/Stores/theme';
-import { usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { usePage, Link, router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import Dropdown from '@/Components/Dropdown.vue';
+import DropdownLink from '@/Components/DropdownLink.vue';
 
 const props = defineProps({
     collapsed: {
@@ -14,6 +16,16 @@ const emit = defineEmits(['openMobile']);
 
 const themeStore = useThemeStore();
 const page = usePage();
+
+const searchQuery = ref('');
+
+function handleSearch() {
+    router.get(route('transactions.index'), { search: searchQuery.value }, { preserveState: true });
+}
+
+function handleMobileSearchClick() {
+    router.get(route('transactions.index'));
+}
 
 const user = computed(() => page.props.auth?.user);
 const initials = computed(() => {
@@ -71,6 +83,8 @@ const initials = computed(() => {
                     <path d="m21 21-4.3-4.3" />
                 </svg>
                 <input
+                    v-model="searchQuery"
+                    @keyup.enter="handleSearch"
                     type="text"
                     placeholder="Search transactions..."
                     class="h-10 w-52 md:w-64 rounded-[12px] border border-border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/40 transition-all duration-200"
@@ -78,7 +92,7 @@ const initials = computed(() => {
             </div>
 
             <!-- Mobile Search (icon only) -->
-            <button class="flex h-10 w-10 items-center justify-center rounded-[12px] text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 sm:hidden" title="Search">
+            <button @click="handleMobileSearchClick" class="flex h-10 w-10 items-center justify-center rounded-[12px] text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 sm:hidden" title="Search">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8" />
                     <path d="m21 21-4.3-4.3" />
@@ -118,39 +132,51 @@ const initials = computed(() => {
                     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                 </svg>
-                <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
-                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75"></span>
-                    <span class="relative inline-flex h-2 w-2 rounded-full bg-destructive"></span>
-                </span>
             </button>
 
             <!-- Settings -->
-            <button class="hidden md:flex h-10 w-10 items-center justify-center rounded-[12px] text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200" title="Settings">
+            <Link
+                :href="route('profile.edit')"
+                class="hidden md:flex h-10 w-10 items-center justify-center rounded-[12px] text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200"
+                title="Settings"
+            >
                 <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
                     <circle cx="12" cy="12" r="3" />
                 </svg>
-            </button>
+            </Link>
 
             <!-- Divider -->
             <div class="mx-1 h-8 w-px bg-border/50 hidden md:block"></div>
 
-            <!-- User Avatar -->
-            <button class="flex items-center gap-3 rounded-[12px] px-2 md:px-3 py-1.5 hover:bg-card transition-all duration-200">
-                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-sm shrink-0 ring-2 ring-primary/20">
-                    <img
-                        v-if="user?.avatar"
-                        :src="user.avatar"
-                        :alt="user?.name"
-                        class="h-full w-full rounded-full object-cover"
-                    />
-                    <span v-else>{{ initials }}</span>
-                </div>
-                <div class="hidden lg:block text-left" v-if="user">
-                    <p class="text-[13px] font-bold text-foreground leading-tight">{{ user.name }}</p>
-                    <p class="text-[11px] text-muted-foreground leading-tight">{{ user.email }}</p>
-                </div>
-            </button>
+            <!-- User Avatar & Dropdown -->
+            <Dropdown align="right" width="48" content-classes="py-1 bg-card border border-border rounded-xl">
+                <template #trigger>
+                    <button class="flex items-center gap-3 rounded-[12px] px-2 md:px-3 py-1.5 hover:bg-card transition-all duration-200 cursor-pointer">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-sm shrink-0 ring-2 ring-primary/20">
+                            <img
+                                v-if="user?.avatar"
+                                :src="user.avatar"
+                                :alt="user?.name"
+                                class="h-full w-full rounded-full object-cover"
+                            />
+                            <span v-else>{{ initials }}</span>
+                        </div>
+                        <div class="hidden lg:block text-left" v-if="user">
+                            <p class="text-[13px] font-bold text-foreground leading-tight">{{ user.name }}</p>
+                            <p class="text-[11px] text-muted-foreground leading-tight">{{ user.email }}</p>
+                        </div>
+                    </button>
+                </template>
+                <template #content>
+                    <DropdownLink :href="route('profile.edit')" class="text-foreground hover:bg-muted font-medium rounded-t-xl">
+                        Profile Settings
+                    </DropdownLink>
+                    <DropdownLink :href="route('logout')" method="post" as="button" class="w-full text-left text-destructive hover:bg-muted font-medium rounded-b-xl">
+                        Log Out
+                    </DropdownLink>
+                </template>
+            </Dropdown>
         </div>
     </header>
 </template>
