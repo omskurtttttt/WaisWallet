@@ -2,7 +2,9 @@
 import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
-import debounce from 'lodash/debounce';
+import { useDebounce } from '@/Composables/useDebounce';
+
+const { debounce } = useDebounce();
 import AddTransactionModal from './Partials/AddTransactionModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { useCurrency } from '@/Composables/useCurrency';

@@ -9,6 +9,9 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import CustomSelect from '@/Components/CustomSelect.vue';
 import AddCategoryModal from './AddCategoryModal.vue';
+import { useCurrency } from '@/Composables/useCurrency';
+
+const { formatMoney } = useCurrency();
 
 const props = defineProps({
     show: {
@@ -81,7 +84,7 @@ const cardOptions = computed(() => {
         { value: '', label: '💵 Cash / Other' },
         ...props.cards.map(card => {
             const emoji = getColorEmoji(card.color);
-            const balanceStr = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(card.balance);
+            const balanceStr = formatMoney(card.balance);
             const lastFourStr = card.last_four && card.last_four !== '0000' ? ` (•••• ${card.last_four})` : '';
             return {
                 value: card.id,
