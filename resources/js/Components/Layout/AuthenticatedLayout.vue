@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import Sidebar from '@/Components/Layout/Sidebar.vue';
 import Header from '@/Components/Layout/Header.vue';
+import Toast from '@/Components/Toast.vue';
 import { useThemeStore } from '@/Stores/theme';
 
 const themeStore = useThemeStore();
@@ -50,5 +51,7 @@ onMounted(() => {
                 <slot />
             </div>
         </main>
+
+        <Toast />
     </div>
 </template>
