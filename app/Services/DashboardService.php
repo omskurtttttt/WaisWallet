@@ -25,8 +25,8 @@ class DashboardService
             ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
             ->sum('amount');
 
-        $previousMonthStart = $now->copy()->subMonth()->startOfMonth();
-        $previousMonthEnd = $now->copy()->subMonth()->endOfMonth();
+        $previousMonthStart = $now->copy()->startOfMonth()->subMonth();
+        $previousMonthEnd = $previousMonthStart->copy()->endOfMonth();
         $previousMonthSpending = $this->user->transactions()
             ->where('type', 'expense')
             ->whereBetween('transaction_date', [$previousMonthStart, $previousMonthEnd])
@@ -60,7 +60,8 @@ class DashboardService
 
     public function getIncomeChartData(Carbon $now): array
     {
-        $sixMonthsAgo = $now->copy()->subMonths(5)->startOfMonth();
+        $startOfCurrentMonth = $now->copy()->startOfMonth();
+        $sixMonthsAgo = $startOfCurrentMonth->copy()->subMonths(5);
         $monthlyIncomes = $this->user->transactions()
             ->where('type', 'income')
             ->where('transaction_date', '>=', $sixMonthsAgo)
@@ -71,7 +72,7 @@ class DashboardService
 
         $incomeChartData = [];
         for ($i = 5; $i >= 0; $i--) {
-            $monthStart = $now->copy()->subMonths($i)->startOfMonth();
+            $monthStart = $startOfCurrentMonth->copy()->subMonths($i);
             $monthKey = $monthStart->format('Y-m');
             $monthIncome = $monthlyIncomes->get($monthKey) ?? 0;
                 

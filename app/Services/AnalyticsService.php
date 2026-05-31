@@ -16,7 +16,8 @@ class AnalyticsService
 
     public function getIncomeVsExpenses(Carbon $now): array
     {
-        $sixMonthsAgo = $now->copy()->subMonths(5)->startOfMonth();
+        $startOfCurrentMonth = $now->copy()->startOfMonth();
+        $sixMonthsAgo = $startOfCurrentMonth->copy()->subMonths(5);
         $monthlyTotals = $this->user->transactions()
             ->where('transaction_date', '>=', $sixMonthsAgo)
             ->selectRaw("TO_CHAR(transaction_date, 'YYYY-MM') as month_key, type, sum(amount) as total")
@@ -29,7 +30,7 @@ class AnalyticsService
 
         $incomeVsExpenses = [];
         for ($i = 5; $i >= 0; $i--) {
-            $monthStart = $now->copy()->subMonths($i)->startOfMonth();
+            $monthStart = $startOfCurrentMonth->copy()->subMonths($i);
             $monthKey = $monthStart->format('Y-m');
             
             $monthData = $groupedTotals->get($monthKey);
