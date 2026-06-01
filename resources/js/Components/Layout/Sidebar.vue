@@ -70,6 +70,7 @@ function handleNavClick() {
             collapsed ? 'lg:w-20' : 'lg:w-72',
             // Mobile (override when open)
             mobileOpen ? 'max-lg:translate-x-0 max-lg:w-72' : '',
+            isExpanded ? 'sidebar-expanded' : 'sidebar-collapsed',
         ]"
     >
         <!-- Logo Section — Clickable to toggle collapse/expand on desktop -->
@@ -245,7 +246,7 @@ function handleNavClick() {
 }
 
 /* Only show the accent bar in expanded mode */
-:deep(.lg\:w-\[264px\]) .sidebar-nav-active::before {
+.sidebar-expanded .sidebar-nav-active::before {
     opacity: 1;
 }
 </style>
