@@ -62,9 +62,7 @@ class GoalController extends Controller
      */
     public function addFunds(AddGoalFundsRequest $request, Goal $goal)
     {
-        if ($goal->user_id !== auth()->id()) {
-            abort(403);
-        }
+        \Illuminate\Support\Facades\Gate::authorize('update', $goal);
 
         $validated = $request->validated();
         $amountInCents = (int) round($validated['amount'] * 100);
@@ -89,9 +87,7 @@ class GoalController extends Controller
      */
     public function destroy(Goal $goal)
     {
-        if ($goal->user_id !== auth()->id()) {
-            abort(403);
-        }
+        \Illuminate\Support\Facades\Gate::authorize('delete', $goal);
 
         $goal->delete();
 

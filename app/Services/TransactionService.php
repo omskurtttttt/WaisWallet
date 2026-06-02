@@ -102,10 +102,7 @@ class TransactionService
 
     public function updateTransaction(Transaction $transaction, array $validated)
     {
-        // Verify ownership is checked by method caller, but we verify here as well
-        if ($transaction->user_id !== $this->user->id) {
-            abort(403);
-        }
+        \Illuminate\Support\Facades\Gate::authorize('update', $transaction);
 
         // Convert amount to cents before saving
         $validated['amount'] = (int) round($validated['amount'] * 100);
@@ -115,10 +112,7 @@ class TransactionService
 
     public function deleteTransaction(Transaction $transaction)
     {
-        // Verify ownership
-        if ($transaction->user_id !== $this->user->id) {
-            abort(403);
-        }
+        \Illuminate\Support\Facades\Gate::authorize('delete', $transaction);
 
         return $transaction->delete();
     }

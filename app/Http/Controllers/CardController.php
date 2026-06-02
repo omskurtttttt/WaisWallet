@@ -53,9 +53,7 @@ class CardController extends Controller
 
     public function destroy(Card $card)
     {
-        if ($card->user_id !== auth()->id()) {
-            abort(403);
-        }
+        \Illuminate\Support\Facades\Gate::authorize('delete', $card);
 
         // Before deleting, ensure we don't break transactions. Soft delete would be better
         // but for simplicity we will just delete it, transactions might have card_id set to null
