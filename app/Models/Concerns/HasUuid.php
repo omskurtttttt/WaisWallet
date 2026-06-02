@@ -19,6 +19,15 @@ trait HasUuid
     }
 
     /**
+     * Initialize the HasUuid trait.
+     */
+    public function initializeHasUuid(): void
+    {
+        $this->keyType = 'string';
+        $this->incrementing = false;
+    }
+
+    /**
      * Get the auto-incrementing key type.
      */
     public function getKeyType(): string
