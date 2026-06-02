@@ -1,6 +1,13 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\CardController;
+use App\Http\Controllers\GoalController;
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,14 +23,6 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\CardController;
-use App\Http\Controllers\GoalController;
-use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\CategoryController;
 
 Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
