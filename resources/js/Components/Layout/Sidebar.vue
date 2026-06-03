@@ -65,11 +65,10 @@ function handleNavClick() {
         :class="[
             'fixed left-0 top-0 z-50 h-screen bg-sidebar border-r border-sidebar-border flex flex-col',
             'transition-all duration-300 ease-in-out',
-            // Desktop
-            'max-lg:translate-x-[-100%] lg:translate-x-0',
+            // Desktop and Mobile positioning
+            'lg:translate-x-0',
+            mobileOpen ? 'max-lg:translate-x-0 max-lg:w-72' : 'max-lg:translate-x-[-100%]',
             collapsed ? 'lg:w-20' : 'lg:w-72',
-            // Mobile (override when open)
-            mobileOpen ? 'max-lg:translate-x-0 max-lg:w-72' : '',
             isExpanded ? 'sidebar-expanded' : 'sidebar-collapsed',
         ]"
     >
@@ -77,7 +76,7 @@ function handleNavClick() {
         <div
             :class="[
                 'flex items-center shrink-0 transition-all duration-300',
-                collapsed ? 'h-[72px] justify-center px-0' : 'h-[72px] px-6 gap-3',
+                !isExpanded ? 'h-[72px] justify-center px-0' : 'h-[72px] px-6 gap-3',
             ]"
         >
             <button
@@ -102,7 +101,7 @@ function handleNavClick() {
             
             <span
                 :class="[
-                    collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto ml-3'
+                    !isExpanded ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto ml-3'
                 ]"
                 class="text-[17px] font-extrabold tracking-tight text-sidebar-foreground whitespace-nowrap transition-all duration-300 ease-in-out"
             >
@@ -113,7 +112,7 @@ function handleNavClick() {
         <!-- Logo Divider (Only shown when collapsed) -->
         <div
             :class="[
-                collapsed ? 'opacity-100 h-auto py-2' : 'opacity-0 h-0 overflow-hidden py-0'
+                !isExpanded ? 'opacity-100 h-auto py-2' : 'opacity-0 h-0 overflow-hidden py-0'
             ]"
             class="flex justify-center shrink-0 transition-all duration-300 ease-in-out"
         >
@@ -123,10 +122,10 @@ function handleNavClick() {
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto overflow-x-hidden py-5 sidebar-scrollable">
             <!-- Main Navigation Section -->
-            <div :class="collapsed ? 'px-2.5' : 'px-4'">
+            <div :class="!isExpanded ? 'px-2.5' : 'px-4'">
                 <p
                     :class="[
-                        collapsed ? 'opacity-0 h-0 overflow-hidden pb-0' : 'opacity-100 h-auto pb-3'
+                        !isExpanded ? 'opacity-0 h-0 overflow-hidden pb-0' : 'opacity-100 h-auto pb-3'
                     ]"
                     class="px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70 transition-all duration-300 ease-in-out whitespace-nowrap"
                 >
@@ -144,11 +143,11 @@ function handleNavClick() {
                             isActive(item)
                                 ? 'bg-sidebar-accent text-sidebar-foreground sidebar-nav-active'
                                 : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
-                            collapsed
+                            !isExpanded
                                 ? 'justify-center p-2.5'
                                 : 'gap-3 px-3 py-2.5',
                         ]"
-                        :title="collapsed ? '' : item.name"
+                        :title="!isExpanded ? '' : item.name"
                     >
                         <!-- Dashboard Icon -->
                         <svg v-if="item.icon === 'dashboard'" :class="['h-[20px] w-[20px] shrink-0 transition-colors duration-300 ease-in-out', isActive(item) ? 'text-primary' : '']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -195,7 +194,7 @@ function handleNavClick() {
 
                         <span
                             :class="[
-                                collapsed ? 'opacity-0 w-0 overflow-hidden ml-0' : 'opacity-100 w-auto ml-3'
+                                !isExpanded ? 'opacity-0 w-0 overflow-hidden ml-0' : 'opacity-100 w-auto ml-3'
                             ]"
                             class="whitespace-nowrap transition-all duration-300 ease-in-out font-medium"
                         >
@@ -204,7 +203,7 @@ function handleNavClick() {
 
                         <!-- Collapsed tooltip -->
                         <div
-                            v-if="collapsed"
+                            v-if="!isExpanded"
                             class="absolute left-full ml-3 hidden group-hover:flex items-center z-50"
                         >
                             <div class="rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background shadow-lg whitespace-nowrap">

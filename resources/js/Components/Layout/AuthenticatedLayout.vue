@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import Sidebar from '@/Components/Layout/Sidebar.vue';
 import Header from '@/Components/Layout/Header.vue';
 import Toast from '@/Components/Toast.vue';
 import { useThemeStore } from '@/Stores/theme';
+import { router } from '@inertiajs/vue3';
 
 const themeStore = useThemeStore();
 const sidebarCollapsed = ref(false);
@@ -22,9 +23,18 @@ function closeMobileMenu() {
     mobileMenuOpen.value = false;
 }
 
+// Close mobile menu on page navigation
+const unregisterNavigate = router.on('navigate', () => {
+    mobileMenuOpen.value = false;
+});
+
 onMounted(() => {
     themeStore.init();
     sidebarCollapsed.value = localStorage.getItem('sidebar-collapsed') === 'true';
+});
+
+onUnmounted(() => {
+    unregisterNavigate();
 });
 </script>
 
