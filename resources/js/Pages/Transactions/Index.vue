@@ -10,6 +10,8 @@ import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { useCurrency } from '@/Composables/useCurrency';
 import { useIcons } from '@/Composables/useIcons';
 import CustomSelect from '@/Components/CustomSelect.vue';
+import Badge from '@/Components/UI/Badge.vue';
+import EmptyState from '@/Components/UI/EmptyState.vue';
 
 const props = defineProps({
     transactions: Object,
@@ -159,9 +161,9 @@ const categoryOptions = computed(() => {
                                 </td>
                                 <td class="px-6 py-4 text-muted-foreground">{{ tx.display_date }}</td>
                                 <td class="px-6 py-4">
-                                    <span v-if="tx.card" class="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
+                                    <Badge v-if="tx.card" variant="secondary" size="md">
                                         {{ tx.card.brand }} •••• {{ tx.card.last_four }}
-                                    </span>
+                                    </Badge>
                                     <span v-else class="text-muted-foreground">Cash</span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -183,17 +185,20 @@ const categoryOptions = computed(() => {
                         </tbody>
                         <tbody v-else>
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center text-muted-foreground">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="h-12 w-12 opacity-20 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                                            <line x1="16" x2="16" y1="2" y2="6"/>
-                                            <line x1="8" x2="8" y1="2" y2="6"/>
-                                            <line x1="3" x2="21" y1="10" y2="10"/>
-                                        </svg>
-                                        <p class="text-base font-medium">No transactions found</p>
-                                        <p class="text-sm mt-1">Try adjusting your filters or add a new transaction.</p>
-                                    </div>
+                                <td colspan="6" class="p-0">
+                                    <EmptyState 
+                                        title="No transactions found"
+                                        description="Try adjusting your filters or add a new transaction."
+                                    >
+                                        <template #icon>
+                                            <svg class="h-12 w-12 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                                                <line x1="16" x2="16" y1="2" y2="6"/>
+                                                <line x1="8" x2="8" y1="2" y2="6"/>
+                                                <line x1="3" x2="21" y1="10" y2="10"/>
+                                            </svg>
+                                        </template>
+                                    </EmptyState>
                                 </td>
                             </tr>
                         </tbody>

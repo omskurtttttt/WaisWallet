@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import Sidebar from '@/Components/Layout/Sidebar.vue';
 import Header from '@/Components/Layout/Header.vue';
-import Toast from '@/Components/Toast.vue';
+import Toast from '@/Components/UI/Toast.vue';
 import { useThemeStore } from '@/Stores/theme';
 import { router } from '@inertiajs/vue3';
 

@@ -5,6 +5,8 @@ import { ref } from 'vue';
 import AddGoalModal from './Partials/AddGoalModal.vue';
 import AddFundsModal from './Partials/AddFundsModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import Badge from '@/Components/UI/Badge.vue';
+import EmptyState from '@/Components/UI/EmptyState.vue';
 
 import { useCurrency } from '@/Composables/useCurrency';
 
@@ -99,22 +101,19 @@ const getDaysRemaining = (targetDateStr) => {
                             </div>
                             
                             <!-- Badges / Days Remaining -->
-                            <div class="text-right">
-                                <span 
+                            <div class="text-right flex gap-1 justify-end">
+                                <Badge 
                                     v-if="goal.percentage >= 100" 
-                                    class="inline-flex items-center rounded-md bg-chart-1/10 px-2 py-1 text-xs font-semibold text-chart-1"
+                                    variant="success"
                                 >
                                     Completed 🎉
-                                </span>
-                                <span 
+                                </Badge>
+                                <Badge 
                                     v-else-if="getDaysRemaining(goal.target_date) !== null"
-                                    :class="[
-                                        'inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold',
-                                        getDaysRemaining(goal.target_date) <= 30 ? 'bg-destructive/10 text-destructive' : 'bg-muted text-muted-foreground'
-                                    ]"
+                                    :variant="getDaysRemaining(goal.target_date) <= 30 ? 'danger' : 'secondary'"
                                 >
                                     {{ getDaysRemaining(goal.target_date) }} days left
-                                </span>
+                                </Badge>
                             </div>
                         </div>
 
@@ -165,28 +164,30 @@ const getDaysRemaining = (targetDateStr) => {
             </div>
 
             <!-- Empty State -->
-            <div 
-                v-else 
-                class="glass-card flex flex-col items-center justify-center py-20 px-4 text-center animate-slide-up"
+            <EmptyState 
+                v-else
+                class="glass-card py-20"
+                title="No Savings Goals Yet"
+                description="Create savings goals to keep track of big purchases, emergency funds, or investment milestones."
             >
-                <div class="h-20 w-20 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-6">
-                    <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M8 12.5h8" />
-                        <path d="M12 8.5v8" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-foreground mb-2">No Savings Goals Yet</h3>
-                <p class="text-muted-foreground max-w-md mb-8">
-                    Create savings goals to keep track of big purchases, emergency funds, or investment milestones.
-                </p>
-                <button 
-                    @click="showAddGoalModal = true"
-                    class="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-lg shadow-primary/25"
-                >
-                    Add Your First Goal
-                </button>
-            </div>
+                <template #icon>
+                    <div class="h-20 w-20 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M8 12.5h8" />
+                            <path d="M12 8.5v8" />
+                        </svg>
+                    </div>
+                </template>
+                <template #action>
+                    <button 
+                        @click="showAddGoalModal = true"
+                        class="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-lg shadow-primary/25"
+                    >
+                        Add Your First Goal
+                    </button>
+                </template>
+            </EmptyState>
         </div>
 
         <AddGoalModal :show="showAddGoalModal" @close="showAddGoalModal = false" />
