@@ -37,30 +37,7 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
-    function toggle() {
-        isDark.value = !isDark.value;
-        const themeStr = isDark.value ? 'dark' : 'light';
-        localStorage.setItem('waiswallet-theme', themeStr);
-        applyTheme();
-
-        // Sync to backend if authenticated
-        try {
-            const page = usePage();
-            if (page && page.props.auth?.user) {
-                router.post('/profile/theme', { theme: themeStr }, { preserveScroll: true, preserveState: true });
-            }
-        } catch (e) {
-            // Fail silently if page/auth context is not ready
-        }
-    }
-
-    function setTheme(dark) {
-        isDark.value = dark;
-        const themeStr = dark ? 'dark' : 'light';
-        localStorage.setItem('waiswallet-theme', themeStr);
-        applyTheme();
-
-        // Sync to backend if authenticated
+    function syncThemeToBackend(themeStr) {
         try {
             const page = usePage();
             if (page && page.props.auth?.user) {
@@ -69,6 +46,22 @@ export const useThemeStore = defineStore('theme', () => {
         } catch (e) {
             // Fail silently
         }
+    }
+
+    function toggle() {
+        isDark.value = !isDark.value;
+        const themeStr = isDark.value ? 'dark' : 'light';
+        localStorage.setItem('waiswallet-theme', themeStr);
+        applyTheme();
+        syncThemeToBackend(themeStr);
+    }
+
+    function setTheme(dark) {
+        isDark.value = dark;
+        const themeStr = dark ? 'dark' : 'light';
+        localStorage.setItem('waiswallet-theme', themeStr);
+        applyTheme();
+        syncThemeToBackend(themeStr);
     }
 
     // Watch for changes
