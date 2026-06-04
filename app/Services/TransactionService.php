@@ -102,8 +102,6 @@ class TransactionService
 
     public function updateTransaction(Transaction $transaction, array $validated)
     {
-        \Illuminate\Support\Facades\Gate::authorize('update', $transaction);
-
         // Convert amount to cents before saving
         $validated['amount'] = (int) round($validated['amount'] * 100);
 
@@ -112,8 +110,6 @@ class TransactionService
 
     public function deleteTransaction(Transaction $transaction)
     {
-        \Illuminate\Support\Facades\Gate::authorize('delete', $transaction);
-
         return $transaction->delete();
     }
 }

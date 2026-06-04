@@ -6,6 +6,7 @@ use App\Models\Transaction;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class TransactionController extends Controller
@@ -39,6 +40,8 @@ class TransactionController extends Controller
 
     public function update(StoreTransactionRequest $request, Transaction $transaction)
     {
+        Gate::authorize('update', $transaction);
+
         $service = new TransactionService($request->user());
         $service->updateTransaction($transaction, $request->validated());
 
@@ -47,6 +50,8 @@ class TransactionController extends Controller
 
     public function destroy(Request $request, Transaction $transaction)
     {
+        Gate::authorize('delete', $transaction);
+
         $service = new TransactionService($request->user());
         $service->deleteTransaction($transaction);
 

@@ -36,10 +36,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
     Route::get('/wallet', [CardController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/cards', [CardController::class, 'store'])->name('wallet.cards.store');
+    Route::put('/wallet/cards/{card}', [CardController::class, 'update'])->name('wallet.cards.update');
     Route::delete('/wallet/cards/{card}', [CardController::class, 'destroy'])->name('wallet.cards.destroy');
     Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
     Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
     Route::post('/goals/{goal}/funds', [GoalController::class, 'addFunds'])->name('goals.funds');
+    Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
     Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
     Route::get('/analytics', AnalyticsController::class)->name('analytics.index');
     Route::get('/reports', ReportController::class)->name('reports.index');

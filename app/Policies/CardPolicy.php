@@ -22,4 +22,12 @@ class CardPolicy
     {
         return $user->id === $card->user_id;
     }
+
+    /**
+     * Determine whether the user can update the card.
+     */
+    public function update(User $user, Card $card): bool
+    {
+        return $user->id === $card->user_id;
+    }
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Card;
 use App\Http\Requests\StoreCardRequest;
+use App\Http\Requests\UpdateCardRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class CardController extends Controller
@@ -51,9 +53,18 @@ class CardController extends Controller
         return redirect()->back()->with('success', 'Card added successfully.');
     }
 
+    public function update(UpdateCardRequest $request, Card $card)
+    {
+        Gate::authorize('update', $card);
+
+        $card->update($request->validated());
+
+        return redirect()->back()->with('success', 'Card updated successfully.');
+    }
+
     public function destroy(Card $card)
     {
-        \Illuminate\Support\Facades\Gate::authorize('delete', $card);
+        Gate::authorize('delete', $card);
 
         // Before deleting, ensure we don't break transactions. Soft delete would be better
         // but for simplicity we will just delete it, transactions might have card_id set to null

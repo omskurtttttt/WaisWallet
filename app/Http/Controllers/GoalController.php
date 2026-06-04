@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Goal;
 use App\Http\Requests\StoreGoalRequest;
+use App\Http\Requests\UpdateGoalRequest;
 use App\Http\Requests\AddGoalFundsRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -58,11 +60,26 @@ class GoalController extends Controller
     }
 
     /**
+     * Update the specified goal.
+     */
+    public function update(UpdateGoalRequest $request, Goal $goal)
+    {
+        Gate::authorize('update', $goal);
+
+        $validated = $request->validated();
+        $validated['target_amount'] = (int) round($validated['target_amount'] * 100);
+
+        $goal->update($validated);
+
+        return redirect()->back()->with('success', 'Savings goal updated successfully.');
+    }
+
+    /**
      * Add funds to a goal.
      */
     public function addFunds(AddGoalFundsRequest $request, Goal $goal)
     {
-        \Illuminate\Support\Facades\Gate::authorize('update', $goal);
+        Gate::authorize('update', $goal);
 
         $validated = $request->validated();
         $amountInCents = (int) round($validated['amount'] * 100);
@@ -87,7 +104,7 @@ class GoalController extends Controller
      */
     public function destroy(Goal $goal)
     {
-        \Illuminate\Support\Facades\Gate::authorize('delete', $goal);
+        Gate::authorize('delete', $goal);
 
         $goal->delete();
 
