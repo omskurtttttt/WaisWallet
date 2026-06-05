@@ -26,34 +26,32 @@ const { formatMoney } = useCurrency();
 const cards = computed(() => {
     return [
         { 
-            label: 'Budget Used', 
-            value: `${props.metrics.budgetUsedPercentage}%`, 
-            subtext: `${formatMoney(props.metrics.monthlySpending, { maximumFractionDigits: 0 })} of ${formatMoney(props.metrics.totalBudgetAllocated, { maximumFractionDigits: 0 })} spent`,
-            colorClass: 'text-[#3ee08f]',
-            icon: 'income' 
-        },
-        { 
-            label: 'Total Savings', 
-            value: formatMoney(props.metrics.totalSavings), 
-            subtext: 'Accumulated goal savings',
-            colorClass: 'text-[#8c5cff]',
-            icon: 'savings' 
-        },
-        { 
-            label: 'Monthly Spending', 
-            value: formatMoney(props.metrics.monthlySpending), 
-            change: `${props.metrics.spendingTrend > 0 ? '+' : ''}${props.metrics.spendingTrend}%`, 
-            positive: props.metrics.spendingTrend <= 0, 
-            subtext: 'Expenses this month',
-            colorClass: 'text-[#ff477e]',
-            icon: 'expense' 
-        },
-        { 
             label: 'Total Balance', 
             value: formatMoney(props.metrics.totalBalance), 
             subtext: 'Net asset position',
             colorClass: 'text-[#fdbe2a]',
             icon: 'balance' 
+        },
+        { 
+            label: 'Income', 
+            value: formatMoney(props.metrics.monthlyIncome), 
+            subtext: 'Total received this month',
+            colorClass: 'text-[#3ee08f]',
+            icon: 'income' 
+        },
+        { 
+            label: 'Expense', 
+            value: formatMoney(props.metrics.monthlyExpense), 
+            subtext: 'Total spent this month',
+            colorClass: 'text-[#ff477e]',
+            icon: 'expense' 
+        },
+        { 
+            label: 'Total Savings', 
+            value: formatMoney(props.metrics.monthlySavings), 
+            subtext: 'Net savings this month',
+            colorClass: 'text-[#8c5cff]',
+            icon: 'savings' 
         },
     ];
 });
@@ -110,19 +108,6 @@ const cards = computed(() => {
                         <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/80">{{ card.label }}</p>
                         
                         <div class="flex items-center gap-1.5 min-h-[16px]">
-                            <!-- Spending Trend badge if available -->
-                            <span v-if="card.change" :class=" [
-                                'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold leading-none',
-                                card.positive ? 'bg-chart-1/10 text-chart-1' : 'bg-destructive/10 text-destructive'
-                            ]">
-                                <svg v-if="card.positive" class="mr-0.5 h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m6 9 6 6 6-6" />
-                                </svg>
-                                <svg v-else class="mr-0.5 h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m18 15-6-6-6 6" />
-                                </svg>
-                                {{ card.change }}
-                            </span>
                             <span class="text-xs text-muted-foreground/60 leading-none font-sans">{{ card.subtext }}</span>
                         </div>
                     </div>

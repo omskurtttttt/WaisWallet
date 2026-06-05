@@ -16,43 +16,95 @@ class DashboardService
 
     public function getMetrics(Carbon $now, Carbon $startOfMonth, Carbon $endOfMonth): array
     {
+        // 1. Total Balance
         $totalIncome = $this->user->transactions()->where('type', 'income')->sum('amount');
         $totalExpenses = $this->user->transactions()->where('type', 'expense')->sum('amount');
         $totalBalance = $totalIncome - $totalExpenses;
 
-        $monthlySpending = $this->user->transactions()
+        $incomeBefore = $this->user->transactions()
+            ->where('type', 'income')
+            ->where('transaction_date', '<', $startOfMonth)
+            ->sum('amount');
+        $expensesBefore = $this->user->transactions()
             ->where('type', 'expense')
+            ->where('transaction_date', '<', $startOfMonth)
+            ->sum('amount');
+        $previousBalance = $incomeBefore - $expensesBefore;
+
+        $balanceTrend = 0;
+        if ($previousBalance != 0) {
+            $balanceTrend = round((($totalBalance - $previousBalance) / abs($previousBalance)) * 100, 1);
+        }
+
+        // 2. Income
+        $monthlyIncome = $this->user->transactions()
+            ->where('type', 'income')
             ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
             ->sum('amount');
 
         $previousMonthStart = $now->copy()->startOfMonth()->subMonth();
         $previousMonthEnd = $previousMonthStart->copy()->endOfMonth();
-        $previousMonthSpending = $this->user->transactions()
+
+        $previousMonthIncome = $this->user->transactions()
+            ->where('type', 'income')
+            ->whereBetween('transaction_date', [$previousMonthStart, $previousMonthEnd])
+            ->sum('amount');
+
+        $incomeTrend = 0;
+        if ($previousMonthIncome != 0) {
+            $incomeTrend = round((($monthlyIncome - $previousMonthIncome) / abs($previousMonthIncome)) * 100, 1);
+        }
+
+        // 3. Expense
+        $monthlyExpense = $this->user->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        $previousMonthExpense = $this->user->transactions()
             ->where('type', 'expense')
             ->whereBetween('transaction_date', [$previousMonthStart, $previousMonthEnd])
             ->sum('amount');
-            
-        $spendingTrend = 0;
-        if ($previousMonthSpending > 0) {
-            $spendingTrend = round((($monthlySpending - $previousMonthSpending) / $previousMonthSpending) * 100, 1);
+
+        $expenseTrend = 0;
+        if ($previousMonthExpense != 0) {
+            $expenseTrend = round((($monthlyExpense - $previousMonthExpense) / abs($previousMonthExpense)) * 100, 1);
         }
 
-        $totalSavings = $this->user->goals()->sum('current_amount');
+        // 4. Total Savings (income minus expenses for the month)
+        $monthlySavings = $monthlyIncome - $monthlyExpense;
+        $previousMonthSavings = $previousMonthIncome - $previousMonthExpense;
 
+        $savingsTrend = 0;
+        if ($previousMonthSavings != 0) {
+            $savingsTrend = round((($monthlySavings - $previousMonthSavings) / abs($previousMonthSavings)) * 100, 1);
+        }
+
+        // 5. Budget Used details (for spending limits widget support)
         $totalBudgetAllocated = $this->user->budgets()
             ->whereDate('month', $startOfMonth->format('Y-m-d'))
             ->sum('allocated_amount');
             
         $budgetUsedPercentage = 0;
         if ($totalBudgetAllocated > 0) {
-            $budgetUsedPercentage = min(100, round(($monthlySpending / $totalBudgetAllocated) * 100));
+            $budgetUsedPercentage = min(100, round(($monthlyExpense / $totalBudgetAllocated) * 100));
+        } else {
+            $limit = $this->user->monthly_spending_limit > 0 ? $this->user->monthly_spending_limit : 500000;
+            $budgetUsedPercentage = min(100, round(($monthlyExpense / $limit) * 100));
+            $totalBudgetAllocated = $limit;
         }
 
         return [
             'totalBalance' => $totalBalance,
-            'monthlySpending' => $monthlySpending,
-            'spendingTrend' => $spendingTrend,
-            'totalSavings' => $totalSavings,
+            'balanceTrend' => $balanceTrend,
+            'monthlyIncome' => $monthlyIncome,
+            'incomeTrend' => $incomeTrend,
+            'monthlyExpense' => $monthlyExpense,
+            'expenseTrend' => $expenseTrend,
+            'monthlySavings' => $monthlySavings,
+            'savingsTrend' => $savingsTrend,
+            // spendingLimits support
+            'monthlySpending' => $monthlyExpense,
             'budgetUsedPercentage' => $budgetUsedPercentage,
             'totalBudgetAllocated' => $totalBudgetAllocated,
         ];
@@ -137,13 +189,14 @@ class DashboardService
 
         // If no budgets are defined, provide the overall monthly spending limit
         if ($spendingLimitsData->isEmpty()) {
+            $limit = $totalBudgetAllocated > 0 ? $totalBudgetAllocated : ($this->user->monthly_spending_limit > 0 ? $this->user->monthly_spending_limit : max($monthlySpending, 100000));
             $spendingLimitsData->push([
                 'id' => 'overall',
                 'name' => 'Overall Monthly Spending',
                 'color' => '#7033ff',
                 'spent' => $monthlySpending,
-                'allocated' => $totalBudgetAllocated > 0 ? $totalBudgetAllocated : max($monthlySpending, 100000), // Default 1000 if none
-                'percentage' => $budgetUsedPercentage,
+                'allocated' => $limit,
+                'percentage' => $limit > 0 ? min(100, round(($monthlySpending / $limit) * 100)) : 0,
             ]);
         }
 
