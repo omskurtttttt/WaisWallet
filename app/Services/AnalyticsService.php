@@ -70,8 +70,8 @@ class AnalyticsService
         $dailySpending = $this->user->transactions()
             ->where('type', 'expense')
             ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-            ->selectRaw('transaction_date, sum(amount) as total')
-            ->groupBy('transaction_date')
+            ->selectRaw("DATE(transaction_date) as transaction_date, sum(amount) as total")
+            ->groupByRaw("DATE(transaction_date)")
             ->orderBy('transaction_date')
             ->get()
             ->map(function ($item) {

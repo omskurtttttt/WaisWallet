@@ -22,6 +22,7 @@ class CategoryFactory extends Factory
             'name' => fake()->word(),
             'type' => fake()->randomElement(['income', 'expense', 'budget']),
             'icon' => fake()->randomElement(['tag', 'home', 'shopping-cart', 'coffee', 'car', 'briefcase']),
+            'color' => fake()->safeHexColor(),
         ];
     }
 }
