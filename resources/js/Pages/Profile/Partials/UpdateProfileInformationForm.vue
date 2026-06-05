@@ -19,6 +19,7 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    monthly_spending_limit: user.monthly_spending_limit / 100,
 });
 </script>
 
@@ -67,6 +68,23 @@ const form = useForm({
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+
+
+            <div>
+                <InputLabel for="monthly_spending_limit" value="Monthly Spending Limit" />
+
+                <TextInput
+                    id="monthly_spending_limit"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="mt-1 block w-full"
+                    v-model="form.monthly_spending_limit"
+                    required
+                />
+
+                <InputError class="mt-2" :message="form.errors.monthly_spending_limit" />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">

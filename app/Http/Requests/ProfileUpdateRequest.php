@@ -26,6 +26,8 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'monthly_spending_limit' => ['nullable', 'numeric', 'min:0'],
+            'currency' => ['nullable', 'string', 'in:PHP,USD,EUR,GBP,JPY,CAD,AUD,SGD'],
         ];
     }
 }

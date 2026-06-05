@@ -29,7 +29,12 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $data = $request->validated();
+        if (isset($data['monthly_spending_limit'])) {
+            $data['monthly_spending_limit'] = (int) round($data['monthly_spending_limit'] * 100);
+        }
+
+        $request->user()->fill($data);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
