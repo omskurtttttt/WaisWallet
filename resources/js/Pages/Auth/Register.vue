@@ -4,6 +4,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import CustomSelect from '@/Components/CustomSelect.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
@@ -11,7 +12,19 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    currency: 'PHP',
 });
+
+const currencies = [
+    { value: 'PHP', label: 'PHP (₱)' },
+    { value: 'USD', label: 'USD ($)' },
+    { value: 'EUR', label: 'EUR (€)' },
+    { value: 'GBP', label: 'GBP (£)' },
+    { value: 'JPY', label: 'JPY (¥)' },
+    { value: 'CAD', label: 'CAD ($)' },
+    { value: 'AUD', label: 'AUD ($)' },
+    { value: 'SGD', label: 'SGD ($)' },
+];
 
 const submit = () => {
     form.post(route('register'), {
@@ -56,6 +69,20 @@ const submit = () => {
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+
+            <div>
+                <InputLabel for="currency" value="Preferred Currency" />
+
+                <CustomSelect
+                    id="currency"
+                    v-model="form.currency"
+                    :options="currencies"
+                    class="mt-1"
+                    trigger-class="h-11 rounded-xl"
+                />
+
+                <InputError class="mt-2" :message="form.errors.currency" />
             </div>
 
             <div>

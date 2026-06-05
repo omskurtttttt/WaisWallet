@@ -35,12 +35,14 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'currency' => 'nullable|string|in:PHP,USD,EUR,GBP,JPY,CAD,AUD,SGD',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'currency' => $request->currency ?? 'PHP',
         ]);
 
         \App\Models\Category::seedDefaultsForUser($user);
