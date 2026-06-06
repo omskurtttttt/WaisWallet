@@ -12,7 +12,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(\App\Services\DashboardService::class, function ($app) {
+            return new \App\Services\DashboardService(auth()->user() ?? new \App\Models\User());
+        });
+
+        $this->app->bind(\App\Services\TransactionService::class, function ($app) {
+            return new \App\Services\TransactionService(auth()->user() ?? new \App\Models\User());
+        });
+
+        $this->app->bind(\App\Services\AnalyticsService::class, function ($app) {
+            return new \App\Services\AnalyticsService(auth()->user() ?? new \App\Models\User());
+        });
+
+        $this->app->bind(\App\Services\ReportService::class, function ($app) {
+            return new \App\Services\ReportService(auth()->user() ?? new \App\Models\User());
+        });
     }
 
     /**

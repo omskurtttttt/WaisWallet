@@ -11,15 +11,20 @@ use Inertia\Inertia;
 
 class TransactionController extends Controller
 {
+    protected TransactionService $service;
+
+    public function __construct(TransactionService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
-        $service = new TransactionService($user);
-
         $filters = $request->only(['search', 'type', 'category']);
-        $transactions = $service->getTransactionsList($filters);
-        $categories = $service->getCategories();
-        $cards = $service->getCards();
+        $transactions = $this->service->getTransactionsList($filters);
+        $categories = $this->service->getCategories();
+        $cards = $this->service->getCards();
 
         return Inertia::render('Transactions/Index', [
             'transactions' => $transactions,
@@ -32,8 +37,7 @@ class TransactionController extends Controller
 
     public function store(StoreTransactionRequest $request)
     {
-        $service = new TransactionService($request->user());
-        $service->storeTransaction($request->validated());
+        $this->service->storeTransaction($request->validated());
 
         return redirect()->back()->with('success', 'Transaction created successfully.');
     }
@@ -42,8 +46,7 @@ class TransactionController extends Controller
     {
         Gate::authorize('update', $transaction);
 
-        $service = new TransactionService($request->user());
-        $service->updateTransaction($transaction, $request->validated());
+        $this->service->updateTransaction($transaction, $request->validated());
 
         return redirect()->back()->with('success', 'Transaction updated successfully.');
     }
@@ -52,8 +55,7 @@ class TransactionController extends Controller
     {
         Gate::authorize('delete', $transaction);
 
-        $service = new TransactionService($request->user());
-        $service->deleteTransaction($transaction);
+        $this->service->deleteTransaction($transaction);
 
         return redirect()->back()->with('success', 'Transaction deleted successfully.');
     }

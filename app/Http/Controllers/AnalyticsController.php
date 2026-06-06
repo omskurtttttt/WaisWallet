@@ -12,14 +12,12 @@ class AnalyticsController extends Controller
     /**
      * Display a listing of analytics data.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, AnalyticsService $service)
     {
         $user = $request->user();
         $now = Carbon::now();
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
-
-        $service = new AnalyticsService($user);
 
         $incomeVsExpenses = $service->getIncomeVsExpenses($now);
         $categoryBreakdown = $service->getCategoryBreakdown($startOfMonth, $endOfMonth);

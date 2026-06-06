@@ -13,14 +13,12 @@ class DashboardController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, DashboardService $service): Response
     {
         $user = $request->user();
         $now = Carbon::now();
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
-
-        $service = new DashboardService($user);
 
         $metrics = $service->getMetrics($now, $startOfMonth, $endOfMonth);
         $incomeChartData = $service->getIncomeChartData($now);

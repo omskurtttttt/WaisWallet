@@ -13,7 +13,7 @@ class ReportController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, ReportService $service): Response
     {
         $request->validate([
             'type' => ['nullable', 'string', 'in:monthly,yearly'],
@@ -22,7 +22,6 @@ class ReportController extends Controller
         ]);
 
         $user = $request->user();
-        $service = new ReportService($user);
 
         $reportData = $service->getReportData($request->only(['type', 'year', 'month']));
 
