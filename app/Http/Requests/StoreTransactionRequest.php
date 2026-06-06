@@ -12,11 +12,20 @@ class StoreTransactionRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('amount')) {
+            $this->merge([
+                'amount' => (int) round($this->amount * 100),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'amount' => ['required', 'numeric', 'min:0.01', 'max:99999999'],
+            'amount' => ['required', 'integer', 'min:1', 'max:9999999900'],
             'type' => ['required', 'string', Rule::in(['income', 'expense'])],
             'transaction_date' => ['required', 'date'],
             'category_id' => [

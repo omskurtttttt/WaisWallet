@@ -50,10 +50,6 @@ class GoalController extends Controller
     {
         $validated = $request->validated();
 
-        // Convert dollars to cents
-        $validated['target_amount'] = (int) round($validated['target_amount'] * 100);
-        $validated['current_amount'] = isset($validated['current_amount']) ? (int) round($validated['current_amount'] * 100) : 0;
-
         $request->user()->goals()->create($validated);
 
         return redirect()->back()->with('success', 'Savings goal created successfully.');
@@ -67,7 +63,6 @@ class GoalController extends Controller
         Gate::authorize('update', $goal);
 
         $validated = $request->validated();
-        $validated['target_amount'] = (int) round($validated['target_amount'] * 100);
 
         $goal->update($validated);
 
@@ -82,7 +77,7 @@ class GoalController extends Controller
         Gate::authorize('update', $goal);
 
         $validated = $request->validated();
-        $amountInCents = (int) round($validated['amount'] * 100);
+        $amountInCents = $validated['amount'];
 
         DB::transaction(function () use ($goal, $amountInCents, $validated) {
             $lockedGoal = Goal::where('id', $goal->id)->lockForUpdate()->firstOrFail();

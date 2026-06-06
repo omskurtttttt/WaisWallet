@@ -94,17 +94,11 @@ class TransactionService
 
     public function storeTransaction(array $validated)
     {
-        // Convert amount to cents before saving
-        $validated['amount'] = (int) round($validated['amount'] * 100);
-
         return $this->user->transactions()->create($validated);
     }
 
     public function updateTransaction(Transaction $transaction, array $validated)
     {
-        // Convert amount to cents before saving
-        $validated['amount'] = (int) round($validated['amount'] * 100);
-
         return $transaction->update($validated);
     }
 

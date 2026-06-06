@@ -11,10 +11,19 @@ class AddGoalFundsRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('amount')) {
+            $this->merge([
+                'amount' => (int) round($this->amount * 100),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
-            'amount' => ['required', 'numeric', 'min:0.01', 'max:99999999'],
+            'amount' => ['required', 'integer', 'min:1', 'max:9999999900'],
             'operation' => ['required', 'string', 'in:add,withdraw'],
         ];
     }
