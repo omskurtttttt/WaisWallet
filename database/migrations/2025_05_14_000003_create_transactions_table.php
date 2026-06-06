@@ -18,6 +18,8 @@ return new class extends Migration
             $table->integer('amount'); // stored in cents
             $table->foreignUuid('category_id')->constrained()->cascadeOnDelete();
             $table->string('recipient_name');
+            $table->string('title')->nullable();
+            $table->foreignUuid('card_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('status', ['completed', 'pending', 'failed'])->default('completed');
             $table->timestamp('transaction_date');
             $table->text('notes')->nullable();

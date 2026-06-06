@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('type', ['income', 'expense', 'budget']);
             $table->string('icon')->default('tag');
+            $table->string('color')->nullable();
             $table->timestamps();
 
             $table->index(['user_id', 'type']);

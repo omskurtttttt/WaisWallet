@@ -15,10 +15,12 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->string('last_four', 4);
-            $table->string('cardholder_name');
-            $table->string('expiry_date', 5); // MM/YY
-            $table->enum('card_type', ['visa', 'mastercard', 'amex', 'other'])->default('visa');
-            $table->string('nickname')->nullable();
+            $table->string('name');
+            $table->string('brand')->default('Visa');
+            $table->integer('expiration_month')->default(12);
+            $table->integer('expiration_year')->default(2027);
+            $table->string('color')->default('#7033ff');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->index('user_id');

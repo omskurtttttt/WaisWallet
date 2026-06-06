@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->integer('target_amount'); // stored in cents
             $table->integer('current_amount')->default(0); // stored in cents
-            $table->timestamp('target_date');
+            $table->timestamp('target_date')->nullable();
             $table->timestamps();
 
             $table->index('user_id');
