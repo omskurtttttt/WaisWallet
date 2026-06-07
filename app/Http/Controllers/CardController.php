@@ -14,12 +14,7 @@ class CardController extends Controller
     public function index(Request $request)
     {
         $cards = $request->user()->cards()
-            ->withSum(['transactions as income_sum' => function ($query) {
-                $query->where('type', 'income');
-            }], 'amount')
-            ->withSum(['transactions as expense_sum' => function ($query) {
-                $query->where('type', 'expense');
-            }], 'amount')
+            ->withBalance()
             ->orderByDesc('is_active')
             ->orderBy('name')
             ->get()

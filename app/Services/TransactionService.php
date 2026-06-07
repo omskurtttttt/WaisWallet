@@ -72,12 +72,7 @@ class TransactionService
     {
         return $this->user->cards()
             ->where('is_active', true)
-            ->withSum(['transactions as income_sum' => function ($query) {
-                $query->where('type', 'income');
-            }], 'amount')
-            ->withSum(['transactions as expense_sum' => function ($query) {
-                $query->where('type', 'expense');
-            }], 'amount')
+            ->withBalance()
             ->get()
             ->map(function ($card) {
                 $balance = ($card->income_sum ?? 0) - ($card->expense_sum ?? 0);

@@ -42,6 +42,16 @@ class Card extends Model
     }
 
     /**
+     * Scope a query to include the calculated balance for each card.
+     */
+    public function scopeWithBalance($query)
+    {
+        return $query
+            ->withSum(['transactions as income_sum' => fn($q) => $q->where('type', 'income')], 'amount')
+            ->withSum(['transactions as expense_sum' => fn($q) => $q->where('type', 'expense')], 'amount');
+    }
+
+    /**
      * Get the user that owns the card.
      */
     public function user(): BelongsTo

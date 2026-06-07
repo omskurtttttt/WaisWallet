@@ -234,12 +234,7 @@ class DashboardService
     public function getMyCards()
     {
         return $this->user->cards()
-            ->withSum(['transactions as income_sum' => function ($query) {
-                $query->where('type', 'income');
-            }], 'amount')
-            ->withSum(['transactions as expense_sum' => function ($query) {
-                $query->where('type', 'expense');
-            }], 'amount')
+            ->withBalance()
             ->where('is_active', true)
             ->get()
             ->map(function ($card) {
