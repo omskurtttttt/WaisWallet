@@ -187,18 +187,19 @@ class DashboardService
             ->sortByDesc('percentage')
             ->values();
 
-        // If no budgets are defined, provide the overall monthly spending limit
-        if ($spendingLimitsData->isEmpty()) {
-            $limit = $totalBudgetAllocated > 0 ? $totalBudgetAllocated : ($this->user->monthly_spending_limit > 0 ? $this->user->monthly_spending_limit : max($monthlySpending, 100000));
-            $spendingLimitsData->push([
-                'id' => 'overall',
-                'name' => 'Overall Monthly Spending',
-                'color' => '#7033ff',
-                'spent' => $monthlySpending,
-                'allocated' => $limit,
-                'percentage' => $limit > 0 ? min(100, round(($monthlySpending / $limit) * 100)) : 0,
-            ]);
-        }
+        // Always prepend the overall monthly spending limit at the top
+        $overallLimit = $this->user->monthly_spending_limit > 0 ? $this->user->monthly_spending_limit : 500000;
+        $overallPercentage = $overallLimit > 0 ? min(100, round(($monthlySpending / $overallLimit) * 100)) : 0;
+
+        $spendingLimitsData->prepend([
+            'id' => 'overall',
+            'name' => 'Overall Monthly Limit',
+            'color' => '#7033ff',
+            'spent' => $monthlySpending,
+            'allocated' => $overallLimit,
+            'percentage' => $overallPercentage,
+            'is_overall' => true,
+        ]);
 
         return $spendingLimitsData;
     }

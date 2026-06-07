@@ -40,6 +40,8 @@ class DashboardController extends Controller
             'recentTransactionsData' => $recentTransactionsData,
             'myCardsData' => $myCardsData,
             'currency' => $user->currency,
+            'expenseCategories' => $user->categories()->where('type', 'expense')->select('id', 'name', 'color')->get(),
+            'existingBudgets' => $user->budgets()->whereDate('month', $startOfMonth->format('Y-m-d'))->get(),
         ]);
     }
 }
