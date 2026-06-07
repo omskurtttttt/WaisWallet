@@ -1,12 +1,12 @@
 <script setup>
 import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
-import VueApexCharts from 'vue3-apexcharts';
-import { useThemeStore } from '@/Stores/theme';
+import { ref, watch } from 'vue';
 import { useCurrency } from '@/Composables/useCurrency';
-import { useIcons } from '@/Composables/useIcons';
-import CustomSelect from '@/Components/CustomSelect.vue';
+import ReportFilters from './Partials/ReportFilters.vue';
+import MetricCards from './Partials/MetricCards.vue';
+import ReportChart from './Partials/ReportChart.vue';
+import TopCategories from './Partials/TopCategories.vue';
 
 const props = defineProps({
     filters: Object,
@@ -19,30 +19,11 @@ const props = defineProps({
     currency: String,
 });
 
-const themeStore = useThemeStore();
-const isDark = computed(() => themeStore.isDark);
-
 const viewType = ref(props.filters.type || 'monthly');
 const selectedYear = ref(props.filters.year || new Date().getFullYear());
 const selectedMonth = ref(props.filters.month || new Date().getMonth() + 1);
 
-const months = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' },
-];
-
 const { formatMoney } = useCurrency();
-const { getIconSvg } = useIcons();
 
 const handleFilterChange = () => {
     router.get(route('reports.index'), {
@@ -53,147 +34,7 @@ const handleFilterChange = () => {
 };
 
 watch(viewType, () => {
-    // When changing tabs, automatically update filters
     handleFilterChange();
-});
-
-// Chart setup
-const chartSeries = computed(() => {
-    if (viewType.value === 'monthly') {
-        return [{
-            name: 'Daily Spending',
-            data: props.chartData.map(item => item.amount)
-        }];
-    } else {
-        return [
-            {
-                name: 'Income',
-                data: props.chartData.map(item => item.income)
-            },
-            {
-                name: 'Expenses',
-                data: props.chartData.map(item => item.expense)
-            }
-        ];
-    }
-});
-
-const chartOptions = computed(() => {
-    const isDarkTheme = isDark.value;
-    const labelColor = isDarkTheme ? '#9CA3AF' : '#6B7280';
-    const gridColor = isDarkTheme ? '#374151' : '#E5E7EB';
-    
-    if (viewType.value === 'monthly') {
-        return {
-            chart: {
-                type: 'area',
-                fontFamily: 'Inter, sans-serif',
-                background: 'transparent',
-                toolbar: { show: false },
-                animations: { enabled: true }
-            },
-            colors: ['#7033ff'],
-            dataLabels: { enabled: false },
-            stroke: {
-                curve: 'smooth',
-                width: 3
-            },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    opacityFrom: 0.45,
-                    opacityTo: 0.05,
-                    stops: [0, 100]
-                }
-            },
-            xaxis: {
-                categories: props.chartData.map(item => item.label),
-                labels: {
-                    style: {
-                        colors: labelColor,
-                        fontSize: '11px'
-                    }
-                },
-                axisBorder: { show: false },
-                axisTicks: { show: false }
-            },
-            yaxis: {
-                labels: {
-                    style: { colors: labelColor },
-                    formatter: (val) => formatMoney(val * 100)
-                }
-            },
-            grid: {
-                borderColor: gridColor,
-                strokeDashArray: 4
-            },
-            tooltip: {
-                theme: isDarkTheme ? 'dark' : 'light',
-                y: {
-                    formatter: (val) => formatMoney(val * 100)
-                }
-            }
-        };
-    } else {
-        return {
-            chart: {
-                type: 'bar',
-                fontFamily: 'Inter, sans-serif',
-                background: 'transparent',
-                toolbar: { show: false },
-                animations: { enabled: true }
-            },
-            colors: ['#10b981', '#ef4444'], // Green for income, Red for expenses
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    borderRadius: 6
-                }
-            },
-            dataLabels: { enabled: false },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            xaxis: {
-                categories: props.chartData.map(item => item.label),
-                labels: {
-                    style: {
-                        colors: labelColor,
-                        fontSize: '12px'
-                    }
-                },
-                axisBorder: { show: false },
-                axisTicks: { show: false }
-            },
-            yaxis: {
-                labels: {
-                    style: { colors: labelColor },
-                    formatter: (val) => formatMoney(val * 100)
-                }
-            },
-            grid: {
-                borderColor: gridColor,
-                strokeDashArray: 4
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'right',
-                labels: {
-                    colors: isDarkTheme ? '#F9FAFB' : '#111827'
-                }
-            },
-            tooltip: {
-                theme: isDarkTheme ? 'dark' : 'light',
-                y: {
-                    formatter: (val) => formatMoney(val * 100)
-                }
-            }
-        };
-    }
 });
 
 const printReport = () => {
@@ -266,47 +107,13 @@ const downloadReportData = () => {
             </div>
 
             <!-- Navigation & Filters -->
-            <div class="glass-card p-4 print:hidden animate-slide-up flex flex-col md:flex-row gap-4 items-center justify-between relative z-20">
-                <!-- Toggle Mode tabs -->
-                <div class="flex bg-muted/60 p-1 rounded-xl w-full md:w-auto">
-                    <button 
-                        @click="viewType = 'monthly'"
-                        :class="[
-                            'flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all',
-                            viewType === 'monthly' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                        ]"
-                    >
-                        Monthly
-                    </button>
-                    <button 
-                        @click="viewType = 'yearly'"
-                        :class="[
-                            'flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all',
-                            viewType === 'yearly' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                        ]"
-                    >
-                        Yearly
-                    </button>
-                </div>
-
-                <!-- Select Filters -->
-                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
-                    <CustomSelect 
-                        v-if="viewType === 'monthly'"
-                        v-model="selectedMonth"
-                        :options="months"
-                        @change="handleFilterChange"
-                        class="min-w-[130px]"
-                    />
-
-                    <CustomSelect 
-                        v-model="selectedYear"
-                        :options="availableYears"
-                        @change="handleFilterChange"
-                        class="min-w-[110px]"
-                    />
-                </div>
-            </div>
+            <ReportFilters 
+                v-model:viewType="viewType"
+                v-model:selectedMonth="selectedMonth"
+                v-model:selectedYear="selectedYear"
+                :availableYears="availableYears"
+                @change="handleFilterChange"
+            />
 
             <!-- Print Context Info -->
             <div class="hidden print:flex items-center justify-between text-sm text-muted-foreground py-2 border-b border-border">
@@ -315,140 +122,23 @@ const downloadReportData = () => {
             </div>
 
             <!-- Metrics Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up relative z-10" style="animation-delay: 0.05s">
-                <!-- Total Income -->
-                <div class="glass-card p-5 border-l-4 border-chart-1 shadow-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Income</p>
-                    <p class="mt-2 text-2xl font-bold text-foreground font-financial">{{ formatMoney(metrics.income) }}</p>
-                    <div class="mt-2 flex items-center gap-1.5 print:hidden">
-                        <span :class="[
-                            'inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium',
-                            metrics.trends.income >= 0 ? 'bg-chart-1/10 text-chart-1' : 'bg-destructive/10 text-destructive'
-                        ]">
-                            <svg class="mr-0.5 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path v-if="metrics.trends.income >= 0" d="m18 15-6-6-6 6"/><path v-else d="m6 9 6 6 6-6"/>
-                            </svg>
-                            {{ Math.abs(metrics.trends.income) }}%
-                        </span>
-                        <span class="text-xs text-muted-foreground">vs {{ prevPeriodLabel }}</span>
-                    </div>
-                </div>
-
-                <!-- Total Expenses -->
-                <div class="glass-card p-5 border-l-4 border-destructive shadow-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Expenses</p>
-                    <p class="mt-2 text-2xl font-bold text-foreground font-financial">{{ formatMoney(metrics.expense) }}</p>
-                    <div class="mt-2 flex items-center gap-1.5 print:hidden">
-                        <span :class="[
-                            'inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium',
-                            metrics.trends.expense <= 0 ? 'bg-chart-1/10 text-chart-1' : 'bg-destructive/10 text-destructive'
-                        ]">
-                            <svg class="mr-0.5 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path v-if="metrics.trends.expense <= 0" d="m6 9 6 6 6-6"/><path v-else d="m18 15-6-6-6 6"/>
-                            </svg>
-                            {{ Math.abs(metrics.trends.expense) }}%
-                        </span>
-                        <span class="text-xs text-muted-foreground">vs {{ prevPeriodLabel }}</span>
-                    </div>
-                </div>
-
-                <!-- Net Savings -->
-                <div class="glass-card p-5 border-l-4 border-primary shadow-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Net Savings</p>
-                    <p class="mt-2 text-2xl font-bold text-foreground font-financial" :class="metrics.netSavings < 0 ? 'text-destructive' : 'text-foreground'">
-                        {{ formatMoney(metrics.netSavings) }}
-                    </p>
-                    <div class="mt-2 flex items-center gap-1.5 print:hidden">
-                        <span :class="[
-                            'inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium',
-                            metrics.trends.netSavings >= 0 ? 'bg-chart-1/10 text-chart-1' : 'bg-destructive/10 text-destructive'
-                        ]">
-                            <svg class="mr-0.5 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path v-if="metrics.trends.netSavings >= 0" d="m18 15-6-6-6 6"/><path v-else d="m6 9 6 6 6-6"/>
-                            </svg>
-                            {{ Math.abs(metrics.trends.netSavings) }}%
-                        </span>
-                        <span class="text-xs text-muted-foreground">vs {{ prevPeriodLabel }}</span>
-                    </div>
-                </div>
-
-                <!-- Savings Rate -->
-                <div class="glass-card p-5 border-l-4 border-yellow-500 shadow-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Savings Rate</p>
-                    <p class="mt-2 text-2xl font-bold text-foreground font-financial">{{ metrics.savingsRate }}%</p>
-                    <div class="mt-2 flex items-center gap-1.5 print:hidden">
-                        <span :class="[
-                            'inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium',
-                            metrics.savingsRate >= 20 ? 'bg-chart-1/10 text-chart-1' : 'bg-yellow-500/10 text-yellow-600'
-                        ]">
-                            {{ metrics.savingsRate >= 20 ? 'Good' : 'Needs Work' }}
-                        </span>
-                        <span class="text-xs text-muted-foreground">Target: 20%+</span>
-                    </div>
-                </div>
-            </div>
+            <MetricCards 
+                :metrics="metrics"
+                :prevPeriodLabel="prevPeriodLabel"
+            />
 
             <!-- Charts and Categories breakdown row -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up" style="animation-delay: 0.1s">
-                <!-- Trend Chart -->
-                <div class="lg:col-span-2 glass-card p-6 flex flex-col justify-between shadow-sm print:break-inside-avoid">
-                    <div>
-                        <h2 class="text-lg font-semibold text-foreground">
-                            {{ viewType === 'monthly' ? 'Daily Expense Trend' : 'Monthly Cash Flow' }}
-                        </h2>
-                        <p class="text-xs text-muted-foreground mt-0.5">Visual representation of funds during {{ periodLabel }}.</p>
-                    </div>
-                    <div class="h-[300px] w-full mt-6">
-                        <VueApexCharts
-                            :type="viewType === 'monthly' ? 'area' : 'bar'"
-                            height="100%"
-                            :options="chartOptions"
-                            :series="chartSeries"
-                        />
-                    </div>
-                </div>
+                <ReportChart 
+                    :view-type="viewType"
+                    :chart-data="chartData"
+                    :period-label="periodLabel"
+                />
 
-                <!-- Top Categories -->
-                <div class="glass-card p-6 flex flex-col justify-between shadow-sm print:break-inside-avoid">
-                    <div>
-                        <h2 class="text-lg font-semibold text-foreground">Expense Categories</h2>
-                        <p class="text-xs text-muted-foreground mt-0.5">Where your money went in {{ periodLabel }}.</p>
-                    </div>
-                    
-                    <div v-if="topCategories.length > 0" class="mt-6 flex-1 space-y-4">
-                        <div v-for="(category, index) in topCategories.slice(0, 5)" :key="index" class="space-y-1.5">
-                            <div class="flex items-center justify-between text-sm">
-                                <div class="flex items-center gap-2">
-                                    <div class="flex h-7 w-7 items-center justify-center rounded-lg" :style="{ backgroundColor: `${category.color}15`, color: category.color }">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" v-html="getIconSvg(category.icon)"></svg>
-                                    </div>
-                                    <span class="font-medium text-foreground">{{ category.name }}</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="font-semibold text-foreground font-financial">{{ formatMoney(category.amount) }}</span>
-                                    <span class="text-xs text-muted-foreground block font-light">{{ category.percentage }}%</span>
-                                </div>
-                            </div>
-                            <!-- Progress indicator -->
-                            <div class="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                                <div class="h-full rounded-full transition-all duration-500" :style="{ width: `${category.percentage}%`, backgroundColor: category.color }"></div>
-                            </div>
-                        </div>
-                        <div v-if="topCategories.length > 5" class="text-center pt-2">
-                            <p class="text-xs text-muted-foreground">+ {{ topCategories.length - 5 }} other categories</p>
-                        </div>
-                    </div>
-
-                    <div v-else class="mt-6 flex-1 flex flex-col items-center justify-center text-muted-foreground py-8">
-                        <svg class="h-12 w-12 opacity-20 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                            <line x1="16" x2="16" y1="2" y2="6"/>
-                            <line x1="8" x2="8" y1="2" y2="6"/>
-                        </svg>
-                        <p class="text-sm">No expenses recorded</p>
-                        <p class="text-xs mt-1">There are no expenses in this period.</p>
-                    </div>
-                </div>
+                <TopCategories 
+                    :top-categories="topCategories"
+                    :period-label="periodLabel"
+                />
             </div>
 
             <!-- Transaction Count Summary and Period Overview -->
