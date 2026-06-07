@@ -125,12 +125,12 @@ const series = computed(() => [{
 
 <template>
     <div class="glass-card p-5 animate-slide-up">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-foreground">Total Income</h2>
+        <div class="flex items-center justify-between gap-4 mb-4">
+            <h2 class="text-lg font-semibold text-foreground whitespace-nowrap">Total Income</h2>
             <CustomSelect
                 v-model="period"
                 :options="periodOptions"
-                class="w-48"
+                class="w-36"
                 trigger-class="h-9 rounded-lg"
             />
         </div>
