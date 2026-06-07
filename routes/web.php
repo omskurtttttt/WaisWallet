@@ -8,6 +8,7 @@ use App\Http\Controllers\GoalController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BudgetController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,6 +31,7 @@ Route::get('/dashboard', DashboardController::class)
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::put('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
