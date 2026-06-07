@@ -5,8 +5,9 @@ import BudgetChart from '@/Components/Dashboard/BudgetChart.vue';
 import SpendingLimits from '@/Components/Dashboard/SpendingLimits.vue';
 import RecentTransactions from '@/Components/Dashboard/RecentTransactions.vue';
 import MyCards from '@/Components/Dashboard/MyCards.vue';
+import ManageBudgetsModal from '@/Components/Dashboard/ManageBudgetsModal.vue';
 import { Head, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     metrics: Object,
@@ -16,7 +17,11 @@ const props = defineProps({
     recentTransactionsData: Array,
     myCardsData: Array,
     currency: String,
+    expenseCategories: Array,
+    existingBudgets: Array,
 });
+
+const showManageBudgetsModal = ref(false);
 
 import { useCurrency } from '@/Composables/useCurrency';
 
@@ -90,8 +95,8 @@ const cards = computed(() => {
                                 <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
                                 <line x1="2" y1="10" x2="22" y2="10" />
                             </svg>
-                            <!-- Income/Lightning -> Pie Chart Icon (Colored) -->
-                            <svg v-else class="h-5 w-5 text-[#3ee08f] fill-[#3ee08f]/10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- Income/Lightning -> Pie Chart Icon -->
+                            <svg v-else class="h-5 w-5 text-muted-foreground/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
                                 <path d="M22 12A10 10 0 0 0 12 2v10z" />
                             </svg>
@@ -137,12 +142,23 @@ const cards = computed(() => {
                 <!-- Right Column -->
                 <div class="space-y-4">
                     <!-- Spending Limits -->
-                    <SpendingLimits :data="spendingLimitsData" :currency="currency" />
+                    <SpendingLimits 
+                        :data="spendingLimitsData" 
+                        :currency="currency" 
+                        @manage="showManageBudgetsModal = true"
+                    />
 
                     <!-- My Cards -->
                     <MyCards :data="myCardsData" />
                 </div>
             </div>
         </div>
+
+        <ManageBudgetsModal
+            :show="showManageBudgetsModal"
+            :expense-categories="expenseCategories"
+            :existing-budgets="existingBudgets"
+            @close="showManageBudgetsModal = false"
+        />
     </AuthenticatedLayout>
 </template>
