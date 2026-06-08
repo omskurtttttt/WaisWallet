@@ -41,7 +41,30 @@ export const useThemeStore = defineStore('theme', () => {
         try {
             const page = usePage();
             if (page && page.props.auth?.user) {
-                router.post('/profile/theme', { theme: themeStr }, { preserveScroll: true, preserveState: true });
+                // Get the encrypted XSRF-TOKEN cookie set by Laravel
+                const csrfToken = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('XSRF-TOKEN='))
+                    ?.split('=')[1];
+
+                if (csrfToken) {
+                    fetch('/profile/theme', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-XSRF-TOKEN': decodeURIComponent(csrfToken),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ theme: themeStr })
+                    });
+                } else {
+                    // Fallback to router.post if cookie is not readable (e.g. local environment setups)
+                    router.post('/profile/theme', { theme: themeStr }, { 
+                        preserveScroll: true, 
+                        preserveState: true,
+                        showProgress: false 
+                    });
+                }
             }
         } catch (e) {
             // Fail silently

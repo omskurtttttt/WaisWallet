@@ -32,7 +32,7 @@ const categoryLimits = computed(() => {
             <h2 class="text-lg font-semibold text-foreground">Spending Limits</h2>
             <button 
                 @click="emit('manage')" 
-                class="text-xs font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
+                class="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200"
             >
                 Manage
             </button>
