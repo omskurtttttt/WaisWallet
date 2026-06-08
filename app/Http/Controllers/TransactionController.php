@@ -21,7 +21,7 @@ class TransactionController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $filters = $request->only(['search', 'type', 'category']);
+        $filters = $request->only(['search', 'type', 'category', 'status', 'date_from', 'date_to', 'sort_by', 'sort_order']);
         $transactions = $this->service->getTransactionsList($filters);
         $categories = $this->service->getCategories();
         $cards = $this->service->getCards();

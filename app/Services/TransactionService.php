@@ -34,15 +34,46 @@ class TransactionService
             $query->where('category_id', $filters['category']);
         }
 
-        return $query->orderByDesc('transaction_date')
-            ->orderByDesc('created_at')
-            ->paginate(15)
+        // Status filter
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
+        }
+
+        // Date range filter
+        if (!empty($filters['date_from'])) {
+            $query->whereDate('transaction_date', '>=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $query->whereDate('transaction_date', '<=', $filters['date_to']);
+        }
+
+        // Sorting
+        $sortBy = $filters['sort_by'] ?? 'date';
+        $sortOrder = $filters['sort_order'] ?? 'desc';
+
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'desc';
+        }
+
+        if ($sortBy === 'amount') {
+            $query->orderBy('amount', $sortOrder);
+        } elseif ($sortBy === 'name') {
+            $query->orderBy('title', $sortOrder);
+        } else {
+            $query->orderBy('transaction_date', $sortOrder);
+        }
+
+        // Secondary sorting to keep pagination stable
+        $query->orderBy('created_at', 'desc');
+
+        return $query->paginate(15)
             ->withQueryString()
             ->through(fn ($tx) => [
                 'id' => $tx->id,
                 'title' => $tx->title,
                 'amount' => $tx->amount,
                 'type' => $tx->type,
+                'status' => $tx->status,
                 'date' => $tx->transaction_date->format('Y-m-d'),
                 'display_date' => $tx->transaction_date->format('M d, Y'),
                 'notes' => $tx->notes,

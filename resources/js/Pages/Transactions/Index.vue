@@ -24,6 +24,11 @@ const props = defineProps({
 const search = ref(props.filters.search || '');
 const typeFilter = ref(props.filters.type || 'all');
 const categoryFilter = ref(props.filters.category || 'all');
+const statusFilter = ref(props.filters.status || 'all');
+const dateFrom = ref(props.filters.date_from || '');
+const dateTo = ref(props.filters.date_to || '');
+const sortBy = ref(props.filters.sort_by || 'date');
+const sortOrder = ref(props.filters.sort_order || 'desc');
 const showAddModal = ref(false);
 
 const { formatMoney } = useCurrency();
@@ -38,10 +43,29 @@ const applyFilters = debounce(() => {
         search: search.value,
         type: typeFilter.value,
         category: categoryFilter.value,
+        status: statusFilter.value,
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
+        sort_by: sortBy.value,
+        sort_order: sortOrder.value,
     }, { preserveState: true, replace: true });
 }, 300);
 
-watch([search, typeFilter, categoryFilter], applyFilters);
+watch([search, typeFilter, categoryFilter, statusFilter, dateFrom, dateTo, sortBy, sortOrder], applyFilters);
+
+const toggleSort = (field) => {
+    if (sortBy.value === field) {
+        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortBy.value = field;
+        sortOrder.value = 'desc';
+    }
+};
+
+const clearDateRange = () => {
+    dateFrom.value = '';
+    dateTo.value = '';
+};
 
 const showDeleteConfirm = ref(false);
 const transactionToDelete = ref(null);
@@ -71,6 +95,13 @@ const typeOptions = [
     { value: 'all', label: 'All Types' },
     { value: 'income', label: 'Income' },
     { value: 'expense', label: 'Expense' }
+];
+
+const statusOptions = [
+    { value: 'all', label: 'All Statuses' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'failed', label: 'Failed' }
 ];
 
 const categoryOptions = computed(() => {
@@ -104,29 +135,63 @@ const categoryOptions = computed(() => {
             </div>
 
             <!-- Filters -->
-            <div class="glass-card p-4 animate-slide-up flex flex-col md:flex-row gap-4 relative z-20">
-                <div class="flex-1 relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-                    </svg>
-                    <input 
-                        v-model="search"
-                        type="text" 
-                        placeholder="Search transactions..." 
-                        class="h-10 w-full rounded-lg border-0 bg-input pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-                    />
+            <div class="glass-card p-4 animate-slide-up space-y-4 relative z-20">
+                <div class="flex flex-col xl:flex-row gap-4">
+                    <!-- Search Input -->
+                    <div class="flex-1 relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                        </svg>
+                        <input 
+                            v-model="search"
+                            type="text" 
+                            placeholder="Search transactions..." 
+                            class="h-10 w-full rounded-lg border-0 bg-input pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                        />
+                    </div>
+                    <!-- Type, Category, Status Selects -->
+                    <div class="flex flex-wrap sm:flex-nowrap gap-3">
+                        <CustomSelect 
+                            v-model="typeFilter"
+                            :options="typeOptions"
+                            class="min-w-[130px]"
+                        />
+                        <CustomSelect 
+                            v-model="categoryFilter"
+                            :options="categoryOptions"
+                            class="min-w-[150px]"
+                        />
+                        <CustomSelect 
+                            v-model="statusFilter"
+                            :options="statusOptions"
+                            class="min-w-[140px]"
+                        />
+                    </div>
                 </div>
-                <div class="flex flex-wrap md:flex-nowrap gap-4">
-                    <CustomSelect 
-                        v-model="typeFilter"
-                        :options="typeOptions"
-                        class="min-w-[140px]"
-                    />
-                    <CustomSelect 
-                        v-model="categoryFilter"
-                        :options="categoryOptions"
-                        class="min-w-[160px]"
-                    />
+                
+                <!-- Date Range picker -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-3 border-t border-border">
+                    <span class="text-xs font-semibold text-muted-foreground uppercase tracking-[0.08em] whitespace-nowrap">Date Range:</span>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <input 
+                            v-model="dateFrom"
+                            type="date" 
+                            class="h-9 rounded-xl border-0 bg-input px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                        />
+                        <span class="text-muted-foreground text-xs font-semibold">to</span>
+                        <input 
+                            v-model="dateTo"
+                            type="date" 
+                            class="h-9 rounded-xl border-0 bg-input px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                        />
+                        <button 
+                            v-if="dateFrom || dateTo"
+                            @click="clearDateRange"
+                            class="text-xs text-primary hover:text-primary/80 font-semibold pl-1"
+                        >
+                            Clear
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -136,18 +201,60 @@ const categoryOptions = computed(() => {
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead class="bg-muted/30 text-muted-foreground border-b border-border">
                             <tr>
-                                <th class="px-6 py-4 font-semibold">Transaction</th>
+                                <th 
+                                    @click="toggleSort('name')" 
+                                    class="px-6 py-4 font-semibold cursor-pointer hover:text-foreground transition-colors group select-none"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        <span>Transaction</span>
+                                        <span class="transition-opacity opacity-0 group-hover:opacity-100 flex items-center" :class="{ 'opacity-100': sortBy === 'name' }">
+                                            <svg v-if="sortBy === 'name' && sortOrder === 'asc'" class="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                                            <svg v-else class="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
                                 <th class="px-6 py-4 font-semibold">Category</th>
-                                <th class="px-6 py-4 font-semibold">Date</th>
+                                <th 
+                                    @click="toggleSort('date')" 
+                                    class="px-6 py-4 font-semibold cursor-pointer hover:text-foreground transition-colors group select-none"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        <span>Date</span>
+                                        <span class="transition-opacity opacity-0 group-hover:opacity-100 flex items-center" :class="{ 'opacity-100': sortBy === 'date' }">
+                                            <svg v-if="sortBy === 'date' && sortOrder === 'asc'" class="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                                            <svg v-else class="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
                                 <th class="px-6 py-4 font-semibold">Method</th>
-                                <th class="px-6 py-4 font-semibold text-right">Amount</th>
+                                <th 
+                                    @click="toggleSort('amount')" 
+                                    class="px-6 py-4 font-semibold cursor-pointer hover:text-foreground transition-colors group select-none text-right"
+                                >
+                                    <div class="flex items-center justify-end gap-1">
+                                        <span>Amount</span>
+                                        <span class="transition-opacity opacity-0 group-hover:opacity-100 flex items-center" :class="{ 'opacity-100': sortBy === 'amount' }">
+                                            <svg v-if="sortBy === 'amount' && sortOrder === 'asc'" class="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                                            <svg v-else class="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
                                 <th class="px-6 py-4 font-semibold text-right"></th>
                             </tr>
                         </thead>
                         <tbody v-if="transactions.data.length > 0" class="divide-y divide-border">
                             <tr v-for="tx in transactions.data" :key="tx.id" class="hover:bg-muted/20 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-foreground">{{ tx.title }}</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-medium text-foreground">{{ tx.title }}</span>
+                                        <Badge 
+                                            :variant="tx.status === 'completed' ? 'success' : (tx.status === 'failed' ? 'danger' : 'warning')"
+                                            size="sm"
+                                            class="capitalize"
+                                        >
+                                            {{ tx.status }}
+                                        </Badge>
+                                    </div>
                                     <div class="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px]">{{ tx.notes || 'No notes' }}</div>
                                 </td>
                                 <td class="px-6 py-4">
