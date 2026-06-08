@@ -154,17 +154,17 @@ const categoryOptions = computed(() => {
                         <CustomSelect 
                             v-model="typeFilter"
                             :options="typeOptions"
-                            class="min-w-[130px]"
+                            class="min-w-[140px]"
                         />
                         <CustomSelect 
                             v-model="categoryFilter"
                             :options="categoryOptions"
-                            class="min-w-[150px]"
+                            class="min-w-[200px]"
                         />
                         <CustomSelect 
                             v-model="statusFilter"
                             :options="statusOptions"
-                            class="min-w-[140px]"
+                            class="min-w-[150px]"
                         />
                     </div>
                 </div>

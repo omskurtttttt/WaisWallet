@@ -65,7 +65,7 @@ const emitChange = () => {
                 v-model="selectedMonth"
                 :options="months"
                 @change="emitChange"
-                class="min-w-[130px]"
+                class="min-w-[140px]"
             />
 
             <CustomSelect 

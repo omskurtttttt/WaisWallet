@@ -137,7 +137,7 @@ onUnmounted(() => {
         >
             <div
                 v-show="isOpen"
-                class="absolute z-50 mt-1.5 max-h-60 w-full overflow-y-auto rounded-xl border border-border bg-popover py-1 shadow-lg focus:outline-none scrollbar-thin"
+                class="absolute left-0 z-50 mt-1.5 max-h-60 min-w-full w-max max-w-[280px] overflow-y-auto rounded-xl border border-border bg-popover py-1 shadow-lg focus:outline-none scrollbar-thin"
                 style="transform-origin: top;"
                 role="listbox"
             >

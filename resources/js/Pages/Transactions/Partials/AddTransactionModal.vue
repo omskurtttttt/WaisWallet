@@ -36,6 +36,7 @@ const form = useForm({
     title: '',
     amount: '',
     type: 'expense',
+    status: 'completed',
     transaction_date: new Date().toISOString().split('T')[0],
     category_id: '',
     card_id: '',
@@ -93,6 +94,12 @@ const cardOptions = computed(() => {
         })
     ];
 });
+
+const statusOptions = [
+    { value: 'completed', label: '🟢 Completed' },
+    { value: 'pending', label: '🟡 Pending' },
+    { value: 'failed', label: '🔴 Failed' }
+];
 
 // Watch category_id: if "CREATE_NEW_CATEGORY" is chosen, open sub-modal and reset select value
 watch(() => form.category_id, (newVal) => {
@@ -223,6 +230,20 @@ watch(() => props.categories, (newCats, oldCats) => {
                             trigger-class="h-11 rounded-xl"
                         />
                         <InputError class="mt-2" :message="form.errors.card_id" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <InputLabel for="status" value="Status" />
+                        <CustomSelect
+                            id="status"
+                            v-model="form.status"
+                            :options="statusOptions"
+                            class="mt-1"
+                            trigger-class="h-11 rounded-xl"
+                        />
+                        <InputError class="mt-2" :message="form.errors.status" />
                     </div>
                 </div>
 

@@ -150,7 +150,7 @@ const initials = computed(() => {
             <div class="mx-1 h-8 w-px bg-border/50 hidden md:block"></div>
 
             <!-- User Avatar & Dropdown -->
-            <Dropdown align="right" width="48" content-classes="py-1 bg-card border border-border rounded-xl">
+            <Dropdown align="right" width="48" content-classes="py-1 bg-card border border-border rounded-xl overflow-hidden">
                 <template #trigger>
                     <button class="flex items-center gap-3 rounded-[12px] px-2 md:px-3 py-1.5 hover:bg-card transition-all duration-200 cursor-pointer">
                         <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-sm shrink-0 ring-2 ring-primary/20">
