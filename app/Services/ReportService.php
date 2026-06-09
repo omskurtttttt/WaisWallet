@@ -40,37 +40,36 @@ class ReportService
             $prevPeriodLabel = $prevStart->format('F Y');
         }
 
-        // Fetch all transactions in the current period with their categories
-        $transactions = $this->user->transactions()
+        // Fetch current period metrics aggregated at database level
+        $metrics = $this->user->transactions()
             ->whereBetween('transaction_date', [$start, $end])
-            ->with('category')
-            ->get();
+            ->selectRaw("
+                COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
+                COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense,
+                COUNT(*) as total_count
+            ")
+            ->first();
 
-        // Calculate current period metrics
-        $incomeTx = $transactions->where('type', 'income');
-        $expenseTx = $transactions->where('type', 'expense');
-
-        $income = $incomeTx->sum('amount');
-        $expense = $expenseTx->sum('amount');
+        $income = (int) $metrics->income;
+        $expense = (int) $metrics->expense;
         $netSavings = $income - $expense;
         $savingsRate = $income > 0 ? round(($netSavings / $income) * 100, 1) : 0;
-        $transactionCount = $transactions->count();
+        $transactionCount = (int) $metrics->total_count;
 
-        // Calculate previous period metrics for comparison
-        $prevIncome = $this->user->transactions()
-            ->where('type', 'income')
+        // Fetch previous period metrics aggregated at database level
+        $prevMetrics = $this->user->transactions()
             ->whereBetween('transaction_date', [$prevStart, $prevEnd])
-            ->sum('amount');
-            
-        $prevExpense = $this->user->transactions()
-            ->where('type', 'expense')
-            ->whereBetween('transaction_date', [$prevStart, $prevEnd])
-            ->sum('amount');
-            
+            ->selectRaw("
+                COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
+                COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense,
+                COUNT(*) as total_count
+            ")
+            ->first();
+
+        $prevIncome = (int) $prevMetrics->income;
+        $prevExpense = (int) $prevMetrics->expense;
         $prevNetSavings = $prevIncome - $prevExpense;
-        $prevTransactionCount = $this->user->transactions()
-            ->whereBetween('transaction_date', [$prevStart, $prevEnd])
-            ->count();
+        $prevTransactionCount = (int) $prevMetrics->total_count;
 
         // Trends (percentage change)
         $incomeTrend = $prevIncome > 0 ? round((($income - $prevIncome) / $prevIncome) * 100, 1) : 0;
@@ -81,36 +80,54 @@ class ReportService
         }
         $transactionCountTrend = $prevTransactionCount > 0 ? round((($transactionCount - $prevTransactionCount) / $prevTransactionCount) * 100, 1) : 0;
 
-        // Top Categories
-        $topCategories = $expenseTx->groupBy('category_id')
-            ->map(function ($group) use ($expense) {
-                $first = $group->first();
-                $total = $group->sum('amount');
-                return [
-                    'name' => $first->category->name ?? 'Uncategorized',
-                    'color' => $first->category->color ?? '#9CA3AF',
-                    'icon' => $first->category->icon ?? 'tag',
-                    'amount' => $total,
-                    'count' => $group->count(),
-                    'percentage' => $expense > 0 ? round(($total / $expense) * 100, 1) : 0,
-                ];
-            })
-            ->sortByDesc('amount')
-            ->values()
-            ->all();
+        // Top Categories grouped and summed at database level
+        $topCategoriesData = $this->user->transactions()
+            ->where('transactions.type', 'expense')
+            ->whereBetween('transactions.transaction_date', [$start, $end])
+            ->leftJoin('categories', 'transactions.category_id', '=', 'categories.id')
+            ->groupBy('transactions.category_id', 'categories.name', 'categories.color', 'categories.icon')
+            ->selectRaw("
+                transactions.category_id,
+                categories.name as category_name,
+                categories.color as category_color,
+                categories.icon as category_icon,
+                COALESCE(SUM(transactions.amount), 0) as total_amount,
+                COUNT(transactions.id) as transaction_count
+            ")
+            ->orderByDesc('total_amount')
+            ->get();
 
-        // Chart Data
+        $topCategories = $topCategoriesData->map(function ($row) use ($expense) {
+            $total = (int) $row->total_amount;
+            return [
+                'name' => $row->category_name ?? 'Uncategorized',
+                'color' => $row->category_color ?? '#9CA3AF',
+                'icon' => $row->category_icon ?? 'tag',
+                'amount' => $total,
+                'count' => (int) $row->transaction_count,
+                'percentage' => $expense > 0 ? round(($total / $expense) * 100, 1) : 0,
+            ];
+        })->all();
+
+        // Chart Data aggregated at database level
         $chartData = [];
         if ($type === 'monthly') {
+            $dailyExpenses = $this->user->transactions()
+                ->where('type', 'expense')
+                ->whereBetween('transaction_date', [$start, $end])
+                ->groupByRaw("TO_CHAR(transaction_date, 'YYYY-MM-DD')")
+                ->selectRaw("TO_CHAR(transaction_date, 'YYYY-MM-DD') as date_str, COALESCE(SUM(amount), 0) as total_amount")
+                ->get()
+                ->pluck('total_amount', 'date_str')
+                ->toArray();
+
             $daysInMonth = $start->daysInMonth;
             for ($d = 1; $d <= $daysInMonth; $d++) {
                 $dayDate = $start->copy()->day($d);
                 $dayStr = $dayDate->format('Y-m-d');
                 $dayLabel = $dayDate->format('d M');
                 
-                $daySum = $expenseTx->filter(function ($t) use ($dayStr) {
-                    return $t->transaction_date->format('Y-m-d') === $dayStr;
-                })->sum('amount');
+                $daySum = (int) ($dailyExpenses[$dayStr] ?? 0);
                 
                 $chartData[] = [
                     'label' => $dayLabel,
@@ -118,19 +135,26 @@ class ReportService
                 ];
             }
         } else {
+            $monthlyData = $this->user->transactions()
+                ->whereBetween('transaction_date', [$start, $end])
+                ->groupByRaw("TO_CHAR(transaction_date, 'YYYY-MM')")
+                ->selectRaw("
+                    TO_CHAR(transaction_date, 'YYYY-MM') as month_str,
+                    COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
+                    COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
+                ")
+                ->get()
+                ->keyBy('month_str');
+
             // Yearly chart data (by month)
             for ($m = 1; $m <= 12; $m++) {
                 $monthDate = Carbon::create($year, $m, 1);
                 $monthStr = $monthDate->format('Y-m');
                 $monthLabel = $monthDate->format('M');
                 
-                $monthIncome = $incomeTx->filter(function ($t) use ($monthStr) {
-                    return $t->transaction_date->format('Y-m') === $monthStr;
-                })->sum('amount');
-                
-                $monthExpense = $expenseTx->filter(function ($t) use ($monthStr) {
-                    return $t->transaction_date->format('Y-m') === $monthStr;
-                })->sum('amount');
+                $row = $monthlyData->get($monthStr);
+                $monthIncome = $row ? (int) $row->income : 0;
+                $monthExpense = $row ? (int) $row->expense : 0;
                 
                 $chartData[] = [
                     'label' => $monthLabel,
