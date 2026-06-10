@@ -37,7 +37,7 @@ const incomeVsExpensesSeries = computed(() => {
 const incomeVsExpensesOptions = computed(() => ({
     chart: {
         type: 'bar',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
         background: 'transparent',
         toolbar: { show: false },
         animations: { enabled: true }
@@ -113,7 +113,7 @@ const dailySpendingSeries = computed(() => {
 const dailySpendingOptions = computed(() => ({
     chart: {
         type: 'area',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
         background: 'transparent',
         toolbar: { show: false },
         sparkline: { enabled: false }
@@ -174,7 +174,7 @@ const categorySeries = computed(() => {
 const categoryOptions = computed(() => ({
     chart: {
         type: 'pie',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
         background: 'transparent',
         animations: { enabled: true }
     },
@@ -191,7 +191,7 @@ const categoryOptions = computed(() => ({
         },
         style: {
             fontSize: '12px',
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
             fontWeight: 'bold',
         },
         dropShadow: { enabled: false }
