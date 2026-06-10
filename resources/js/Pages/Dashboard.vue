@@ -41,7 +41,7 @@ const cards = computed(() => {
             label: 'Income', 
             value: formatMoney(props.metrics.monthlyIncome), 
             subtext: 'Total received this month',
-            colorClass: 'text-[#3ee08f]',
+            colorClass: 'text-chart-1',
             icon: 'income' 
         },
         { 
@@ -55,7 +55,7 @@ const cards = computed(() => {
             label: 'Total Savings', 
             value: formatMoney(props.metrics.monthlySavings), 
             subtext: 'Net savings this month',
-            colorClass: 'text-[#8c5cff]',
+            colorClass: 'text-primary',
             icon: 'savings' 
         },
     ];

@@ -3,6 +3,8 @@ import { computed, ref } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { useThemeStore } from '@/Stores/theme';
 import CustomSelect from '@/Components/CustomSelect.vue';
+import { useChartTheme } from '@/Composables/useChartTheme';
+import { useCurrency } from '@/Composables/useCurrency';
 
 const props = defineProps({
     data: {
@@ -17,6 +19,8 @@ const props = defineProps({
 
 const themeStore = useThemeStore();
 const isDark = computed(() => themeStore.isDark);
+const { chartColors } = useChartTheme();
+const { formatMoney } = useCurrency();
 
 const hasData = computed(() => props.data && props.data.length > 0);
 
@@ -52,21 +56,15 @@ const chartOptions = computed(() => ({
                         fontSize: '13px',
                         fontFamily: 'Plus Jakarta Sans, sans-serif',
                         fontWeight: 600,
-                        color: isDark.value ? '#767e93' : '#6B7280',
+                        color: chartColors.value.textMuted,
                     },
                     value: {
                         show: true,
                         fontSize: '22px',
                         fontFamily: 'Plus Jakarta Sans, sans-serif',
                         fontWeight: 700,
-                        color: isDark.value ? '#f0f0f0' : '#111827',
-                        formatter: function (val) {
-                            return new Intl.NumberFormat('en-US', {
-                                style: 'currency',
-                                currency: props.currency,
-                                maximumFractionDigits: 0
-                            }).format(val);
-                        }
+                        color: chartColors.value.text,
+                        formatter: (val) => formatMoney(val * 100, { maximumFractionDigits: 0 })
                     },
                     total: {
                         show: true,
@@ -74,16 +72,12 @@ const chartOptions = computed(() => ({
                         label: 'Total Spent',
                         fontSize: '11px',
                         fontWeight: 600,
-                        color: isDark.value ? '#767e93' : '#6B7280',
+                        color: chartColors.value.textMuted,
                         formatter: function (w) {
                             const total = w.globals.seriesTotals.reduce((a, b) => {
                                 return a + b
                             }, 0)
-                            return new Intl.NumberFormat('en-US', {
-                                style: 'currency',
-                                currency: props.currency,
-                                maximumFractionDigits: 0
-                            }).format(total);
+                            return formatMoney(total * 100, { maximumFractionDigits: 0 });
                         }
                     }
                 }
@@ -95,7 +89,7 @@ const chartOptions = computed(() => ({
     },
     stroke: {
         show: true,
-        colors: isDark.value ? ['#12131a'] : ['#ffffff'],
+        colors: [chartColors.value.card],
         width: 3
     },
     legend: {
@@ -104,12 +98,7 @@ const chartOptions = computed(() => ({
     tooltip: {
         theme: isDark.value ? 'dark' : 'light',
         y: {
-            formatter: function (val) {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: props.currency
-                }).format(val);
-            }
+            formatter: (val) => formatMoney(val * 100)
         }
     }
 }));
@@ -149,7 +138,7 @@ const series = computed(() => {
                         <span class="text-muted-foreground">{{ item.name }}</span>
                     </div>
                     <span class="font-medium text-foreground font-financial">
-                        {{ new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(item.amount) }}
+                        {{ formatMoney(item.amount * 100, { maximumFractionDigits: 0 }) }}
                     </span>
                 </div>
             </div>

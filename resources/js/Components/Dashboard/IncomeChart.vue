@@ -3,6 +3,8 @@ import { computed, ref, watch } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { useThemeStore } from '@/Stores/theme';
 import CustomSelect from '@/Components/CustomSelect.vue';
+import { useChartTheme } from '@/Composables/useChartTheme';
+import { useCurrency } from '@/Composables/useCurrency';
 
 const props = defineProps({
     data: {
@@ -17,6 +19,8 @@ const props = defineProps({
 
 const themeStore = useThemeStore();
 const isDark = computed(() => themeStore.isDark);
+const { chartColors } = useChartTheme();
+const { formatMoney } = useCurrency();
 
 const period = ref('Last 6 months');
 const periodOptions = [
@@ -25,7 +29,6 @@ const periodOptions = [
 ];
 
 const chartOptions = computed(() => ({
-// ... rest of chartOptions and series code
     chart: {
         type: 'bar',
         fontFamily: 'Plus Jakarta Sans, sans-serif',
@@ -39,7 +42,7 @@ const chartOptions = computed(() => ({
         },
         background: 'transparent'
     },
-    colors: [isDark.value ? '#8c5cff' : '#7033ff'],
+    colors: [chartColors.value.chart2],
     plotOptions: {
         bar: {
             borderRadius: 6,
@@ -61,7 +64,7 @@ const chartOptions = computed(() => ({
         axisTicks: { show: false },
         labels: {
             style: {
-                colors: isDark.value ? '#767e93' : '#6B7280',
+                colors: chartColors.value.textMuted,
                 fontSize: '11px',
                 fontFamily: 'Plus Jakarta Sans, sans-serif'
             }
@@ -70,21 +73,15 @@ const chartOptions = computed(() => ({
     yaxis: {
         labels: {
             style: {
-                colors: isDark.value ? '#767e93' : '#6B7280',
+                colors: chartColors.value.textMuted,
                 fontSize: '11px',
                 fontFamily: 'IBM Plex Mono, monospace'
             },
-            formatter: (value) => {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: props.currency,
-                    maximumFractionDigits: 0
-                }).format(value);
-            }
+            formatter: (value) => formatMoney(value * 100, { maximumFractionDigits: 0 })
         }
     },
     grid: {
-        borderColor: isDark.value ? '#1d1e26' : '#E5E7EB',
+        borderColor: chartColors.value.border,
         strokeDashArray: 4,
         yaxis: { lines: { show: true } },
         xaxis: { lines: { show: false } },
@@ -97,7 +94,7 @@ const chartOptions = computed(() => ({
             shade: isDark.value ? 'dark' : 'light',
             type: 'vertical',
             shadeIntensity: 0.5,
-            gradientToColors: [isDark.value ? '#38bdf8' : '#9c77ff'],
+            gradientToColors: [isDark.value ? chartColors.value.chart4 : chartColors.value.primary],
             inverseColors: true,
             opacityFrom: 1,
             opacityTo: 0.8,
@@ -107,12 +104,7 @@ const chartOptions = computed(() => ({
     tooltip: {
         theme: isDark.value ? 'dark' : 'light',
         y: {
-            formatter: function (val) {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: props.currency
-                }).format(val);
-            }
+            formatter: (val) => formatMoney(val * 100)
         }
     }
 }));

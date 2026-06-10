@@ -5,6 +5,7 @@ import { computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { useThemeStore } from '@/Stores/theme';
 import { useCurrency } from '@/Composables/useCurrency';
+import { useChartTheme } from '@/Composables/useChartTheme';
 
 const props = defineProps({
     incomeVsExpenses: Array,
@@ -15,6 +16,7 @@ const props = defineProps({
 
 const themeStore = useThemeStore();
 const isDark = computed(() => themeStore.isDark);
+const { chartColors } = useChartTheme();
 
 const { formatMoney } = useCurrency();
 
@@ -40,7 +42,7 @@ const incomeVsExpensesOptions = computed(() => ({
         toolbar: { show: false },
         animations: { enabled: true }
     },
-    colors: ['#10b981', '#ef4444'], // Green for income, Red for expenses
+    colors: [chartColors.value.chart1, chartColors.value.destructive], // Green for income, Red for expenses
     plotOptions: {
         bar: {
             horizontal: false,
@@ -59,7 +61,7 @@ const incomeVsExpensesOptions = computed(() => ({
         categories: props.incomeVsExpenses.map(item => item.month),
         labels: {
             style: {
-                colors: isDark.value ? '#9CA3AF' : '#6B7280',
+                colors: chartColors.value.textMuted,
                 fontSize: '12px'
             }
         },
@@ -70,25 +72,25 @@ const incomeVsExpensesOptions = computed(() => ({
         title: {
             text: `Amount (${props.currency})`,
             style: {
-                color: isDark.value ? '#9CA3AF' : '#6B7280',
+                color: chartColors.value.textMuted,
             }
         },
         labels: {
             style: {
-                colors: isDark.value ? '#9CA3AF' : '#6B7280',
+                colors: chartColors.value.textMuted,
             },
             formatter: (val) => formatMoney(val * 100, { maximumFractionDigits: 0 })
         }
     },
     grid: {
-        borderColor: isDark.value ? '#374151' : '#E5E7EB',
+        borderColor: chartColors.value.border,
         strokeDashArray: 4,
     },
     legend: {
         position: 'top',
         horizontalAlign: 'right',
         labels: {
-            colors: isDark.value ? '#F9FAFB' : '#111827',
+            colors: chartColors.value.text,
         }
     },
     fill: { opacity: 1 },
@@ -116,7 +118,7 @@ const dailySpendingOptions = computed(() => ({
         toolbar: { show: false },
         sparkline: { enabled: false }
     },
-    colors: ['#7033ff'],
+    colors: [chartColors.value.chart2],
     dataLabels: { enabled: false },
     stroke: {
         curve: 'smooth',
@@ -135,7 +137,7 @@ const dailySpendingOptions = computed(() => ({
         categories: props.dailySpending.map(item => item.date),
         labels: {
             style: {
-                colors: isDark.value ? '#9CA3AF' : '#6B7280',
+                colors: chartColors.value.textMuted,
                 fontSize: '11px'
             }
         },
@@ -145,13 +147,13 @@ const dailySpendingOptions = computed(() => ({
     yaxis: {
         labels: {
             style: {
-                colors: isDark.value ? '#9CA3AF' : '#6B7280',
+                colors: chartColors.value.textMuted,
             },
             formatter: (val) => formatMoney(val * 100, { maximumFractionDigits: 0 })
         }
     },
     grid: {
-        borderColor: isDark.value ? '#374151' : '#E5E7EB',
+        borderColor: chartColors.value.border,
         strokeDashArray: 4,
     },
     tooltip: {
@@ -179,7 +181,7 @@ const categoryOptions = computed(() => ({
     colors: hasCategoryData.value ? props.categoryBreakdown.map(item => item.color) : ['#E5E7EB'],
     labels: hasCategoryData.value ? props.categoryBreakdown.map(item => item.name) : ['No Data'],
     stroke: {
-        colors: isDark.value ? ['#1f2937'] : ['#ffffff'],
+        colors: [chartColors.value.card],
         width: 2
     },
     dataLabels: {
@@ -197,7 +199,7 @@ const categoryOptions = computed(() => ({
     legend: {
         position: 'bottom',
         labels: {
-            colors: isDark.value ? '#9CA3AF' : '#6B7280',
+            colors: chartColors.value.textMuted,
         }
     },
     tooltip: {
