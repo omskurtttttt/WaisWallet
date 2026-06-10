@@ -5,12 +5,14 @@ import { ref } from 'vue';
 import AddCardModal from './Partials/AddCardModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { useCurrency } from '@/Composables/useCurrency';
+import { useCardUtils } from '@/Composables/useCardUtils';
 
 const props = defineProps({
     cards: Array,
 });
 
 const { formatMoney } = useCurrency();
+const { getAccountCategory } = useCardUtils();
 const showAddModal = ref(false);
 
 const getBrandIcon = (brand) => {
@@ -24,19 +26,6 @@ const getBrandIcon = (brand) => {
         case 'grabpay': return 'GrabPay';
         case 'coins.ph': return 'Coins.ph';
         default: return brand || 'CARD';
-    }
-};
-
-const getAccountCategory = (brand) => {
-    const brandLower = brand?.toLowerCase();
-    if (['gcash', 'maya', 'grabpay', 'coins.ph'].includes(brandLower)) {
-        return { name: 'E-Wallet', icon: 'wallet', colorClass: 'bg-[#8c5cff]/10 text-[#8c5cff]' };
-    } else if (['bpi', 'bdo', 'metrobank', 'unionbank'].includes(brandLower)) {
-        return { name: 'Bank Account', icon: 'bank', colorClass: 'bg-[#38bdf8]/10 text-[#38bdf8]' };
-    } else if (brandLower === 'cash') {
-        return { name: 'Cash', icon: 'cash', colorClass: 'bg-[#3ee08f]/10 text-[#3ee08f]' };
-    } else {
-        return { name: 'Credit Card', icon: 'card', colorClass: 'bg-[#ff477e]/10 text-[#ff477e]' };
     }
 };
 
