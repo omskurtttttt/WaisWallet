@@ -21,18 +21,17 @@ const page = usePage();
 const isExpanded = computed(() => !props.collapsed || props.mobileOpen);
 
 const mainNavItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-    { name: 'Transactions', href: '/transactions', icon: 'transactions' },
-    { name: 'Wallet', href: '/wallet', icon: 'wallet' },
-    { name: 'Goals', href: '/goals', icon: 'goals' },
-    { name: 'Analytics', href: '/analytics', icon: 'analytics' },
-    { name: 'Reports', href: '/reports', icon: 'reports' },
+    { name: 'Dashboard', routeName: 'dashboard', icon: 'dashboard' },
+    { name: 'Transactions', routeName: 'transactions.index', icon: 'transactions' },
+    { name: 'Wallet', routeName: 'wallet.index', icon: 'wallet' },
+    { name: 'Goals', routeName: 'goals.index', icon: 'goals' },
+    { name: 'Analytics', routeName: 'analytics.index', icon: 'analytics' },
+    { name: 'Reports', routeName: 'reports.index', icon: 'reports' },
 ];
 
 function isActive(item) {
-    const url = page.url;
-    if (item.href === '/') return url === '/';
-    return url.startsWith(item.href);
+    const baseRouteName = item.routeName.split('.')[0];
+    return route().current(item.routeName) || route().current(`${baseRouteName}.*`);
 }
 
 function handleNavClick() {
@@ -136,7 +135,7 @@ function handleNavClick() {
                     <Link
                         v-for="item in mainNavItems"
                         :key="item.name"
-                        :href="item.href"
+                        :href="route(item.routeName)"
                         @click="handleNavClick"
                         :class="[
                             'sidebar-nav-item flex items-center rounded-[12px] text-[13px] font-semibold transition-all duration-300 ease-in-out group relative',
