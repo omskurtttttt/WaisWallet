@@ -59,6 +59,7 @@
 }
 
 .dark {
+  /* Note: Deviates from GEMINI.md spec (#222327) to provide a richer, more dramatic dark mode layout */
   --card: #12131a;
   --ring: #8c5cff;
   --input: #1e202b;
@@ -78,6 +79,7 @@
   --font-mono: 'IBM Plex Mono', monospace;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --secondary: #16171f;
+  /* Note: Deviates from GEMINI.md spec (#1a1b1e) to provide a richer, more dramatic dark mode layout */
   --background: #090a0f;
   --font-serif: 'Lora', serif;
   --foreground: #f0f0f0;
