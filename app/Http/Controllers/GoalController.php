@@ -6,39 +6,27 @@ use App\Models\Goal;
 use App\Http\Requests\StoreGoalRequest;
 use App\Http\Requests\UpdateGoalRequest;
 use App\Http\Requests\AddGoalFundsRequest;
+use App\Services\GoalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class GoalController extends Controller
 {
+    protected GoalService $service;
+
+    public function __construct(GoalService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        
-        $goals = $user->goals()
-            ->orderBy('target_date')
-            ->get()
-            ->map(function ($goal) {
-                $target = $goal->target_amount;
-                $current = $goal->current_amount;
-                $percentage = $target > 0 ? min(100, round(($current / $target) * 100)) : 0;
-                
-                return [
-                    'id' => $goal->id,
-                    'name' => $goal->name,
-                    'target_amount' => $target, // in cents
-                    'current_amount' => $current, // in cents
-                    'target_date' => $goal->target_date ? $goal->target_date->format('Y-m-d') : null,
-                    'display_date' => $goal->target_date ? $goal->target_date->format('M d, Y') : 'No Date',
-                    'percentage' => $percentage,
-                    'remaining' => max(0, $target - $current),
-                ];
-            });
+        $goals = $this->service->getGoals();
 
         return Inertia::render('Goals/Index', [
             'goals' => $goals,
@@ -48,9 +36,7 @@ class GoalController extends Controller
 
     public function store(StoreGoalRequest $request)
     {
-        $validated = $request->validated();
-
-        $request->user()->goals()->create($validated);
+        $this->service->storeGoal($request->validated());
 
         return redirect()->back()->with('success', 'Savings goal created successfully.');
     }
@@ -62,9 +48,7 @@ class GoalController extends Controller
     {
         Gate::authorize('update', $goal);
 
-        $validated = $request->validated();
-
-        $goal->update($validated);
+        $this->service->updateGoal($goal, $request->validated());
 
         return redirect()->back()->with('success', 'Savings goal updated successfully.');
     }
@@ -76,20 +60,7 @@ class GoalController extends Controller
     {
         Gate::authorize('update', $goal);
 
-        $validated = $request->validated();
-        $amountInCents = $validated['amount'];
-
-        DB::transaction(function () use ($goal, $amountInCents, $validated) {
-            $lockedGoal = Goal::where('id', $goal->id)->lockForUpdate()->firstOrFail();
-
-            if ($validated['operation'] === 'add') {
-                $lockedGoal->increment('current_amount', $amountInCents);
-            } else {
-                // Ensure we don't go below 0
-                $newAmount = max(0, $lockedGoal->current_amount - $amountInCents);
-                $lockedGoal->update(['current_amount' => $newAmount]);
-            }
-        });
+        $this->service->addFunds($goal, $request->validated());
 
         return redirect()->back()->with('success', 'Funds updated successfully.');
     }
@@ -101,7 +72,7 @@ class GoalController extends Controller
     {
         Gate::authorize('delete', $goal);
 
-        $goal->delete();
+        $this->service->deleteGoal($goal);
 
         return redirect()->back()->with('success', 'Savings goal removed successfully.');
     }

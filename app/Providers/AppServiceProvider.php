@@ -27,6 +27,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\ReportService::class, function ($app) {
             return new \App\Services\ReportService(auth()->user() ?? new \App\Models\User());
         });
+
+        $this->app->bind(\App\Services\CardService::class, function ($app) {
+            return new \App\Services\CardService(auth()->user() ?? new \App\Models\User());
+        });
+
+        $this->app->bind(\App\Services\GoalService::class, function ($app) {
+            return new \App\Services\GoalService(auth()->user() ?? new \App\Models\User());
+        });
+
+        $this->app->bind(\App\Services\BudgetService::class, function ($app) {
+            return new \App\Services\BudgetService(auth()->user() ?? new \App\Models\User());
+        });
     }
 
     /**

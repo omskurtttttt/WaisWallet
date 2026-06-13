@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budget;
+use App\Services\BudgetService;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 
 class BudgetController extends Controller
 {
+    protected BudgetService $service;
+
+    public function __construct(BudgetService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Store or update budgets.
      */
@@ -27,29 +34,7 @@ class BudgetController extends Controller
             'budgets.*.amount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $month = Carbon::createFromFormat('Y-m', $validated['month'])->startOfMonth()->format('Y-m-d');
-
-        foreach ($validated['budgets'] as $budgetItem) {
-            $categoryId = $budgetItem['category_id'];
-            $amountInCents = isset($budgetItem['amount']) ? (int) round($budgetItem['amount'] * 100) : 0;
-
-            if ($amountInCents > 0) {
-                $user->budgets()->updateOrCreate(
-                    [
-                        'category_id' => $categoryId,
-                        'month' => $month,
-                    ],
-                    [
-                        'allocated_amount' => $amountInCents,
-                    ]
-                );
-            } else {
-                $user->budgets()
-                    ->where('category_id', $categoryId)
-                    ->whereDate('month', $month)
-                    ->delete();
-            }
-        }
+        $this->service->updateOrCreateBudgets($validated);
 
         return redirect()->back()->with('success', 'Budgets updated successfully.');
     }
