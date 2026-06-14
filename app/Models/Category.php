@@ -59,6 +59,16 @@ class Category extends Model
     ];
 
     /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [];
+    }
+
+    /**
      * Get the user that owns the category.
      */
     public function user(): BelongsTo
