@@ -12,32 +12,44 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(\App\Services\DashboardService::class, function ($app) {
-            return new \App\Services\DashboardService(auth()->user() ?? new \App\Models\User());
+        $resolveUser = function () {
+            if (auth()->check()) {
+                return auth()->user();
+            }
+
+            if (app()->runningUnitTests()) {
+                return new \App\Models\User();
+            }
+
+            throw new \RuntimeException("Cannot resolve user-scoped service: No authenticated user in this context.");
+        };
+
+        $this->app->bind(\App\Services\DashboardService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\DashboardService($resolveUser());
         });
 
-        $this->app->bind(\App\Services\TransactionService::class, function ($app) {
-            return new \App\Services\TransactionService(auth()->user() ?? new \App\Models\User());
+        $this->app->bind(\App\Services\TransactionService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\TransactionService($resolveUser());
         });
 
-        $this->app->bind(\App\Services\AnalyticsService::class, function ($app) {
-            return new \App\Services\AnalyticsService(auth()->user() ?? new \App\Models\User());
+        $this->app->bind(\App\Services\AnalyticsService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\AnalyticsService($resolveUser());
         });
 
-        $this->app->bind(\App\Services\ReportService::class, function ($app) {
-            return new \App\Services\ReportService(auth()->user() ?? new \App\Models\User());
+        $this->app->bind(\App\Services\ReportService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\ReportService($resolveUser());
         });
 
-        $this->app->bind(\App\Services\CardService::class, function ($app) {
-            return new \App\Services\CardService(auth()->user() ?? new \App\Models\User());
+        $this->app->bind(\App\Services\CardService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\CardService($resolveUser());
         });
 
-        $this->app->bind(\App\Services\GoalService::class, function ($app) {
-            return new \App\Services\GoalService(auth()->user() ?? new \App\Models\User());
+        $this->app->bind(\App\Services\GoalService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\GoalService($resolveUser());
         });
 
-        $this->app->bind(\App\Services\BudgetService::class, function ($app) {
-            return new \App\Services\BudgetService(auth()->user() ?? new \App\Models\User());
+        $this->app->bind(\App\Services\BudgetService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\BudgetService($resolveUser());
         });
     }
 
