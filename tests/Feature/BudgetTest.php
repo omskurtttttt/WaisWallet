@@ -144,3 +144,19 @@ test('user cannot set budgets for categories they do not own', function () {
 
     $response->assertSessionHasErrors(['budgets.0.category_id']);
 });
+
+test('user cannot update or delete another user\'s budget via policy', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $categoryOfUser2 = Category::factory()->create(['user_id' => $user2->id, 'type' => 'expense']);
+    $budgetOfUser2 = Budget::factory()->create([
+        'user_id' => $user2->id,
+        'category_id' => $categoryOfUser2->id,
+        'allocated_amount' => 10000,
+        'month' => Carbon::now()->startOfMonth()->format('Y-m-d'),
+    ]);
+
+    $policy = new \App\Policies\BudgetPolicy();
+    expect($policy->update($user1, $budgetOfUser2))->toBeFalse();
+    expect($policy->delete($user1, $budgetOfUser2))->toBeFalse();
+});

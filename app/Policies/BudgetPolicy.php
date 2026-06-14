@@ -16,6 +16,14 @@ class BudgetPolicy
     }
 
     /**
+     * Determine whether the user can create budgets.
+     */
+    public function create(User $user): bool
+    {
+        return true;
+    }
+
+    /**
      * Determine whether the user can update the budget.
      */
     public function update(User $user, Budget $budget): bool
