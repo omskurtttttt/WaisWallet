@@ -47,6 +47,20 @@ const initials = computed(() => {
         .slice(0, 2)
         .toUpperCase();
 });
+
+const notifications = computed(() => page.props.notifications);
+
+function markAsRead(id) {
+    router.patch(route('notifications.read', id), {}, {
+        preserveScroll: true,
+    });
+}
+
+function markAllAsRead() {
+    router.post(route('notifications.read-all'), {}, {
+        preserveScroll: true,
+    });
+}
 </script>
 
 <template>
@@ -137,12 +151,84 @@ const initials = computed(() => {
             </button>
 
             <!-- Notifications -->
-            <button class="relative flex h-10 w-10 items-center justify-center rounded-[12px] text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200" title="Notifications">
-                <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-                </svg>
-            </button>
+            <Dropdown align="right" width="80" content-classes="py-2 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+                <template #trigger>
+                    <button class="relative flex h-10 w-10 items-center justify-center rounded-[12px] text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200" title="Notifications">
+                        <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                        </svg>
+                        <!-- Unread Badge count -->
+                        <span 
+                            v-if="notifications?.unread_count > 0"
+                            class="absolute top-1.5 right-1.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white ring-2 ring-background"
+                        >
+                            {{ notifications.unread_count }}
+                        </span>
+                    </button>
+                </template>
+                <template #content>
+                    <!-- Header -->
+                    <div class="px-4 py-2 border-b border-border flex justify-between items-center bg-muted/20">
+                        <span class="text-xs font-bold text-foreground">Notifications</span>
+                        <button 
+                            v-if="notifications?.unread_count > 0"
+                            @click.stop="markAllAsRead"
+                            class="text-[10px] font-semibold text-primary hover:text-primary/80 transition-colors"
+                        >
+                            Mark all read
+                        </button>
+                    </div>
+
+                    <!-- List -->
+                    <div class="max-h-[300px] overflow-y-auto divide-y divide-border/60">
+                        <div 
+                            v-if="notifications?.latest.length > 0"
+                            v-for="item in notifications.latest" 
+                            :key="item.id"
+                            :class="[
+                                'px-4 py-3 flex gap-3 transition-colors duration-150',
+                                !item.read_at ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/50'
+                            ]"
+                        >
+                            <!-- Notification Type Icon -->
+                            <div class="mt-0.5 shrink-0 flex items-center justify-center h-8 w-8 rounded-full" 
+                                 :class="[
+                                     item.type === 'budget_alert' ? 'bg-destructive/10 text-destructive' : 'bg-chart-1/10 text-chart-1'
+                                 ]">
+                                <svg v-if="item.type === 'budget_alert'" class="h-4.5 w-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                <svg v-else class="h-4.5 w-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z"/>
+                                </svg>
+                            </div>
+
+                            <!-- Text Content -->
+                            <div class="flex-1 min-w-0 text-left">
+                                <p class="text-xs font-bold text-foreground truncate">{{ item.title }}</p>
+                                <p class="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{{ item.message }}</p>
+                                <p class="text-[9px] text-muted-foreground/60 mt-1 font-semibold uppercase tracking-wider">{{ item.created_ago }}</p>
+                            </div>
+
+                            <!-- Mark Read Button -->
+                            <button 
+                                v-if="!item.read_at"
+                                @click.stop="markAsRead(item.id)"
+                                class="shrink-0 h-5 w-5 rounded-full hover:bg-primary/20 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-150"
+                                title="Mark read"
+                            >
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div v-else class="px-4 py-8 text-center text-xs text-muted-foreground">
+                            No notifications yet
+                        </div>
+                    </div>
+                </template>
+            </Dropdown>
 
             <!-- Settings -->
             <Link

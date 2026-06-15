@@ -120,12 +120,24 @@ class TransactionService
 
     public function storeTransaction(array $validated)
     {
-        return $this->user->transactions()->create($validated);
+        $transaction = $this->user->transactions()->create($validated);
+        
+        if ($transaction->type === 'expense' && $transaction->category) {
+            app(\App\Services\NotificationService::class)->checkBudgetAlerts($transaction->category, $transaction->transaction_date);
+        }
+        
+        return $transaction;
     }
 
     public function updateTransaction(Transaction $transaction, array $validated)
     {
-        return $transaction->update($validated);
+        $updated = $transaction->update($validated);
+        
+        if ($transaction->type === 'expense' && $transaction->category) {
+            app(\App\Services\NotificationService::class)->checkBudgetAlerts($transaction->category, $transaction->transaction_date);
+        }
+        
+        return $updated;
     }
 
     public function deleteTransaction(Transaction $transaction)

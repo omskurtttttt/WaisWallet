@@ -51,6 +51,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\BudgetService::class, function ($app) use ($resolveUser) {
             return new \App\Services\BudgetService($resolveUser());
         });
+
+        $this->app->bind(\App\Services\NotificationService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\NotificationService($resolveUser());
+        });
     }
 
     /**

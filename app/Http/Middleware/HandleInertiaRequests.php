@@ -47,6 +47,21 @@ class HandleInertiaRequests extends Middleware
                     'theme_preference' => $request->user()->theme_preference,
                 ] : null,
             ],
+            'notifications' => $request->user() ? [
+                'unread_count' => $request->user()->notifications()->whereNull('read_at')->count(),
+                'latest' => $request->user()->notifications()
+                    ->orderByDesc('created_at')
+                    ->limit(5)
+                    ->get()
+                    ->map(fn ($n) => [
+                        'id' => $n->id,
+                        'title' => $n->title,
+                        'message' => $n->message,
+                        'type' => $n->type,
+                        'read_at' => $n->read_at,
+                        'created_ago' => $n->created_at->diffForHumans(),
+                    ]),
+            ] : null,
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),

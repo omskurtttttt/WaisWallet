@@ -76,6 +76,9 @@ class GoalService
             }
         });
 
+        $goal->refresh();
+        app(\App\Services\NotificationService::class)->checkGoalAlerts($goal);
+
         return true;
     }
 
@@ -84,9 +87,13 @@ class GoalService
      */
     public function markAsComplete(Goal $goal): bool
     {
-        return $goal->update([
+        $updated = $goal->update([
             'current_amount' => $goal->target_amount
         ]);
+
+        app(\App\Services\NotificationService::class)->checkGoalAlerts($goal);
+
+        return $updated;
     }
 
     /**
