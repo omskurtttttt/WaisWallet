@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
     Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
     Route::post('/goals/{goal}/funds', [GoalController::class, 'addFunds'])->name('goals.funds');
+    Route::patch('/goals/{goal}/complete', [GoalController::class, 'markAsComplete'])->name('goals.complete');
     Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
     Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
     Route::get('/analytics', AnalyticsController::class)->name('analytics.index');

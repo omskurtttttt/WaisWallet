@@ -66,6 +66,18 @@ class GoalController extends Controller
     }
 
     /**
+     * Mark the specified goal as complete.
+     */
+    public function markAsComplete(Goal $goal)
+    {
+        Gate::authorize('update', $goal);
+
+        $this->service->markAsComplete($goal);
+
+        return redirect()->back()->with('success', 'Savings goal completed successfully!');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Goal $goal)

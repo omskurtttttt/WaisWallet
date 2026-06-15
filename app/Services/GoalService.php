@@ -80,6 +80,16 @@ class GoalService
     }
 
     /**
+     * Mark the goal as complete (set current_amount to target_amount).
+     */
+    public function markAsComplete(Goal $goal): bool
+    {
+        return $goal->update([
+            'current_amount' => $goal->target_amount
+        ]);
+    }
+
+    /**
      * Delete an existing savings goal.
      */
     public function deleteGoal(Goal $goal): bool

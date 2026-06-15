@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import AddGoalModal from './Partials/AddGoalModal.vue';
 import AddFundsModal from './Partials/AddFundsModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
@@ -59,6 +59,53 @@ const getDaysRemaining = (targetDateStr) => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
 };
+
+// Tabs state
+const activeTab = ref('active');
+
+const activeGoals = computed(() => {
+    return props.goals.filter(goal => goal.percentage < 100);
+});
+
+const completedGoals = computed(() => {
+    return props.goals.filter(goal => goal.percentage >= 100);
+});
+
+const filteredGoals = computed(() => {
+    return activeTab.value === 'active' ? activeGoals.value : completedGoals.value;
+});
+
+// Celebration state
+const showCelebration = ref(false);
+const celebratedGoalName = ref('');
+
+const markGoalComplete = (goal) => {
+    router.patch(route('goals.complete', goal.id), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            celebratedGoalName.value = goal.name;
+            showCelebration.value = true;
+            // auto hide celebration after 4 seconds
+            setTimeout(() => {
+                showCelebration.value = false;
+            }, 4000);
+        }
+    });
+};
+
+const getConfettiStyle = (i) => {
+    const colors = ['#4ac885', '#7033ff', '#fd822b', '#3276e4', '#fdbe2a', '#e54b4f'];
+    const color = colors[i % colors.length];
+    const left = `${(i * 8.5) % 100}%`;
+    const delay = `${(i * 0.25) % 2}s`;
+    const duration = `${2 + (i * 0.2) % 1.5}s`;
+    return {
+        backgroundColor: color,
+        left: left,
+        animationDelay: delay,
+        animationDuration: duration,
+    };
+};
 </script>
 
 <template>
@@ -83,10 +130,36 @@ const getDaysRemaining = (targetDateStr) => {
                 </button>
             </div>
 
+            <!-- Tabs / Filter -->
+            <div class="flex border-b border-border">
+                <button 
+                    @click="activeTab = 'active'"
+                    :class="[
+                        'px-6 py-3 text-sm font-semibold transition-all duration-200 border-b-2 -mb-[2px]',
+                        activeTab === 'active' 
+                            ? 'border-primary text-primary' 
+                            : 'border-transparent text-muted-foreground hover:text-foreground'
+                    ]"
+                >
+                    Active Goals ({{ activeGoals.length }})
+                </button>
+                <button 
+                    @click="activeTab = 'completed'"
+                    :class="[
+                        'px-6 py-3 text-sm font-semibold transition-all duration-200 border-b-2 -mb-[2px]',
+                        activeTab === 'completed' 
+                            ? 'border-primary text-primary' 
+                            : 'border-transparent text-muted-foreground hover:text-foreground'
+                    ]"
+                >
+                    Completed & Archived ({{ completedGoals.length }})
+                </button>
+            </div>
+
             <!-- Goals Grid -->
-            <div v-if="goals && goals.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up">
+            <div v-if="filteredGoals && filteredGoals.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up">
                 <div 
-                    v-for="goal in goals" 
+                    v-for="goal in filteredGoals" 
                     :key="goal.id"
                     class="glass-card p-6 flex flex-col justify-between hover:shadow-lg transition-all duration-300"
                 >
@@ -151,6 +224,16 @@ const getDaysRemaining = (targetDateStr) => {
                             Adjust Funds
                         </button>
                         <button 
+                            v-if="goal.percentage < 100"
+                            @click="markGoalComplete(goal)"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-chart-1/10 text-chart-1 hover:bg-chart-1 hover:text-white transition-all duration-200"
+                            title="Mark as Complete"
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                        </button>
+                        <button 
                             @click="confirmDeleteGoal(goal.id)"
                             class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200"
                             title="Delete Goal"
@@ -201,5 +284,75 @@ const getDaysRemaining = (targetDateStr) => {
             @confirm="deleteGoal"
             @close="showDeleteConfirm = false"
         />
+
+        <!-- Celebration Overlay -->
+        <div 
+            v-if="showCelebration" 
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
+        >
+            <div class="bg-card text-foreground rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl border border-border animate-scale-in relative overflow-hidden">
+                <!-- Confetti pieces -->
+                <div class="absolute inset-0 pointer-events-none">
+                    <div 
+                        v-for="i in 15" 
+                        :key="i" 
+                        class="confetti-piece" 
+                        :style="getConfettiStyle(i)"
+                    ></div>
+                </div>
+
+                <div class="h-20 w-20 mx-auto rounded-full bg-chart-1/10 text-chart-1 flex items-center justify-center mb-6 animate-bounce">
+                    <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+                
+                <h3 class="text-2xl font-bold mb-2">Goal Completed! 🎉</h3>
+                <p class="text-muted-foreground mb-6 text-sm leading-relaxed">
+                    Awesome job! You have successfully reached your target for <span class="font-bold text-foreground">{{ celebratedGoalName }}</span>.
+                </p>
+                
+                <button 
+                    @click="showCelebration = false"
+                    class="w-full inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90"
+                >
+                    Awesome!
+                </button>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+@keyframes fall {
+    0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(400px) rotate(360deg); opacity: 0; }
+}
+
+.confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 16px;
+    top: 0;
+    animation: fall 3s linear infinite;
+    border-radius: 2px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+</style>

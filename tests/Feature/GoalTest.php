@@ -208,3 +208,42 @@ test('user cannot delete another user\'s savings goal', function () {
         'id' => $goal->id,
     ]);
 });
+
+test('user can mark their savings goal as complete', function () {
+    $user = User::factory()->create();
+    $goal = Goal::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Car Fund',
+        'target_amount' => 500000,
+        'current_amount' => 100000,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->patch(route('goals.complete', $goal));
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('goals', [
+        'id' => $goal->id,
+        'current_amount' => 500000, // equal to target_amount
+    ]);
+});
+
+test('user cannot mark another user\'s savings goal as complete', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $goal = Goal::factory()->create([
+        'user_id' => $user2->id,
+        'name' => 'Car Fund',
+        'target_amount' => 500000,
+        'current_amount' => 100000,
+    ]);
+
+    $response = $this->actingAs($user1)
+        ->patch(route('goals.complete', $goal));
+
+    $response->assertStatus(403);
+    $this->assertDatabaseHas('goals', [
+        'id' => $goal->id,
+        'current_amount' => 100000,
+    ]);
+});
