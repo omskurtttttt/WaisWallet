@@ -30,6 +30,22 @@ const dateTo = ref(props.filters.date_to || '');
 const sortBy = ref(props.filters.sort_by || 'date');
 const sortOrder = ref(props.filters.sort_order || 'desc');
 const showAddModal = ref(false);
+const transactionToEdit = ref(null);
+
+const openAddModal = () => {
+    transactionToEdit.value = null;
+    showAddModal.value = true;
+};
+
+const editTransaction = (tx) => {
+    transactionToEdit.value = tx;
+    showAddModal.value = true;
+};
+
+const closeAddModal = () => {
+    showAddModal.value = false;
+    transactionToEdit.value = null;
+};
 
 const { formatMoney } = useCurrency();
 const { getIconSvg } = useIcons();
@@ -123,7 +139,7 @@ const categoryOptions = computed(() => {
                     <p class="mt-1 text-sm text-muted-foreground">Manage and track your income and expenses.</p>
                 </div>
                 <button 
-                    @click="showAddModal = true"
+                    @click="openAddModal"
                     class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-md shadow-primary/25"
                 >
                     <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -282,11 +298,19 @@ const categoryOptions = computed(() => {
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button @click="confirmDeleteTransaction(tx.id)" class="text-muted-foreground hover:text-destructive transition-colors">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                        </svg>
-                                    </button>
+                                    <div class="flex items-center justify-end gap-3">
+                                        <button @click="editTransaction(tx)" class="text-muted-foreground hover:text-primary transition-colors" title="Edit Transaction">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 20h9"/>
+                                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                                            </svg>
+                                        </button>
+                                        <button @click="confirmDeleteTransaction(tx.id)" class="text-muted-foreground hover:text-destructive transition-colors" title="Delete Transaction">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -340,7 +364,8 @@ const categoryOptions = computed(() => {
             :show="showAddModal" 
             :categories="categories" 
             :cards="cards" 
-            @close="showAddModal = false" 
+            :transaction="transactionToEdit"
+            @close="closeAddModal" 
         />
 
         <ConfirmationModal

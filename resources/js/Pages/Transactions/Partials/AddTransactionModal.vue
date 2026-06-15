@@ -25,6 +25,10 @@ const props = defineProps({
     cards: {
         type: Array,
         required: true,
+    },
+    transaction: {
+        type: Object,
+        default: null,
     }
 });
 
@@ -44,13 +48,23 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('transactions.store'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            form.reset();
-            emit('close');
-        },
-    });
+    if (props.transaction) {
+        form.put(route('transactions.update', props.transaction.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                form.reset();
+                emit('close');
+            },
+        });
+    } else {
+        form.post(route('transactions.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                form.reset();
+                emit('close');
+            },
+        });
+    }
 };
 
 const close = () => {
@@ -58,6 +72,30 @@ const close = () => {
     form.clearErrors();
     emit('close');
 };
+
+watch(() => props.show, (newVal) => {
+    if (newVal) {
+        if (props.transaction) {
+            form.title = props.transaction.title;
+            form.amount = (props.transaction.amount / 100).toString();
+            form.type = props.transaction.type;
+            form.status = props.transaction.status;
+            form.transaction_date = props.transaction.date;
+            form.category_id = props.transaction.category ? props.transaction.category.id : '';
+            form.card_id = props.transaction.card ? props.transaction.card.id : '';
+            form.notes = props.transaction.notes || '';
+        } else {
+            form.title = '';
+            form.amount = '';
+            form.type = 'expense';
+            form.status = 'completed';
+            form.transaction_date = new Date().toISOString().split('T')[0];
+            form.category_id = '';
+            form.card_id = '';
+            form.notes = '';
+        }
+    }
+});
 
 // Filter categories by selected transaction type and append "Create New" option
 const categoryOptions = computed(() => {
@@ -128,7 +166,7 @@ watch(() => props.categories, (newCats, oldCats) => {
 <template>
     <Modal :show="show" @close="close" maxWidth="md">
         <div class="p-6">
-            <h2 class="text-xl font-bold text-foreground mb-6">Add Transaction</h2>
+            <h2 class="text-xl font-bold text-foreground mb-6">{{ transaction ? 'Edit Transaction' : 'Add Transaction' }}</h2>
 
             <form @submit.prevent="submit" class="space-y-4">
                 <!-- Type Selection -->
@@ -265,7 +303,7 @@ watch(() => props.categories, (newCats, oldCats) => {
                         :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
                         :disabled="form.processing"
                     >
-                        {{ form.processing ? 'Saving...' : 'Save Transaction' }}
+                        {{ form.processing ? 'Saving...' : (transaction ? 'Save Changes' : 'Save Transaction') }}
                     </PrimaryButton>
                 </div>
             </form>
