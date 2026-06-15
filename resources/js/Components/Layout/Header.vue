@@ -1,7 +1,7 @@
 <script setup>
 import { useThemeStore } from '@/Stores/theme';
 import { usePage, Link, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 
@@ -19,8 +19,18 @@ const page = usePage();
 
 const searchQuery = ref('');
 
+// Sync search query input with URL query param across page changes
+watch(() => page.url, (url) => {
+    try {
+        const urlObj = new URL(url, window.location.origin);
+        searchQuery.value = urlObj.searchParams.get('search') || '';
+    } catch (e) {
+        searchQuery.value = '';
+    }
+}, { immediate: true });
+
 function handleSearch() {
-    router.get(route('transactions.index'), { search: searchQuery.value }, { preserveState: true });
+    router.get(route('transactions.index'), { search: searchQuery.value });
 }
 
 function handleMobileSearchClick() {
