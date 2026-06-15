@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, watch, nextTick } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -14,6 +14,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    card: {
+        type: Object,
+        default: null,
+    }
 });
 
 const emit = defineEmits(['close']);
@@ -48,7 +52,10 @@ const isEWallet = computed(() => ['gcash', 'maya', 'grabpay', 'coins.ph'].includ
 const showExpiry = computed(() => !isCash.value && !isEWallet.value);
 const showLastFour = computed(() => !isCash.value);
 
+let isInitializing = false;
+
 watch(() => form.brand, (newBrand) => {
+    if (isInitializing) return;
     if (newBrand === 'Cash') {
         form.last_four = '0000';
         form.expiration_month = 12;
@@ -59,6 +66,32 @@ watch(() => form.brand, (newBrand) => {
         if (form.last_four === '0000') {
             form.last_four = '';
         }
+    }
+});
+
+watch(() => props.show, (newVal) => {
+    if (newVal) {
+        isInitializing = true;
+        if (props.card) {
+            form.name = props.card.name;
+            form.brand = props.card.brand;
+            form.last_four = props.card.last_four;
+            form.expiration_month = parseInt(props.card.expiration_month);
+            form.expiration_year = parseInt(props.card.expiration_year);
+            form.color = props.card.color;
+            form.is_active = props.card.is_active === 1 || props.card.is_active === true;
+        } else {
+            form.name = '';
+            form.brand = 'Visa';
+            form.last_four = '';
+            form.expiration_month = '';
+            form.expiration_year = '';
+            form.color = '#8b5cf6';
+            form.is_active = true;
+        }
+        nextTick(() => {
+            isInitializing = false;
+        });
     }
 });
 
@@ -73,13 +106,23 @@ const lastFourLabel = computed(() => {
 });
 
 const submit = () => {
-    form.post(route('wallet.cards.store'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            form.reset();
-            emit('close');
-        },
-    });
+    if (props.card) {
+        form.put(route('wallet.cards.update', props.card.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                form.reset();
+                emit('close');
+            },
+        });
+    } else {
+        form.post(route('wallet.cards.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                form.reset();
+                emit('close');
+            },
+        });
+    }
 };
 
 const close = () => {
@@ -92,7 +135,7 @@ const close = () => {
 <template>
     <Modal :show="show" @close="close" maxWidth="md">
         <div class="p-6">
-            <h2 class="text-xl font-bold text-foreground mb-6">Add New Account</h2>
+            <h2 class="text-xl font-bold text-foreground mb-6">{{ card ? 'Edit Account' : 'Add New Account' }}</h2>
 
             <form @submit.prevent="submit" class="space-y-4">
                 
@@ -246,7 +289,7 @@ const close = () => {
                         :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
                         :disabled="form.processing"
                     >
-                        {{ form.processing ? 'Saving...' : 'Add Account' }}
+                        {{ form.processing ? 'Saving...' : (card ? 'Save Changes' : 'Add Account') }}
                     </PrimaryButton>
                 </div>
             </form>

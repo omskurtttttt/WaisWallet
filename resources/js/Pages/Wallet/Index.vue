@@ -14,6 +14,22 @@ const props = defineProps({
 const { formatMoney } = useCurrency();
 const { getAccountCategory } = useCardUtils();
 const showAddModal = ref(false);
+const cardToEdit = ref(null);
+
+const openAddModal = () => {
+    cardToEdit.value = null;
+    showAddModal.value = true;
+};
+
+const editCard = (card) => {
+    cardToEdit.value = card;
+    showAddModal.value = true;
+};
+
+const closeAddModal = () => {
+    showAddModal.value = false;
+    cardToEdit.value = null;
+};
 
 const getBrandIcon = (brand) => {
     switch (brand?.toLowerCase()) {
@@ -65,7 +81,7 @@ const deleteCard = () => {
                     <p class="mt-1 text-sm text-muted-foreground">Manage your credit cards, debit cards, cash, and e-wallets.</p>
                 </div>
                 <button 
-                    @click="showAddModal = true"
+                    @click="openAddModal"
                     class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-md shadow-primary/25"
                 >
                     <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -144,7 +160,13 @@ const deleteCard = () => {
                     </div>
                     
                     <!-- Actions Menu (Visible on hover) -->
-                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 flex gap-2">
+                        <button @click="editCard(card)" class="flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-primary hover:text-primary-foreground transition-colors" title="Edit Account">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"/>
+                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                            </svg>
+                        </button>
                         <button @click="confirmDeleteCard(card.id)" class="flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-destructive hover:text-destructive-foreground transition-colors" title="Remove Account">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
@@ -154,7 +176,7 @@ const deleteCard = () => {
                 </div>
                 
                 <!-- Add Card Button (Empty State card) -->
-                <button @click="showAddModal = true" class="h-56 rounded-2xl border-2 border-dashed border-border bg-transparent flex flex-col items-center justify-center text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-colors group">
+                <button @click="openAddModal" class="h-56 rounded-2xl border-2 border-dashed border-border bg-transparent flex flex-col items-center justify-center text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-colors group">
                     <div class="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                         <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M5 12h14"/><path d="M12 5v14"/>
@@ -174,7 +196,7 @@ const deleteCard = () => {
                 <h3 class="text-xl font-bold text-foreground mb-2">No Accounts Added Yet</h3>
                 <p class="text-muted-foreground max-w-md mb-8">Keep track of your spending methods by adding your bank accounts, e-wallets, cash, and credit cards to your digital wallet.</p>
                 <button 
-                    @click="showAddModal = true"
+                    @click="openAddModal"
                     class="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-lg shadow-primary/25"
                 >
                     Add Your First Account
@@ -182,7 +204,7 @@ const deleteCard = () => {
             </div>
         </div>
 
-        <AddCardModal :show="showAddModal" @close="showAddModal = false" />
+        <AddCardModal :show="showAddModal" :card="cardToEdit" @close="closeAddModal" />
 
         <ConfirmationModal
             :show="showDeleteConfirm"
