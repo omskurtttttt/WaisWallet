@@ -159,8 +159,8 @@ const deleteCard = () => {
                         </div>
                     </div>
                     
-                    <!-- Actions Menu (Visible on hover) -->
-                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 flex gap-2">
+                    <!-- Actions Menu (Visible on hover on desktop, always visible on mobile/tablet) -->
+                    <div class="absolute top-4 right-4 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 z-20 flex gap-2">
                         <button @click="editCard(card)" class="flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-primary hover:text-primary-foreground transition-colors" title="Edit Account">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 20h9"/>

@@ -166,21 +166,21 @@ const categoryOptions = computed(() => {
                         />
                     </div>
                     <!-- Type, Category, Status Selects -->
-                    <div class="flex flex-wrap sm:flex-nowrap gap-3">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
                         <CustomSelect 
                             v-model="typeFilter"
                             :options="typeOptions"
-                            class="min-w-[140px]"
+                            class="w-full sm:min-w-[140px] sm:w-auto"
                         />
                         <CustomSelect 
                             v-model="categoryFilter"
                             :options="categoryOptions"
-                            class="min-w-[200px]"
+                            class="w-full sm:min-w-[200px] sm:w-auto"
                         />
                         <CustomSelect 
                             v-model="statusFilter"
                             :options="statusOptions"
-                            class="min-w-[150px]"
+                            class="w-full sm:min-w-[150px] sm:w-auto"
                         />
                     </div>
                 </div>
@@ -192,13 +192,13 @@ const categoryOptions = computed(() => {
                         <input 
                             v-model="dateFrom"
                             type="date" 
-                            class="h-9 rounded-xl border-0 bg-input px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                            class="h-9 w-full sm:w-auto flex-1 sm:flex-none rounded-xl border-0 bg-input px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                         />
                         <span class="text-muted-foreground text-xs font-semibold">to</span>
                         <input 
                             v-model="dateTo"
                             type="date" 
-                            class="h-9 rounded-xl border-0 bg-input px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                            class="h-9 w-full sm:w-auto flex-1 sm:flex-none rounded-xl border-0 bg-input px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                         />
                         <button 
                             v-if="dateFrom || dateTo"

@@ -131,11 +131,11 @@ const getConfettiStyle = (i) => {
             </div>
 
             <!-- Tabs / Filter -->
-            <div class="flex border-b border-border">
+            <div class="flex flex-wrap sm:flex-nowrap border-b border-border">
                 <button 
                     @click="activeTab = 'active'"
                     :class="[
-                        'px-6 py-3 text-sm font-semibold transition-all duration-200 border-b-2 -mb-[2px]',
+                        'flex-1 sm:flex-none px-3 sm:px-6 py-3 text-sm font-semibold transition-all duration-200 border-b-2 -mb-[2px] text-center',
                         activeTab === 'active' 
                             ? 'border-primary text-primary' 
                             : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -146,7 +146,7 @@ const getConfettiStyle = (i) => {
                 <button 
                     @click="activeTab = 'completed'"
                     :class="[
-                        'px-6 py-3 text-sm font-semibold transition-all duration-200 border-b-2 -mb-[2px]',
+                        'flex-1 sm:flex-none px-3 sm:px-6 py-3 text-sm font-semibold transition-all duration-200 border-b-2 -mb-[2px] text-center',
                         activeTab === 'completed' 
                             ? 'border-primary text-primary' 
                             : 'border-transparent text-muted-foreground hover:text-foreground'

@@ -59,20 +59,20 @@ const emitChange = () => {
         </div>
 
         <!-- Select Filters -->
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
             <CustomSelect 
                 v-if="viewType === 'monthly'"
                 v-model="selectedMonth"
                 :options="months"
                 @change="emitChange"
-                class="min-w-[140px]"
+                class="w-full sm:min-w-[150px] sm:w-auto"
             />
 
             <CustomSelect 
                 v-model="selectedYear"
                 :options="availableYears"
                 @change="emitChange"
-                class="min-w-[110px]"
+                class="w-full sm:min-w-[120px] sm:w-auto"
             />
         </div>
     </div>
