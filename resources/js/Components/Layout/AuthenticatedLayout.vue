@@ -28,6 +28,24 @@ const unregisterNavigate = router.on('navigate', () => {
     mobileMenuOpen.value = false;
 });
 
+const isLoading = ref(false);
+let loadingTimeout = null;
+
+const unregisterStart = router.on('start', () => {
+    if (loadingTimeout) clearTimeout(loadingTimeout);
+    loadingTimeout = setTimeout(() => {
+        isLoading.value = true;
+    }, 150);
+});
+
+const unregisterFinish = router.on('finish', () => {
+    if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+        loadingTimeout = null;
+    }
+    isLoading.value = false;
+});
+
 onMounted(() => {
     themeStore.init();
     sidebarCollapsed.value = localStorage.getItem('sidebar-collapsed') === 'true';
@@ -35,6 +53,9 @@ onMounted(() => {
 
 onUnmounted(() => {
     unregisterNavigate();
+    unregisterStart();
+    unregisterFinish();
+    if (loadingTimeout) clearTimeout(loadingTimeout);
 });
 </script>
 
@@ -57,7 +78,53 @@ onUnmounted(() => {
                 sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72',
             ]"
         >
-            <div class="animate-fade-in">
+            <div v-if="isLoading" class="p-4 md:p-6 space-y-6">
+                <!-- Page Title Skeleton -->
+                <div class="space-y-2 max-w-[200px]">
+                    <div class="h-8 w-3/4 skeleton"></div>
+                    <div class="h-4 w-full skeleton"></div>
+                </div>
+
+                <!-- 4 Metrics Cards Skeleton -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div v-for="i in 4" :key="i" class="glass-card p-5 h-[148px] flex flex-col justify-between">
+                        <div class="flex flex-col gap-3">
+                            <div class="h-6 w-6 skeleton"></div>
+                            <div class="h-8 w-1/2 skeleton mt-1"></div>
+                        </div>
+                        <div class="space-y-1.5 mt-3">
+                            <div class="h-2.5 w-1/4 skeleton"></div>
+                            <div class="h-3 w-1/2 skeleton"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Grid Content Skeleton -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="glass-card p-6 h-[300px]">
+                            <div class="h-5 w-1/4 skeleton mb-6"></div>
+                            <div class="h-[200px] w-full skeleton"></div>
+                        </div>
+                        <div class="glass-card p-6 h-[400px]">
+                            <div class="h-5 w-1/4 skeleton mb-6"></div>
+                            <div class="h-[300px] w-full skeleton"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="glass-card p-6 h-[300px]">
+                            <div class="h-5 w-1/4 skeleton mb-6"></div>
+                            <div class="h-[200px] w-full skeleton"></div>
+                        </div>
+                        <div class="glass-card p-6 h-[400px]">
+                            <div class="h-5 w-1/4 skeleton mb-6"></div>
+                            <div class="h-[300px] w-full skeleton"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else class="animate-fade-in">
                 <slot />
             </div>
         </main>
