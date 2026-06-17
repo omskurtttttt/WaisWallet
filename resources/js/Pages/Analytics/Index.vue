@@ -1,8 +1,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Components/Layout/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import VueApexCharts from 'vue3-apexcharts';
+import { computed, defineAsyncComponent } from 'vue';
+const VueApexCharts = defineAsyncComponent(() => import('vue3-apexcharts'));
 import { useThemeStore } from '@/Stores/theme';
 import { useCurrency } from '@/Composables/useCurrency';
 import { useChartTheme } from '@/Composables/useChartTheme';

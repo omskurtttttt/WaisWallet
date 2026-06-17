@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from 'vue';
-import VueApexCharts from 'vue3-apexcharts';
+import { computed, defineAsyncComponent } from 'vue';
+const VueApexCharts = defineAsyncComponent(() => import('vue3-apexcharts'));
 import { useThemeStore } from '@/Stores/theme';
 import { useCurrency } from '@/Composables/useCurrency';
 
