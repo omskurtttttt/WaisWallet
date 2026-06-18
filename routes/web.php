@@ -30,32 +30,37 @@ Route::get('/dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
+    // Read operations (Pages)
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
-    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
-    Route::put('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
-    Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
     Route::get('/wallet', [CardController::class, 'index'])->name('wallet.index');
-    Route::post('/wallet/cards', [CardController::class, 'store'])->name('wallet.cards.store');
-    Route::put('/wallet/cards/{card}', [CardController::class, 'update'])->name('wallet.cards.update');
-    Route::delete('/wallet/cards/{card}', [CardController::class, 'destroy'])->name('wallet.cards.destroy');
     Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
-    Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
-    Route::post('/goals/{goal}/funds', [GoalController::class, 'addFunds'])->name('goals.funds');
-    Route::patch('/goals/{goal}/complete', [GoalController::class, 'markAsComplete'])->name('goals.complete');
-    Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
-    Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
     Route::get('/analytics', AnalyticsController::class)->name('analytics.index');
     Route::get('/reports', ReportController::class)->name('reports.index');
-
-    Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/profile/theme', [ProfileController::class, 'updateTheme'])->name('profile.theme');
+
+    // Write operations (Throttled)
+    Route::middleware('throttle:financial-writes')->group(function () {
+        Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
+        Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+        Route::put('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
+        Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+        Route::post('/wallet/cards', [CardController::class, 'store'])->name('wallet.cards.store');
+        Route::put('/wallet/cards/{card}', [CardController::class, 'update'])->name('wallet.cards.update');
+        Route::delete('/wallet/cards/{card}', [CardController::class, 'destroy'])->name('wallet.cards.destroy');
+        Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
+        Route::post('/goals/{goal}/funds', [GoalController::class, 'addFunds'])->name('goals.funds');
+        Route::patch('/goals/{goal}/complete', [GoalController::class, 'markAsComplete'])->name('goals.complete');
+        Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
+        Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
+
+        Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::post('/profile/theme', [ProfileController::class, 'updateTheme'])->name('profile.theme');
+    });
 });
 
 require __DIR__.'/auth.php';
