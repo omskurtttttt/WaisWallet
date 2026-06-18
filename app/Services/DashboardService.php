@@ -16,19 +16,58 @@ class DashboardService
 
     public function getMetrics(Carbon $now, Carbon $startOfMonth, Carbon $endOfMonth): array
     {
+        $previousMonthStart = $now->copy()->startOfMonth()->subMonth();
+        $previousMonthEnd = $previousMonthStart->copy()->endOfMonth();
+
+        // Consolidated database queries for transaction metrics (reducing 8 separate database queries to 1)
+        $metricsData = $this->user->transactions()
+            ->selectRaw("
+                type,
+                COALESCE(SUM(amount), 0) as total,
+                COALESCE(SUM(CASE WHEN transaction_date < ? THEN amount ELSE 0 END), 0) as before_total,
+                COALESCE(SUM(CASE WHEN transaction_date BETWEEN ? AND ? THEN amount ELSE 0 END), 0) as current_month_total,
+                COALESCE(SUM(CASE WHEN transaction_date BETWEEN ? AND ? THEN amount ELSE 0 END), 0) as prev_month_total
+            ", [
+                $startOfMonth,
+                $startOfMonth,
+                $endOfMonth,
+                $previousMonthStart,
+                $previousMonthEnd
+            ])
+            ->groupBy('type')
+            ->get();
+
+        $metricsMap = [
+            'income' => [
+                'total' => 0,
+                'before_total' => 0,
+                'current_month_total' => 0,
+                'prev_month_total' => 0,
+            ],
+            'expense' => [
+                'total' => 0,
+                'before_total' => 0,
+                'current_month_total' => 0,
+                'prev_month_total' => 0,
+            ]
+        ];
+
+        foreach ($metricsData as $row) {
+            $metricsMap[$row->type] = [
+                'total' => (int) $row->total,
+                'before_total' => (int) $row->before_total,
+                'current_month_total' => (int) $row->current_month_total,
+                'prev_month_total' => (int) $row->prev_month_total,
+            ];
+        }
+
         // 1. Total Balance
-        $totalIncome = $this->user->transactions()->where('type', 'income')->sum('amount');
-        $totalExpenses = $this->user->transactions()->where('type', 'expense')->sum('amount');
+        $totalIncome = $metricsMap['income']['total'];
+        $totalExpenses = $metricsMap['expense']['total'];
         $totalBalance = $totalIncome - $totalExpenses;
 
-        $incomeBefore = $this->user->transactions()
-            ->where('type', 'income')
-            ->where('transaction_date', '<', $startOfMonth)
-            ->sum('amount');
-        $expensesBefore = $this->user->transactions()
-            ->where('type', 'expense')
-            ->where('transaction_date', '<', $startOfMonth)
-            ->sum('amount');
+        $incomeBefore = $metricsMap['income']['before_total'];
+        $expensesBefore = $metricsMap['expense']['before_total'];
         $previousBalance = $incomeBefore - $expensesBefore;
 
         $balanceTrend = 0;
@@ -37,18 +76,8 @@ class DashboardService
         }
 
         // 2. Income
-        $monthlyIncome = $this->user->transactions()
-            ->where('type', 'income')
-            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-
-        $previousMonthStart = $now->copy()->startOfMonth()->subMonth();
-        $previousMonthEnd = $previousMonthStart->copy()->endOfMonth();
-
-        $previousMonthIncome = $this->user->transactions()
-            ->where('type', 'income')
-            ->whereBetween('transaction_date', [$previousMonthStart, $previousMonthEnd])
-            ->sum('amount');
+        $monthlyIncome = $metricsMap['income']['current_month_total'];
+        $previousMonthIncome = $metricsMap['income']['prev_month_total'];
 
         $incomeTrend = 0;
         if ($previousMonthIncome != 0) {
@@ -56,15 +85,8 @@ class DashboardService
         }
 
         // 3. Expense
-        $monthlyExpense = $this->user->transactions()
-            ->where('type', 'expense')
-            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-
-        $previousMonthExpense = $this->user->transactions()
-            ->where('type', 'expense')
-            ->whereBetween('transaction_date', [$previousMonthStart, $previousMonthEnd])
-            ->sum('amount');
+        $monthlyExpense = $metricsMap['expense']['current_month_total'];
+        $previousMonthExpense = $metricsMap['expense']['prev_month_total'];
 
         $expenseTrend = 0;
         if ($previousMonthExpense != 0) {
