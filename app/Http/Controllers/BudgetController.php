@@ -6,8 +6,8 @@ use App\Http\Requests\StoreBudgetRequest;
 use App\Models\Budget;
 use App\Models\Category;
 use App\Services\BudgetService;
-use Illuminate\Support\Facades\Gate;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
 
 class BudgetController extends Controller
 {

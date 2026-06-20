@@ -23,19 +23,19 @@ class ReportService
         if ($type === 'yearly') {
             $start = Carbon::create($year, 1, 1)->startOfYear();
             $end = $start->copy()->endOfYear();
-            
+
             $prevStart = $start->copy()->subYear()->startOfYear();
             $prevEnd = $prevStart->copy()->endOfYear();
-            
+
             $periodLabel = $start->format('Y');
             $prevPeriodLabel = $prevStart->format('Y');
         } else {
             $start = Carbon::create($year, $month, 1)->startOfMonth();
             $end = $start->copy()->endOfMonth();
-            
+
             $prevStart = $start->copy()->subMonth()->startOfMonth();
             $prevEnd = $prevStart->copy()->endOfMonth();
-            
+
             $periodLabel = $start->format('F Y');
             $prevPeriodLabel = $prevStart->format('F Y');
         }
@@ -86,19 +86,20 @@ class ReportService
             ->whereBetween('transactions.transaction_date', [$start, $end])
             ->leftJoin('categories', 'transactions.category_id', '=', 'categories.id')
             ->groupBy('transactions.category_id', 'categories.name', 'categories.color', 'categories.icon')
-            ->selectRaw("
+            ->selectRaw('
                 transactions.category_id,
                 categories.name as category_name,
                 categories.color as category_color,
                 categories.icon as category_icon,
                 COALESCE(SUM(transactions.amount), 0) as total_amount,
                 COUNT(transactions.id) as transaction_count
-            ")
+            ')
             ->orderByDesc('total_amount')
             ->get();
 
         $topCategories = $topCategoriesData->map(function ($row) use ($expense) {
             $total = (int) $row->total_amount;
+
             return [
                 'name' => $row->category_name ?? 'Uncategorized',
                 'color' => $row->category_color ?? '#9CA3AF',
@@ -126,9 +127,9 @@ class ReportService
                 $dayDate = $start->copy()->day($d);
                 $dayStr = $dayDate->format('Y-m-d');
                 $dayLabel = $dayDate->format('d M');
-                
+
                 $daySum = (int) ($dailyExpenses[$dayStr] ?? 0);
-                
+
                 $chartData[] = [
                     'label' => $dayLabel,
                     'amount' => $daySum / 100,
@@ -151,11 +152,11 @@ class ReportService
                 $monthDate = Carbon::create($year, $m, 1);
                 $monthStr = $monthDate->format('Y-m');
                 $monthLabel = $monthDate->format('M');
-                
+
                 $row = $monthlyData->get($monthStr);
                 $monthIncome = $row ? (int) $row->income : 0;
                 $monthExpense = $row ? (int) $row->expense : 0;
-                
+
                 $chartData[] = [
                     'label' => $monthLabel,
                     'income' => $monthIncome / 100,

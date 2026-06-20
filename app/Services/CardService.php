@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Card;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 class CardService
@@ -27,6 +27,7 @@ class CardService
             ->get()
             ->map(function ($card) {
                 $balance = ($card->income_sum ?? 0) - ($card->expense_sum ?? 0);
+
                 return [
                     'id' => $card->id,
                     'name' => $card->name,

@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasUuid;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -44,7 +43,6 @@ class Category extends Model
             $user->categories()->create($category);
         }
     }
-
 
     /**
      * The attributes that are mass assignable.

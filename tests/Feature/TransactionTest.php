@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
-use App\Models\Category;
 use App\Models\Card;
+use App\Models\Category;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -107,7 +107,7 @@ test('user cannot update another user\'s transaction', function () {
     $user2 = User::factory()->create();
     $categoryOfUser1 = Category::factory()->create(['user_id' => $user1->id, 'type' => 'expense']);
     $cardOfUser1 = Card::factory()->create(['user_id' => $user1->id]);
-    
+
     $categoryOfUser2 = Category::factory()->create(['user_id' => $user2->id, 'type' => 'expense']);
     $cardOfUser2 = Card::factory()->create(['user_id' => $user2->id]);
     $transaction = Transaction::factory()->create([
@@ -180,4 +180,3 @@ test('user cannot delete another user\'s transaction', function () {
         'deleted_at' => null,
     ]);
 });
-

@@ -18,7 +18,7 @@ class UpdateCardRequest extends FormRequest
             'brand' => ['required', 'string', 'in:Visa,Mastercard,Amex,Discover,GCash,Maya,GrabPay,Coins.ph,BPI,BDO,Metrobank,UnionBank,Cash,Other'],
             'last_four' => ['required', 'string', 'regex:/^\d{4}$/'],
             'expiration_month' => ['required', 'integer', 'min:1', 'max:12'],
-            'expiration_year' => ['required', 'integer', 'min:' . date('Y'), 'max:2099'],
+            'expiration_year' => ['required', 'integer', 'min:'.date('Y'), 'max:2099'],
             'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'is_active' => ['nullable', 'boolean'],
         ];

@@ -25,18 +25,18 @@ class AnalyticsService
             ->get();
 
         $groupedTotals = $monthlyTotals->groupBy('month_key')->map(function ($items) {
-            return $items->keyBy('type')->map(fn($item) => $item->total);
+            return $items->keyBy('type')->map(fn ($item) => $item->total);
         });
 
         $incomeVsExpenses = [];
         for ($i = 5; $i >= 0; $i--) {
             $monthStart = $startOfCurrentMonth->copy()->subMonths($i);
             $monthKey = $monthStart->format('Y-m');
-            
+
             $monthData = $groupedTotals->get($monthKey);
             $income = $monthData ? ($monthData->get('income') ?? 0) : 0;
             $expense = $monthData ? ($monthData->get('expense') ?? 0) : 0;
-            
+
             $incomeVsExpenses[] = [
                 'month' => $monthStart->format('M Y'),
                 'income' => $income / 100,
@@ -70,8 +70,8 @@ class AnalyticsService
         $dailySpending = $this->user->transactions()
             ->where('type', 'expense')
             ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-            ->selectRaw("DATE(transaction_date) as transaction_date, sum(amount) as total")
-            ->groupByRaw("DATE(transaction_date)")
+            ->selectRaw('DATE(transaction_date) as transaction_date, sum(amount) as total')
+            ->groupByRaw('DATE(transaction_date)')
             ->orderBy('transaction_date')
             ->get()
             ->map(function ($item) {
@@ -86,7 +86,7 @@ class AnalyticsService
                 [
                     'date' => $now->format('M d'),
                     'amount' => 0,
-                ]
+                ],
             ];
         }
 

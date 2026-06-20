@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Transaction;
+use App\Models\User;
 
 class TransactionService
 {
@@ -19,31 +19,31 @@ class TransactionService
         $query = $this->user->transactions()->with(['category', 'card']);
 
         // Search filter
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where('title', 'ilike', "%{$search}%"); // ilike for postgres
         }
 
         // Type filter
-        if (!empty($filters['type']) && $filters['type'] !== 'all') {
+        if (! empty($filters['type']) && $filters['type'] !== 'all') {
             $query->where('type', $filters['type']);
         }
 
         // Category filter
-        if (!empty($filters['category']) && $filters['category'] !== 'all') {
+        if (! empty($filters['category']) && $filters['category'] !== 'all') {
             $query->where('category_id', $filters['category']);
         }
 
         // Status filter
-        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+        if (! empty($filters['status']) && $filters['status'] !== 'all') {
             $query->where('status', $filters['status']);
         }
 
         // Date range filter
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->whereDate('transaction_date', '>=', $filters['date_from']);
         }
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->whereDate('transaction_date', '<=', $filters['date_to']);
         }
 
@@ -51,7 +51,7 @@ class TransactionService
         $sortBy = $filters['sort_by'] ?? 'date';
         $sortOrder = $filters['sort_order'] ?? 'desc';
 
-        if (!in_array($sortOrder, ['asc', 'desc'])) {
+        if (! in_array($sortOrder, ['asc', 'desc'])) {
             $sortOrder = 'desc';
         }
 
@@ -107,6 +107,7 @@ class TransactionService
             ->get()
             ->map(function ($card) {
                 $balance = ($card->income_sum ?? 0) - ($card->expense_sum ?? 0);
+
                 return [
                     'id' => $card->id,
                     'name' => $card->name,
@@ -121,22 +122,22 @@ class TransactionService
     public function storeTransaction(array $validated)
     {
         $transaction = $this->user->transactions()->create($validated);
-        
+
         if ($transaction->type === 'expense' && $transaction->category) {
-            app(\App\Services\NotificationService::class)->checkBudgetAlerts($transaction->category, $transaction->transaction_date);
+            app(NotificationService::class)->checkBudgetAlerts($transaction->category, $transaction->transaction_date);
         }
-        
+
         return $transaction;
     }
 
     public function updateTransaction(Transaction $transaction, array $validated)
     {
         $updated = $transaction->update($validated);
-        
+
         if ($transaction->type === 'expense' && $transaction->category) {
-            app(\App\Services\NotificationService::class)->checkBudgetAlerts($transaction->category, $transaction->transaction_date);
+            app(NotificationService::class)->checkBudgetAlerts($transaction->category, $transaction->transaction_date);
         }
-        
+
         return $updated;
     }
 

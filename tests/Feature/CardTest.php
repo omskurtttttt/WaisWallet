@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Models\Card;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -183,4 +183,3 @@ test('user cannot delete another user\'s card', function () {
         'deleted_at' => null,
     ]);
 });
-

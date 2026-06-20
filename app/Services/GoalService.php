@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Goal;
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +28,7 @@ class GoalService
                 $target = $goal->target_amount;
                 $current = $goal->current_amount;
                 $percentage = $target > 0 ? min(100, round(($current / $target) * 100)) : 0;
-                
+
                 return [
                     'id' => $goal->id,
                     'name' => $goal->name,
@@ -77,7 +77,7 @@ class GoalService
         });
 
         $goal->refresh();
-        app(\App\Services\NotificationService::class)->checkGoalAlerts($goal);
+        app(NotificationService::class)->checkGoalAlerts($goal);
 
         return true;
     }
@@ -88,10 +88,10 @@ class GoalService
     public function markAsComplete(Goal $goal): bool
     {
         $updated = $goal->update([
-            'current_amount' => $goal->target_amount
+            'current_amount' => $goal->target_amount,
         ]);
 
-        app(\App\Services\NotificationService::class)->checkGoalAlerts($goal);
+        app(NotificationService::class)->checkGoalAlerts($goal);
 
         return $updated;
     }

@@ -20,7 +20,7 @@ class StoreTransactionRequest extends FormRequest
             ]);
         }
 
-        if (!$this->has('status') || is_null($this->status)) {
+        if (! $this->has('status') || is_null($this->status)) {
             $this->merge([
                 'status' => 'completed',
             ]);

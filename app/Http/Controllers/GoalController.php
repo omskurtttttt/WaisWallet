@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Goal;
+use App\Http\Requests\AddGoalFundsRequest;
 use App\Http\Requests\StoreGoalRequest;
 use App\Http\Requests\UpdateGoalRequest;
-use App\Http\Requests\AddGoalFundsRequest;
+use App\Models\Goal;
 use App\Services\GoalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;

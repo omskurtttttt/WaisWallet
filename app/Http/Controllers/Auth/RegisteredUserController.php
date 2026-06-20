@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -45,7 +46,7 @@ class RegisteredUserController extends Controller
             'currency' => $request->currency ?? 'PHP',
         ]);
 
-        \App\Models\Category::seedDefaultsForUser($user);
+        Category::seedDefaultsForUser($user);
 
         event(new Registered($user));
 

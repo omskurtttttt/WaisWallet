@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Card;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Card>
+ * @extends Factory<Card>
  */
 class CardFactory extends Factory
 {
@@ -19,7 +20,7 @@ class CardFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => fake()->words(2, true) . ' Card',
+            'name' => fake()->words(2, true).' Card',
             'brand' => fake()->randomElement(['Visa', 'Mastercard', 'Amex', 'Discover', 'Other']),
             'last_four' => fake()->numerify('####'),
             'expiration_month' => fake()->numberBetween(1, 12),

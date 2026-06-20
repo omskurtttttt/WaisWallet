@@ -1,10 +1,11 @@
 <?php
 
-use App\Models\User;
-use App\Models\Category;
 use App\Models\Budget;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Category;
+use App\Models\User;
+use App\Policies\BudgetPolicy;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -17,7 +18,7 @@ test('guests cannot manage budgets', function () {
             [
                 'category_id' => $category->id,
                 'amount' => 150.00,
-            ]
+            ],
         ],
     ]);
 
@@ -41,12 +42,12 @@ test('authenticated user can store and update category budgets', function () {
                 [
                     'category_id' => $category->id,
                     'amount' => 150.00, // $150.00
-                ]
+                ],
             ],
         ]);
 
     $response->assertRedirect();
-    
+
     $this->assertDatabaseHas('budgets', [
         'user_id' => $user->id,
         'category_id' => $category->id,
@@ -62,12 +63,12 @@ test('authenticated user can store and update category budgets', function () {
                 [
                     'category_id' => $category->id,
                     'amount' => 200.50, // $200.50
-                ]
+                ],
             ],
         ]);
 
     $response->assertRedirect();
-    
+
     $this->assertDatabaseHas('budgets', [
         'user_id' => $user->id,
         'category_id' => $category->id,
@@ -108,12 +109,12 @@ test('setting budget to 0 or null deletes the budget record', function () {
                 [
                     'category_id' => $category->id,
                     'amount' => 0,
-                ]
+                ],
             ],
         ]);
 
     $response->assertRedirect();
-    
+
     $this->assertDatabaseMissing('budgets', [
         'user_id' => $user->id,
         'category_id' => $category->id,
@@ -138,7 +139,7 @@ test('user cannot set budgets for categories they do not own', function () {
                 [
                     'category_id' => $categoryOfUser2->id,
                     'amount' => 100,
-                ]
+                ],
             ],
         ]);
 
@@ -156,7 +157,7 @@ test('user cannot update or delete another user\'s budget via policy', function 
         'month' => Carbon::now()->startOfMonth()->format('Y-m-d'),
     ]);
 
-    $policy = new \App\Policies\BudgetPolicy();
+    $policy = new BudgetPolicy;
     expect($policy->update($user1, $budgetOfUser2))->toBeFalse();
     expect($policy->delete($user1, $budgetOfUser2))->toBeFalse();
 });

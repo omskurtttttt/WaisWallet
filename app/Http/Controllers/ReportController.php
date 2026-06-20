@@ -17,7 +17,7 @@ class ReportController extends Controller
     {
         $request->validate([
             'type' => ['nullable', 'string', 'in:monthly,yearly'],
-            'year' => ['nullable', 'integer', 'min:2000', 'max:' . (Carbon::now()->year + 10)],
+            'year' => ['nullable', 'integer', 'min:2000', 'max:'.(Carbon::now()->year + 10)],
             'month' => ['nullable', 'integer', 'min:1', 'max:12'],
         ]);
 

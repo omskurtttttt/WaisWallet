@@ -29,20 +29,20 @@ class ProcessRecurringTransactions extends Command
     public function handle()
     {
         $today = Carbon::today();
-        
+
         $recurringTxs = RecurringTransaction::where('is_active', true)
             ->whereDate('next_run_date', '<=', $today->format('Y-m-d'))
             ->with(['user', 'category', 'card'])
             ->get();
 
-        $this->info("Found " . $recurringTxs->count() . " active recurring transaction templates due for processing.");
+        $this->info('Found '.$recurringTxs->count().' active recurring transaction templates due for processing.');
 
         foreach ($recurringTxs as $recurringTx) {
             $user = $recurringTx->user;
-            
+
             // Instantiate User-Scoped TransactionService manually (since no CLI user session exists)
             $transactionService = new TransactionService($user);
-            
+
             // Create the real transaction
             $transactionService->storeTransaction([
                 'title' => $recurringTx->title,
@@ -51,7 +51,7 @@ class ProcessRecurringTransactions extends Command
                 'category_id' => $recurringTx->category_id,
                 'card_id' => $recurringTx->card_id,
                 'recipient_name' => $recurringTx->recipient_name ?? ($recurringTx->type === 'expense' ? 'N/A' : $recurringTx->title),
-                'notes' => $recurringTx->notes ? "Recurring: " . $recurringTx->notes : "Generated automatically from template: " . $recurringTx->title,
+                'notes' => $recurringTx->notes ? 'Recurring: '.$recurringTx->notes : 'Generated automatically from template: '.$recurringTx->title,
                 'status' => 'completed',
                 'transaction_date' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
@@ -90,6 +90,6 @@ class ProcessRecurringTransactions extends Command
             $this->line("Successfully processed recurring transaction: '{$recurringTx->title}' for User: {$user->email}");
         }
 
-        $this->info("Recurring transactions processing completed successfully.");
+        $this->info('Recurring transactions processing completed successfully.');
     }
 }

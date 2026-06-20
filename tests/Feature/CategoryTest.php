@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -15,7 +15,7 @@ test('new user registration preloads default categories', function () {
     ]);
 
     $response->assertRedirect();
-    
+
     $user = User::where('email', 'jane@example.com')->first();
     $this->assertNotNull($user);
 
@@ -50,7 +50,7 @@ test('authenticated user can create custom category', function () {
         ]);
 
     $response->assertRedirect();
-    
+
     $this->assertDatabaseHas('categories', [
         'user_id' => $user->id,
         'name' => '🍿 Movies & Cinema',

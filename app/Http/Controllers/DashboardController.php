@@ -24,9 +24,9 @@ class DashboardController extends Controller
         $incomeChartData = $service->getIncomeChartData($now);
         $budgetChartData = $service->getBudgetChartData($startOfMonth, $endOfMonth);
         $spendingLimitsData = $service->getSpendingLimits(
-            $startOfMonth, 
-            $metrics['monthlySpending'], 
-            $metrics['totalBudgetAllocated'], 
+            $startOfMonth,
+            $metrics['monthlySpending'],
+            $metrics['totalBudgetAllocated'],
             $metrics['budgetUsedPercentage']
         );
         $recentTransactionsData = $service->getRecentTransactions();

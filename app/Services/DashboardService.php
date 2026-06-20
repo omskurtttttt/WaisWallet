@@ -21,18 +21,18 @@ class DashboardService
 
         // Consolidated database queries for transaction metrics (reducing 8 separate database queries to 1)
         $metricsData = $this->user->transactions()
-            ->selectRaw("
+            ->selectRaw('
                 type,
                 COALESCE(SUM(amount), 0) as total,
                 COALESCE(SUM(CASE WHEN transaction_date < ? THEN amount ELSE 0 END), 0) as before_total,
                 COALESCE(SUM(CASE WHEN transaction_date BETWEEN ? AND ? THEN amount ELSE 0 END), 0) as current_month_total,
                 COALESCE(SUM(CASE WHEN transaction_date BETWEEN ? AND ? THEN amount ELSE 0 END), 0) as prev_month_total
-            ", [
+            ', [
                 $startOfMonth,
                 $startOfMonth,
                 $endOfMonth,
                 $previousMonthStart,
-                $previousMonthEnd
+                $previousMonthEnd,
             ])
             ->groupBy('type')
             ->get();
@@ -49,7 +49,7 @@ class DashboardService
                 'before_total' => 0,
                 'current_month_total' => 0,
                 'prev_month_total' => 0,
-            ]
+            ],
         ];
 
         foreach ($metricsData as $row) {
@@ -106,7 +106,7 @@ class DashboardService
         $totalBudgetAllocated = $this->user->budgets()
             ->whereDate('month', $startOfMonth->format('Y-m-d'))
             ->sum('allocated_amount');
-            
+
         $budgetUsedPercentage = 0;
         if ($totalBudgetAllocated > 0) {
             $budgetUsedPercentage = min(100, round(($monthlyExpense / $totalBudgetAllocated) * 100));
@@ -149,7 +149,7 @@ class DashboardService
             $monthStart = $startOfCurrentMonth->copy()->subMonths($i);
             $monthKey = $monthStart->format('Y-m');
             $monthIncome = $monthlyIncomes->get($monthKey) ?? 0;
-                
+
             $incomeChartData[] = [
                 'month' => $monthStart->format('M Y'),
                 'amount' => $monthIncome / 100,
@@ -196,7 +196,7 @@ class DashboardService
                 $spent = $categorySpending->get($budget->category_id) ?? 0;
                 $allocated = $budget->allocated_amount;
                 $percentage = $allocated > 0 ? min(100, round(($spent / $allocated) * 100)) : 0;
-                
+
                 return [
                     'id' => $budget->id,
                     'name' => $budget->category->name ?? 'General Budget',
@@ -262,12 +262,13 @@ class DashboardService
             ->get()
             ->map(function ($card) {
                 $balance = ($card->income_sum ?? 0) - ($card->expense_sum ?? 0);
+
                 return [
                     'id' => $card->id,
                     'name' => $card->name,
                     'brand' => $card->brand,
                     'last_four' => $card->last_four,
-                    'expires' => str_pad($card->expiration_month, 2, '0', STR_PAD_LEFT) . '/' . substr($card->expiration_year, -2),
+                    'expires' => str_pad($card->expiration_month, 2, '0', STR_PAD_LEFT).'/'.substr($card->expiration_year, -2),
                     'color' => $card->color,
                     'balance' => $balance,
                 ];

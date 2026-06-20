@@ -48,8 +48,8 @@ class Card extends Model
     public function scopeWithBalance($query)
     {
         return $query
-            ->withSum(['transactions as income_sum' => fn($q) => $q->where('type', 'income')], 'amount')
-            ->withSum(['transactions as expense_sum' => fn($q) => $q->where('type', 'expense')], 'amount');
+            ->withSum(['transactions as income_sum' => fn ($q) => $q->where('type', 'income')], 'amount')
+            ->withSum(['transactions as expense_sum' => fn ($q) => $q->where('type', 'expense')], 'amount');
     }
 
     /**
@@ -68,4 +68,3 @@ class Card extends Model
         return $this->hasMany(Transaction::class);
     }
 }
-

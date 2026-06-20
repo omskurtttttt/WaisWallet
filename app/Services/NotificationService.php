@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Notification;
-use App\Models\Category;
 use App\Models\Budget;
+use App\Models\Category;
 use App\Models\Goal;
+use App\Models\Notification;
+use App\Models\User;
 use Carbon\Carbon;
 
 class NotificationService
@@ -42,14 +42,14 @@ class NotificationService
     public function checkBudgetAlerts(Category $category, Carbon $date): void
     {
         $monthStr = $date->format('Y-m-01');
-        
+
         // Find budget for this category and month
         $budget = $this->user->budgets()
             ->where('category_id', $category->id)
             ->where('month', $monthStr)
             ->first();
 
-        if (!$budget) {
+        if (! $budget) {
             return;
         }
 
@@ -75,11 +75,11 @@ class NotificationService
         $percentage = ($totalSpent / $allocated) * 100;
 
         if ($percentage >= 100) {
-            $title = "Budget Exceeded";
+            $title = 'Budget Exceeded';
             $message = "You have spent 100% or more of your budget for {$category->name} this month.";
             $this->createAlertIfNotExists($title, $message, 'budget_alert');
         } elseif ($percentage >= 80) {
-            $title = "Budget Limit Nearing";
+            $title = 'Budget Limit Nearing';
             $message = "You have spent 80% or more of your budget for {$category->name} this month.";
             $this->createAlertIfNotExists($title, $message, 'budget_alert');
         }
@@ -99,11 +99,11 @@ class NotificationService
         $percentage = ($current / $target) * 100;
 
         if ($percentage >= 100) {
-            $title = "Goal Completed 🎉";
+            $title = 'Goal Completed 🎉';
             $message = "Congratulations! You have reached your savings target for {$goal->name}!";
             $this->createAlertIfNotExists($title, $message, 'goal_milestone');
         } elseif ($percentage >= 80) {
-            $title = "Goal Milestone (80%)";
+            $title = 'Goal Milestone (80%)';
             $message = "You are almost there! You have saved 80% or more of your target for {$goal->name}.";
             $this->createAlertIfNotExists($title, $message, 'goal_milestone');
         }
@@ -122,7 +122,7 @@ class NotificationService
             ->where('created_at', '>=', $startOfMonth)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             $this->user->notifications()->create([
                 'title' => $title,
                 'message' => $message,

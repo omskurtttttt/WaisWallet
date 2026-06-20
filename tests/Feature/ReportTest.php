@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -12,7 +12,7 @@ uses(RefreshDatabase::class);
 test('authenticated user can view monthly report', function () {
     $user = User::factory()->create();
     $category = Category::factory()->create(['user_id' => $user->id, 'type' => 'expense', 'name' => 'Food']);
-    
+
     // Create some transactions for current month
     Transaction::factory()->create([
         'user_id' => $user->id,
@@ -56,7 +56,7 @@ test('authenticated user can view monthly report', function () {
 test('authenticated user can view yearly report', function () {
     $user = User::factory()->create();
     $category = Category::factory()->create(['user_id' => $user->id, 'type' => 'expense', 'name' => 'Food']);
-    
+
     // Create some transactions for current year
     Transaction::factory()->create([
         'user_id' => $user->id,

@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\User;
-use App\Models\Transaction;
 use App\Models\Category;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -76,7 +76,7 @@ test('user can filter transactions by date range', function () {
     $response = $this->actingAs($user)
         ->get(route('transactions.index', [
             'date_from' => Carbon::today()->format('Y-m-d'),
-            'date_to' => Carbon::today()->format('Y-m-d')
+            'date_to' => Carbon::today()->format('Y-m-d'),
         ]));
 
     $response->assertOk();

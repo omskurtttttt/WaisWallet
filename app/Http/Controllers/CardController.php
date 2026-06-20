@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Card;
 use App\Http\Requests\StoreCardRequest;
 use App\Http\Requests\UpdateCardRequest;
+use App\Models\Card;
 use App\Services\CardService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 

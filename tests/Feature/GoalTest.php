@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Models\Goal;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 

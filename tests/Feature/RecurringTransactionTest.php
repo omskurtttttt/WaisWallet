@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\User;
-use App\Models\Category;
 use App\Models\Card;
+use App\Models\Category;
 use App\Models\RecurringTransaction;
 use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

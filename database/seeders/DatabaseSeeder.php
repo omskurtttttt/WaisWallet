@@ -90,8 +90,8 @@ class DatabaseSeeder extends Seeder
         }
 
         // 6. Create Transactions (mix of income and expenses over last 3 months)
-        $expenseCategories = $createdCategories->filter(fn($c) => $c->type === 'expense')->all();
-        $incomeCategories = $createdCategories->filter(fn($c) => $c->type === 'income')->all();
+        $expenseCategories = $createdCategories->filter(fn ($c) => $c->type === 'expense')->all();
+        $incomeCategories = $createdCategories->filter(fn ($c) => $c->type === 'income')->all();
 
         // Generate 50 random expenses
         $cardOptions = [$card1->id, $card2->id, null];
@@ -107,7 +107,7 @@ class DatabaseSeeder extends Seeder
             $cat = $expenseCategories[array_rand($expenseCategories)];
             $nameOptions = $transactionNames[$cat->name] ?? ['Expense Purchase'];
             $title = $nameOptions[array_rand($nameOptions)];
-            
+
             Transaction::factory()->create([
                 'user_id' => $user->id,
                 'category_id' => $cat->id,

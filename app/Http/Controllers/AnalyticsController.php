@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\AnalyticsService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class AnalyticsController extends Controller
 {

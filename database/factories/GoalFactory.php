@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Goal;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Goal>
+ * @extends Factory<Goal>
  */
 class GoalFactory extends Factory
 {
@@ -18,7 +19,7 @@ class GoalFactory extends Factory
     public function definition(): array
     {
         $target = fake()->numberBetween(50000, 1000000); // $500.00 to $10,000.00
-        
+
         return [
             'user_id' => User::factory(),
             'name' => fake()->words(3, true),

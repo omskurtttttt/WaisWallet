@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Budget;
+use App\Models\User;
 use Carbon\Carbon;
 
 class BudgetService

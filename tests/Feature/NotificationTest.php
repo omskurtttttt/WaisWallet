@@ -1,14 +1,13 @@
 <?php
 
-use App\Models\User;
-use App\Models\Category;
 use App\Models\Budget;
-use App\Models\Goal;
 use App\Models\Card;
+use App\Models\Category;
+use App\Models\Goal;
 use App\Models\Notification;
-use App\Services\NotificationService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -84,7 +83,7 @@ test('budget warning notification is triggered when transaction exceeds 80% of b
     $user = User::factory()->create();
     $category = Category::factory()->create(['user_id' => $user->id, 'type' => 'expense', 'name' => 'Dining']);
     $card = Card::factory()->create(['user_id' => $user->id]);
-    
+
     // Budget limit $100.00 (10000 cents)
     $budget = Budget::factory()->create([
         'user_id' => $user->id,
@@ -116,7 +115,7 @@ test('budget exceeded notification is triggered when transaction exceeds 100% of
     $user = User::factory()->create();
     $category = Category::factory()->create(['user_id' => $user->id, 'type' => 'expense', 'name' => 'Dining']);
     $card = Card::factory()->create(['user_id' => $user->id]);
-    
+
     // Budget limit $100.00
     $budget = Budget::factory()->create([
         'user_id' => $user->id,
