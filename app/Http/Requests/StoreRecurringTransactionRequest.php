@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class StoreRecurringTransactionRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('amount')) {
+            $this->merge([
+                'amount' => (int) round($this->amount * 100),
+            ]);
+        }
+
+        if ($this->has('is_active')) {
+            $this->merge([
+                'is_active' => $this->boolean('is_active'),
+            ]);
+        }
+    }
+
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'integer', 'min:1', 'max:9999999900'],
+            'type' => ['required', 'string', Rule::in(['income', 'expense'])],
+            'frequency' => ['required', 'string', Rule::in(['daily', 'weekly', 'bi-weekly', 'monthly', 'yearly'])],
+            'next_run_date' => ['required', 'date'],
+            'category_id' => [
+                'required',
+                'string',
+                Rule::exists('categories', 'id')->where(function ($query) {
+                    $query->where('user_id', $this->user()->id);
+                }),
+            ],
+            'card_id' => [
+                'nullable',
+                'string',
+                Rule::exists('cards', 'id')->where(function ($query) {
+                    $query->where('user_id', $this->user()->id);
+                }),
+            ],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'recipient_name' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['nullable', 'boolean'],
+        ];
+    }
+}

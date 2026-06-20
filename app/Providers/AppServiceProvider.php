@@ -55,6 +55,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\NotificationService::class, function ($app) use ($resolveUser) {
             return new \App\Services\NotificationService($resolveUser());
         });
+
+        $this->app->bind(\App\Services\RecurringTransactionService::class, function ($app) use ($resolveUser) {
+            return new \App\Services\RecurringTransactionService($resolveUser());
+        });
     }
 
     public function boot(): void

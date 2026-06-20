@@ -9,6 +9,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\RecurringTransactionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -37,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analytics', AnalyticsController::class)->name('analytics.index');
     Route::get('/reports', ReportController::class)->name('reports.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/transactions/recurring', [RecurringTransactionController::class, 'index'])->name('transactions.recurring.index');
 
     // Write operations (Throttled)
     Route::middleware('throttle:financial-writes')->group(function () {
@@ -53,6 +55,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/goals/{goal}/complete', [GoalController::class, 'markAsComplete'])->name('goals.complete');
         Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
         Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
+
+        Route::post('/transactions/recurring', [RecurringTransactionController::class, 'store'])->name('transactions.recurring.store');
+        Route::put('/transactions/recurring/{recurringTransaction}', [RecurringTransactionController::class, 'update'])->name('transactions.recurring.update');
+        Route::delete('/transactions/recurring/{recurringTransaction}', [RecurringTransactionController::class, 'destroy'])->name('transactions.recurring.destroy');
 
         Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
