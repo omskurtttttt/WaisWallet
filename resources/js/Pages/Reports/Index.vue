@@ -7,6 +7,7 @@ import ReportFilters from './Partials/ReportFilters.vue';
 import MetricCards from './Partials/MetricCards.vue';
 import ReportChart from './Partials/ReportChart.vue';
 import TopCategories from './Partials/TopCategories.vue';
+import Dropdown from '@/Components/Dropdown.vue';
 
 const props = defineProps({
     filters: Object,
@@ -55,6 +56,16 @@ const downloadReportData = () => {
     downloadAnchor.click();
     downloadAnchor.remove();
 };
+
+const downloadCsvReport = () => {
+    const url = route('reports.index', {
+        type: viewType.value,
+        year: selectedYear.value,
+        month: viewType.value === 'monthly' ? selectedMonth.value : null,
+        export: 'csv'
+    });
+    window.location.href = url;
+};
 </script>
 
 <template>
@@ -62,7 +73,7 @@ const downloadReportData = () => {
     <AuthenticatedLayout>
         <div class="p-4 md:p-6 space-y-6 print:p-0 print:space-y-4">
             <!-- Header section -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden animate-fade-in">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden animate-fade-in relative z-30">
                 <div>
                     <h1 class="text-2xl font-bold text-foreground">Financial Reports</h1>
                     <p class="mt-1 text-sm text-muted-foreground">Review metrics and category distributions for a selected period.</p>
@@ -79,17 +90,38 @@ const downloadReportData = () => {
                         </svg>
                         Print
                     </button>
-                    <button 
-                        @click="downloadReportData"
-                        class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-all shadow-md shadow-primary/25"
-                    >
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7 10 12 15 17 10"/>
-                            <line x1="12" x2="12" y1="15" y2="3"/>
-                        </svg>
-                        Export
-                    </button>
+                    
+                    <Dropdown align="right" width="48" content-classes="py-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+                        <template #trigger>
+                            <button 
+                                class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-all shadow-md shadow-primary/25 cursor-pointer"
+                            >
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" x2="12" y1="15" y2="3"/>
+                                </svg>
+                                <span>Export</span>
+                                <svg class="h-3.5 w-3.5 opacity-60 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                        </template>
+                        <template #content>
+                            <button 
+                                @click="downloadReportData"
+                                class="block w-full px-4 py-2.5 text-start text-sm leading-5 text-foreground hover:bg-muted focus:bg-muted focus:outline-none transition duration-150 ease-in-out font-medium cursor-pointer"
+                            >
+                                Export JSON (Summary)
+                            </button>
+                            <button 
+                                @click="downloadCsvReport"
+                                class="block w-full px-4 py-2.5 text-start text-sm leading-5 text-foreground hover:bg-muted focus:bg-muted focus:outline-none transition duration-150 ease-in-out font-medium cursor-pointer"
+                            >
+                                Export CSV (Transactions)
+                            </button>
+                        </template>
+                    </Dropdown>
                 </div>
             </div>
 

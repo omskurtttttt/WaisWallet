@@ -197,4 +197,77 @@ class ReportService
             'availableYears' => $availableYears,
         ];
     }
+
+    /**
+     * Export transactions for the selected period to a CSV file.
+     */
+    public function exportCsv(array $data)
+    {
+        $type = $data['type'] ?? 'monthly';
+        $year = (int) ($data['year'] ?? Carbon::now()->year);
+        $month = (int) ($data['month'] ?? Carbon::now()->month);
+
+        if ($type === 'yearly') {
+            $start = Carbon::create($year, 1, 1)->startOfYear();
+            $end = $start->copy()->endOfYear();
+            $filename = "waiswallet_report_{$year}.csv";
+        } else {
+            $start = Carbon::create($year, $month, 1)->startOfMonth();
+            $end = $start->copy()->endOfMonth();
+            $monthName = strtolower($start->format('F'));
+            $filename = "waiswallet_report_{$monthName}_{$year}.csv";
+        }
+
+        $transactions = $this->user->transactions()
+            ->whereBetween('transaction_date', [$start, $end])
+            ->with(['category', 'card'])
+            ->orderByDesc('transaction_date')
+            ->get();
+
+        $headers = [
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($transactions) {
+            $file = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for proper Excel encoding
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // CSV Headers
+            fputcsv($file, [
+                'Date',
+                'Title',
+                'Type',
+                'Amount',
+                'Category',
+                'Payment Method',
+                'Recipient/Source',
+                'Status',
+                'Notes',
+            ]);
+
+            foreach ($transactions as $transaction) {
+                fputcsv($file, [
+                    $transaction->transaction_date->format('Y-m-d H:i:s'),
+                    $transaction->title,
+                    ucfirst($transaction->type),
+                    number_format($transaction->amount / 100, 2),
+                    $transaction->category ? $transaction->category->name : 'Uncategorized',
+                    $transaction->card ? "{$transaction->card->brand} (•••• {$transaction->card->last_four})" : 'Cash',
+                    $transaction->recipient_name ?? 'N/A',
+                    ucfirst($transaction->status),
+                    $transaction->notes ?? '',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->streamDownload($callback, $filename, $headers);
+    }
 }
