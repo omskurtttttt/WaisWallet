@@ -89,4 +89,12 @@ class Category extends Model
     {
         return $this->hasMany(Budget::class);
     }
+
+    /**
+     * Get the recurring transactions for the category.
+     */
+    public function recurringTransactions(): HasMany
+    {
+        return $this->hasMany(RecurringTransaction::class);
+    }
 }

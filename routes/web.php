@@ -45,6 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Write operations (Throttled)
     Route::middleware('throttle:financial-writes')->group(function () {
         Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
         Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
         Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
         Route::put('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');

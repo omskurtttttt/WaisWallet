@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Notification;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\Gate;
 
 class NotificationController extends Controller
 {
@@ -19,10 +20,7 @@ class NotificationController extends Controller
      */
     public function markAsRead(Notification $notification)
     {
-        // Check ownership
-        if ($notification->user_id !== auth()->id()) {
-            abort(403);
-        }
+        Gate::authorize('update', $notification);
 
         $this->service->markAsRead($notification);
 
