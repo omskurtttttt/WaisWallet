@@ -27,9 +27,26 @@ class GoalController extends Controller
     {
         $user = $request->user();
         $goals = $this->service->getGoals();
+        $cards = $user->cards()
+            ->where('is_active', true)
+            ->withBalance()
+            ->get()
+            ->map(function ($card) {
+                $balance = ($card->income_sum ?? 0) - ($card->expense_sum ?? 0);
+
+                return [
+                    'id' => $card->id,
+                    'name' => $card->name,
+                    'brand' => $card->brand,
+                    'last_four' => $card->last_four,
+                    'color' => $card->color,
+                    'balance' => $balance,
+                ];
+            });
 
         return Inertia::render('Goals/Index', [
             'goals' => $goals,
+            'cards' => $cards,
             'currency' => $user->currency,
         ]);
     }

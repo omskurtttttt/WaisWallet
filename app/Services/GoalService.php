@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Goal;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -64,15 +65,63 @@ class GoalService
     public function addFunds(Goal $goal, array $data): bool
     {
         $amountInCents = $data['amount'];
+        $cardId = $data['card_id'] ?? null;
 
-        DB::transaction(function () use ($goal, $amountInCents, $data) {
+        DB::transaction(function () use ($goal, $amountInCents, $data, $cardId) {
             $lockedGoal = Goal::where('id', $goal->id)->lockForUpdate()->firstOrFail();
 
             if ($data['operation'] === 'add') {
                 $lockedGoal->increment('current_amount', $amountInCents);
+
+                if ($cardId) {
+                    $category = $this->user->categories()
+                        ->where('type', 'expense')
+                        ->where(function ($q) {
+                            $q->where('name', 'ilike', '%invest%')
+                                ->orWhere('name', 'ilike', '%saving%')
+                                ->orWhere('name', 'ilike', '%other%');
+                        })
+                        ->first() ?? $this->user->categories()->where('type', 'expense')->first();
+
+                    $this->user->transactions()->create([
+                        'title' => "Goal Deposit: {$goal->name}",
+                        'type' => 'expense',
+                        'amount' => $amountInCents,
+                        'category_id' => $category?->id,
+                        'card_id' => $cardId,
+                        'recipient_name' => "Goal: {$goal->name}",
+                        'status' => 'completed',
+                        'transaction_date' => Carbon::now(),
+                        'notes' => "Automatic fund allocation to savings goal: {$goal->name}",
+                    ]);
+                }
             } else {
+                $actualWithdrawn = min($lockedGoal->current_amount, $amountInCents);
                 $newAmount = max(0, $lockedGoal->current_amount - $amountInCents);
                 $lockedGoal->update(['current_amount' => $newAmount]);
+
+                if ($cardId && $actualWithdrawn > 0) {
+                    $category = $this->user->categories()
+                        ->where('type', 'income')
+                        ->where(function ($q) {
+                            $q->where('name', 'ilike', '%saving%')
+                                ->orWhere('name', 'ilike', '%other%')
+                                ->orWhere('name', 'ilike', '%investment%');
+                        })
+                        ->first() ?? $this->user->categories()->where('type', 'income')->first();
+
+                    $this->user->transactions()->create([
+                        'title' => "Goal Withdrawal: {$goal->name}",
+                        'type' => 'income',
+                        'amount' => $actualWithdrawn,
+                        'category_id' => $category?->id,
+                        'card_id' => $cardId,
+                        'recipient_name' => "From Goal: {$goal->name}",
+                        'status' => 'completed',
+                        'transaction_date' => Carbon::now(),
+                        'notes' => "Withdrawn from savings goal: {$goal->name}",
+                    ]);
+                }
             }
         });
 

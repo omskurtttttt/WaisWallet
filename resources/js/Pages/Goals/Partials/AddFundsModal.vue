@@ -6,6 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import { useCurrency } from '@/Composables/useCurrency';
 
 const props = defineProps({
     show: {
@@ -16,13 +17,20 @@ const props = defineProps({
         type: Object,
         default: null,
     },
+    cards: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const emit = defineEmits(['close']);
 
+const { formatMoney } = useCurrency();
+
 const form = useForm({
     amount: '',
     operation: 'add', // add or withdraw
+    card_id: '',
 });
 
 // Watch for goal changes to reset the form state
@@ -106,6 +114,21 @@ const close = () => {
                         />
                     </div>
                     <InputError class="mt-2" :message="form.errors.amount" />
+                </div>
+
+                <div>
+                    <InputLabel for="card_id" :value="form.operation === 'add' ? 'Pay From Card (Optional)' : 'Deposit To Card (Optional)'" />
+                    <select
+                        id="card_id"
+                        v-model="form.card_id"
+                        class="h-11 w-full rounded-xl border-0 bg-input px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-200 mt-1"
+                    >
+                        <option value="">No Card (Adjust balance only)</option>
+                        <option v-for="card in cards" :key="card.id" :value="card.id">
+                            {{ card.name }} (•••• {{ card.last_four }}) — {{ formatMoney(card.balance) }}
+                        </option>
+                    </select>
+                    <InputError class="mt-2" :message="form.errors.card_id" />
                 </div>
 
                 <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-border">

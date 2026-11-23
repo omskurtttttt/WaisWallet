@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Card;
+use App\Models\Category;
 use App\Models\Goal;
 use App\Models\User;
 use Carbon\Carbon;
@@ -245,5 +247,122 @@ test('user cannot mark another user\'s savings goal as complete', function () {
     $this->assertDatabaseHas('goals', [
         'id' => $goal->id,
         'current_amount' => 100000,
+    ]);
+});
+
+test('goals page receives active cards for funding options', function () {
+    $user = User::factory()->create();
+    $card = Card::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Savings Card',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('goals.index'));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn ($page) => $page
+        ->component('Goals/Index')
+        ->has('cards', 1)
+        ->where('cards.0.name', 'Savings Card')
+    );
+});
+
+test('adding funds with a card creates an expense transaction and links to the card', function () {
+    $user = User::factory()->create();
+    Category::seedDefaultsForUser($user);
+    $card = Card::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Main Card',
+        'is_active' => true,
+    ]);
+    $goal = Goal::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Vacation Fund',
+        'target_amount' => 100000,
+        'current_amount' => 20000,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->post(route('goals.funds', $goal), [
+            'amount' => 100, // $100.00 -> 10000 cents
+            'operation' => 'add',
+            'card_id' => $card->id,
+        ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('goals', [
+        'id' => $goal->id,
+        'current_amount' => 30000,
+    ]);
+    $this->assertDatabaseHas('transactions', [
+        'user_id' => $user->id,
+        'card_id' => $card->id,
+        'type' => 'expense',
+        'amount' => 10000,
+        'title' => 'Goal Deposit: Vacation Fund',
+    ]);
+});
+
+test('withdrawing funds with a card creates an income transaction and links to the card', function () {
+    $user = User::factory()->create();
+    Category::seedDefaultsForUser($user);
+    $card = Card::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Main Card',
+        'is_active' => true,
+    ]);
+    $goal = Goal::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Vacation Fund',
+        'target_amount' => 100000,
+        'current_amount' => 50000,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->post(route('goals.funds', $goal), [
+            'amount' => 150, // $150.00 -> 15000 cents
+            'operation' => 'withdraw',
+            'card_id' => $card->id,
+        ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('goals', [
+        'id' => $goal->id,
+        'current_amount' => 35000,
+    ]);
+    $this->assertDatabaseHas('transactions', [
+        'user_id' => $user->id,
+        'card_id' => $card->id,
+        'type' => 'income',
+        'amount' => 15000,
+        'title' => 'Goal Withdrawal: Vacation Fund',
+    ]);
+});
+
+test('user cannot add funds using another user\'s card', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $card2 = Card::factory()->create([
+        'user_id' => $user2->id,
+        'is_active' => true,
+    ]);
+    $goal1 = Goal::factory()->create([
+        'user_id' => $user1->id,
+        'current_amount' => 10000,
+    ]);
+
+    $response = $this->actingAs($user1)
+        ->post(route('goals.funds', $goal1), [
+            'amount' => 50,
+            'operation' => 'add',
+            'card_id' => $card2->id,
+        ]);
+
+    $response->assertSessionHasErrors(['card_id']);
+    $this->assertDatabaseMissing('transactions', [
+        'card_id' => $card2->id,
+        'title' => "Goal Deposit: {$goal1->name}",
     ]);
 });

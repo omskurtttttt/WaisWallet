@@ -12,6 +12,10 @@ import { useCurrency } from '@/Composables/useCurrency';
 
 const props = defineProps({
     goals: Array,
+    cards: {
+        type: Array,
+        default: () => [],
+    },
     currency: String,
 });
 
@@ -274,7 +278,7 @@ const getConfettiStyle = (i) => {
         </div>
 
         <AddGoalModal :show="showAddGoalModal" @close="showAddGoalModal = false" />
-        <AddFundsModal :show="showAddFundsModal" :goal="selectedGoal" @close="showAddFundsModal = false" />
+        <AddFundsModal :show="showAddFundsModal" :goal="selectedGoal" :cards="cards" @close="showAddFundsModal = false" />
         
         <ConfirmationModal
             :show="showDeleteConfirm"
