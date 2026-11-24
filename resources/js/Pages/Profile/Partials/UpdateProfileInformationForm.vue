@@ -16,10 +16,22 @@ defineProps({
 
 const user = usePage().props.auth.user;
 
+const currencies = [
+    { code: 'PHP', name: 'Philippine Peso (₱)' },
+    { code: 'USD', name: 'US Dollar ($)' },
+    { code: 'EUR', name: 'Euro (€)' },
+    { code: 'GBP', name: 'British Pound (£)' },
+    { code: 'JPY', name: 'Japanese Yen (¥)' },
+    { code: 'CAD', name: 'Canadian Dollar (CA$)' },
+    { code: 'AUD', name: 'Australian Dollar (A$)' },
+    { code: 'SGD', name: 'Singapore Dollar (S$)' },
+];
+
 const form = useForm({
     name: user.name,
     email: user.email,
     monthly_spending_limit: user.monthly_spending_limit / 100,
+    currency: user.currency || 'PHP',
 });
 </script>
 
@@ -85,6 +97,22 @@ const form = useForm({
                 />
 
                 <InputError class="mt-2" :message="form.errors.monthly_spending_limit" />
+            </div>
+
+            <div>
+                <InputLabel for="currency" value="Preferred Currency" />
+
+                <select
+                    id="currency"
+                    v-model="form.currency"
+                    class="mt-1 block w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-200"
+                >
+                    <option v-for="c in currencies" :key="c.code" :value="c.code">
+                        {{ c.code }} — {{ c.name }}
+                    </option>
+                </select>
+
+                <InputError class="mt-2" :message="form.errors.currency" />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">

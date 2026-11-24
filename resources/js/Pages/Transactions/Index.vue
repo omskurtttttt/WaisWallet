@@ -6,6 +6,7 @@ import { useDebounce } from '@/Composables/useDebounce';
 
 const { debounce } = useDebounce();
 import AddTransactionModal from './Partials/AddTransactionModal.vue';
+import ManageCategoriesModal from './Partials/ManageCategoriesModal.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import { useCurrency } from '@/Composables/useCurrency';
 import { useIcons } from '@/Composables/useIcons';
@@ -30,6 +31,7 @@ const dateTo = ref(props.filters.date_to || '');
 const sortBy = ref(props.filters.sort_by || 'date');
 const sortOrder = ref(props.filters.sort_order || 'desc');
 const showAddModal = ref(false);
+const showManageCategoriesModal = ref(false);
 const transactionToEdit = ref(null);
 
 const openAddModal = () => {
@@ -151,6 +153,17 @@ const categoryOptions = computed(() => {
                         </svg>
                         <span>Recurring Templates</span>
                     </Link>
+                    <button
+                        type="button"
+                        @click="showManageCategoriesModal = true"
+                        class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm w-full sm:w-auto"
+                    >
+                        <svg class="h-4 w-4 shrink-0 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+                            <path d="M7 7h.01"/>
+                        </svg>
+                        <span>Categories</span>
+                    </button>
                     <button 
                         @click="openAddModal"
                         class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-md shadow-primary/25 w-full sm:w-auto shrink-0"
@@ -380,6 +393,12 @@ const categoryOptions = computed(() => {
             :cards="cards" 
             :transaction="transactionToEdit"
             @close="closeAddModal" 
+        />
+
+        <ManageCategoriesModal
+            :show="showManageCategoriesModal"
+            :categories="categories"
+            @close="showManageCategoriesModal = false"
         />
 
         <ConfirmationModal

@@ -50,6 +50,24 @@ test('email verification status is unchanged when the email address is unchanged
     $this->assertNotNull($user->refresh()->email_verified_at);
 });
 
+test('user can update preferred currency', function () {
+    $user = User::factory()->create(['currency' => 'PHP']);
+
+    $response = $this
+        ->actingAs($user)
+        ->patch('/profile', [
+            'name' => 'Test User',
+            'email' => $user->email,
+            'currency' => 'USD',
+        ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/profile');
+
+    $this->assertSame('USD', $user->refresh()->currency);
+});
+
 test('user can delete their account', function () {
     $user = User::factory()->create();
 
